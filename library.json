@@ -1,0 +1,204 @@
+{
+    "name": "EBF - Event Based Framework",
+    "version": "0.1.0",
+    "keywords": "",
+    "description": "Event Based Framework for Arduino",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/TODO/"
+    },
+    "frameworks": ["arduino"],
+    "platforms": "*",
+    "build": {
+        "srcDir": ".",
+        "srcFilter": "+<*> -<examples> -<test>",
+        "libArchive": false,
+        "flags": [
+            "-I$PROJECT_INCLUDE_DIR",
+            "-I./src/Core",
+            "-I./src/Products"
+        ]
+    },
+    "examples": [
+        {
+            "name": "Basics - Analog Read Serial",
+            "base": "examples/Basics-AnalogReadSerial.ino",
+            "files": ["Basics-AnalogReadSerial.ino"]
+        },
+        {
+            "name": "Basics - Blink every second",
+            "base": "examples/Basics-Blink.ino",
+            "files": ["Basics-Blink.ino"]
+        },
+        {
+            "name": "Basics - Short blink every second",
+            "base": "examples/Basics-ShortBlink.ino",
+            "files": ["Basics-ShortBlink.ino"]
+        },
+        {
+            "name": "Basics - Digital read state to serial",
+            "base": "examples/Basics-DigitalReadSerial.ino",
+            "files": ["Basics-DigitalReadSerial.ino"]
+        },
+        {
+            "name": "Basics - Fading LED",
+            "base": "examples/Basics-FadingLed.ino",
+            "files": ["Basics-FadingLed.ino"]
+        },
+        {
+            "name": "Basics - Read Analog Voltage",
+            "base": "examples/Basics-ReadAnalogVoltage.ino",
+            "files": ["Basics-ReadAnalogVoltage.ino"]
+        },
+        {
+            "name": "Basics - Read Analog Voltage using GetRawValue()",
+            "base": "examples/Basics-ReadAnalogVoltageRaw.ino",
+            "files": ["Basics-ReadAnalogVoltageRaw.ino"]
+        },
+        {
+            "name": "Digital - Button and LED",
+            "base": "examples/Digital-ButtonAndLed.ino",
+            "files": ["Digital-ButtonAndLed.ino"]
+        },
+        {
+            "name": "Digital - Debounce pushbutton",
+            "base": "examples/Digital-DeboucePushbutton.ino",
+            "files": ["Digital-DeboucePushbutton.ino"]
+        },
+        {
+            "name": "Digital - Input with Pull-Up and Serial",
+            "base": "examples/Digital-InputPullupSerial.ino",
+            "files": ["Digital-InputPullupSerial.ino"]
+        },
+        {
+            "name": "Digital - Push (Edge) detection with debounce",
+            "base": "examples/Digital-EdgeDetectionWithDebounce.ino",
+            "files": ["Digital-EdgeDetectionWithDebounce.ino"]
+        },
+        {
+            "name": "Digital - Push (Edge) detection",
+            "base": "examples/Digital-EdgeDetection.ino",
+            "files": ["Digital-EdgeDetection.ino"]
+        },
+        {
+            "name": "Digital - Pitch follower using tone() function",
+            "base": "examples/Digital-PitchFollowerUsingTone.ino",
+            "files": ["Digital-PitchFollowerUsingTone.ino"]
+        },
+        {
+            "name": "Digital - Changing polling interval",
+            "base": "examples/Digital-PollingInterval.ino",
+            "files": ["Digital-PollingInterval.ino"]
+        },
+        {
+            "name": "Digital - Interrupts",
+            "base": "examples/Digital-Interrupts.ino",
+            "files": ["Digital-Interrupts.ino"]
+        },
+        {
+            "name": "Analog - Analog In, PWM Out, Serial",
+            "base": "examples/Analog-AnalogInPwmOutSerial.ino",
+            "files": ["Analog-AnalogInPwmOutSerial.ino"]
+        },
+        {
+            "name": "Analog - Analog In, PWM Out, Serial, SetPollInterval",
+            "base": "examples/Analog-AnalogInPwmOutSerialSetPollInterval.ino",
+            "files": ["Analog-AnalogInPwmOutSerialSetPollInterval.ino"]
+        },
+        {
+            "name": "Analog - Analog Input",
+            "base": "examples/Analog-AnalogInput.ino",
+            "files": ["Analog-AnalogInput.ino"]
+        },
+        {
+            "name": "Communication - ASCII table",
+            "base": "examples/Communication-AsciiTable.ino",
+            "files": ["Communication-AsciiTable.ino"]
+        },
+        {
+            "name": "Communication - LED dimmer",
+            "base": "examples/Communication-LedDimmer.ino",
+            "files": ["Communication-LedDimmer.ino"]
+        },
+        {
+            "name": "Communication - Physical Pixel",
+            "base": "examples/Communication-PhysicalPixel.ino",
+            "files": ["Communication-PhysicalPixel.ino"]
+        },
+        {
+            "name": "Communication - Read ASCII String",
+            "base": "examples/Communication-ReadAsciiString.ino",
+            "files": ["Communication-ReadAsciiString.ino"]
+        },
+        {
+            "name": "Communication - Serial Passthrough",
+            "base": "examples/Communication-SerialPassthrough.ino",
+            "files": ["Communication-SerialPassthrough.ino"]
+        },
+        {
+            "name": "Control Structures - How to use arrays",
+            "base": "examples/ControlStructures-HowToUseArrays.ino",
+            "files": ["ControlStructures-HowToUseArrays.ino"]
+        },
+        {
+            "name": "Control Structures - Switch (case) Statement, used with sensor value",
+            "base": "examples/ControlStructures-SwitchCaseSensorValue.ino",
+            "files": ["ControlStructures-SwitchCaseSensorValue.ino"]
+        },
+        {
+            "name": "Sensors - ADXL3xx Accelerometer",
+            "base": "examples/Sensors-ADXL3xxAccelerometer.ino",
+            "files": ["Sensors-ADXL3xxAccelerometer.ino"]
+        },
+        {
+            "name": "Sensors - Detect a knock",
+            "base": "examples/Sensors-DetectKnock.ino",
+            "files": ["Sensors-DetectKnock.ino"]
+        },
+        {
+            "name": "Display - LED bar graph",
+            "base": "examples/Display-LedBarGraph.ino",
+            "files": ["Display-LedBarGraph.ino"]
+        },
+        {
+            "name": "Products - LED On(), Off()",
+            "base": "examples/Products-LedOnOff.ino",
+            "files": ["Products-LedOnOff.ino"]
+        },
+        {
+            "name": "Products - LED Blink()",
+            "base": "examples/Products-LedBlink.ino",
+            "files": ["Products-LedBlink.ino"]
+        },
+        {
+            "name": "Products - LED Brightness()",
+            "base": "examples/Products-LedBrightness.ino",
+            "files": ["Products-LedBrightness.ino"]
+        },
+        {
+            "name": "Products - LED FadeIn() and FadeOut()",
+            "base": "examples/Products-LedFading.ino",
+            "files": ["Products-LedFading.ino"]
+        },
+        {
+            "name": "Products - Relay On(), Off()",
+            "base": "examples/Products-RelayOnOff.ino",
+            "files": ["Products-RelayOnOff.ino"]
+        },
+        {
+            "name": "Products - Switch debounce",
+            "base": "examples/Products-SwitchDebounce.ino",
+            "files": ["Products-SwitchDebounce.ino"]
+        },
+        {
+            "name": "Products - Button Press/Release/LongPress",
+            "base": "examples/Products-ButtonPressReleaseLongPress.ino",
+            "files": ["Products-ButtonPressReleaseLongPress.ino"]
+        },
+        {
+            "name": "Products - Potentiometer averaging",
+            "base": "examples/Products-PotentiometerAveraging.ino",
+            "files": ["Products-PotentiometerAveraging.ino"]
+        }
+    ]
+}
