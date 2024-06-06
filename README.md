@@ -160,7 +160,7 @@ Additional products implementation will be added later.
 We use PlatformIO to develop the EBF, but try to keep it compatible with the Arduino's IDE (that's the reason for the strange directory tree).
 
 In both cases, in order to use the EBF library, download it as a ZIP file (Click on the green "<> Code" button on the top of GitHub's page and "Download ZIP" from the menu),
-extract the ZIP into your environment library directory.
+and extract the ZIP content into your environment's library directory. Change the extracted directory name from "EBF-master" to "EventBasedFramework" or "EBF" to make it more readable.
 
 For PlatformIO on Linux system:
 ```
