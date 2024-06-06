@@ -160,4 +160,5 @@ Additional products implementation will be added later.
 Multiple examples are ready for you here:
 
 # Bugs and requests
-Please submit bug reports and requests for new features via GitHub's Issues system:
+Please submit bug reports and requests for new features via [GitHub's Issues](https://github.com/abetis/EBF/issues) system
+
