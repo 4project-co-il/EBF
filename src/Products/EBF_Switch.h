@@ -1,0 +1,46 @@
+#ifndef __EBF_SWITCH_H__
+#define __EBF_SWITCH_H__
+
+#include <Arduino.h>
+#if __has_include("EBF_Config.h")
+	#include "EBF_Config.h"
+#endif
+
+#include "../Core/EBF_Global.h"
+#include "../Core/EBF_DigitalInput.h"
+
+class EBF_Switch : protected EBF_DigitalInput {
+	public:
+		enum SwitchState {
+			SWITCH_OFF = 0,
+			SWITCH_ON,
+		};
+
+		uint8_t Init(uint8_t pinNumber, bool internelPullup = true);
+		uint8_t GetState() { return state; }
+
+		// Setting debounce time in milli-seconds
+		void SetDebounceTime(uint8_t ms) { debounceTime = ms; }
+		// Setting polling interval in milli-seconds
+		void SetPollInterval(uint16_t ms);
+
+		void SetOnChange(EBF_CallbackType onChangeCallback) { this->onChangeCallback = onChangeCallback; }
+
+	protected:
+		SwitchState state;
+		SwitchState lastState;
+		uint8_t debounceTime;			// in milli-Sec
+		unsigned long debounceStart;	// in milli-Sec
+
+		uint8_t Process();
+		void ProcessCallback();
+		virtual void ProcessSwitchCallback() { onChangeCallback(); }
+
+		// Callbacks
+		EBF_CallbackType onChangeCallback;
+
+	private:
+		uint16_t savedPollingInterval;
+};
+
+#endif
