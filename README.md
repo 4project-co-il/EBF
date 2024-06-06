@@ -172,7 +172,7 @@ For Arduino 2.3.x on Linux system:
 ```
 
 # Examples
-Multiple examples are ready for you here:
+Multiple examples are ready for you in the [examples](https://github.com/abetis/EBF/tree/master/examples) directory.
 
 # Bugs and requests
 Please submit bug reports and requests for new features via [GitHub's Issues](https://github.com/abetis/EBF/issues) system
