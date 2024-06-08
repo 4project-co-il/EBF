@@ -59,6 +59,9 @@ uint8_t EBF_Logic::Process()
 	EBF_HalInstance *pHal;
 	unsigned long ms;
 
+	// Start counting time before the execution of the callbacks, that might take some time
+	uint32_t start = micros();
+
 	// Process timers
 	delayWanted = timers.Process();
 
@@ -100,8 +103,6 @@ uint8_t EBF_Logic::Process()
 	// TODO: Try to power down the CPU for some time...
 
 	// Implementing our own delay loop, so we could check the messages from interrupts in the loop
-	uint32_t start = micros();
-
 	while (delayWanted > 0) {
 		yield();
 
