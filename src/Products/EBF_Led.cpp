@@ -2,13 +2,18 @@
 
 uint8_t EBF_Led::Init(uint8_t pinNumber)
 {
-	EBF_PwmOutput::Init(pinNumber);
+	uint8_t rc;
+
+	rc = EBF_PwmOutput::Init(pinNumber);
+	if (rc != EBF_OK) {
+		return rc;
+	}
 
 	state = LED_OFF;
 	// Full brightness by default
 	brightness = 255;
 
-	return 1;
+	return EBF_OK;
 }
 
 // SetValue acts as an ON/OFF function, value == 0 will perform as OFF, any other value as ON
@@ -42,7 +47,7 @@ uint8_t EBF_Led::Off()
 // Brightness will work only on hardware PWM enabled pins
 uint8_t EBF_Led::SetBrightness(uint8_t percent)
 {
-	uint8_t rc = 1;
+	uint8_t rc = EBF_OK;
 
 	if (percent > 100) {
 		percent = 100;
@@ -62,11 +67,11 @@ uint8_t EBF_Led::SetBrightness(uint8_t percent)
 	case LED_ON:
 	case LED_BLINKING_ON:
 		// Update the brightness
-		EBF_PwmOutput::SetValue(brightness);
+		rc = EBF_PwmOutput::SetValue(brightness);
 		break;
 
 	default:
-		rc = 0;
+		rc = EBF_INVALID_STATE;
 		break;
 	}
 
@@ -76,6 +81,8 @@ uint8_t EBF_Led::SetBrightness(uint8_t percent)
 // Turns on for msOn milliSeconds and stay off for msOff milliSeconds
 uint8_t EBF_Led::Blink(uint16_t msOn, uint16_t msOff)
 {
+	uint8_t rc = EBF_OK;
+
 	onDuration = msOn;
 	offDuration = msOff;
 
@@ -86,9 +93,9 @@ uint8_t EBF_Led::Blink(uint16_t msOn, uint16_t msOff)
 	// Force processing, it will recalculate the needed polling interval there
 	pollIntervalMs = 0;
 
-	EBF_PwmOutput::SetValue(brightness);
+	rc = EBF_PwmOutput::SetValue(brightness);
 
-	return 1;
+	return rc;
 }
 
 // The led will fade in, from OFF to ON (up to brightness)
@@ -96,6 +103,8 @@ uint8_t EBF_Led::Blink(uint16_t msOn, uint16_t msOff)
 // and will be done in the specified number of steps
 uint8_t EBF_Led::FadeIn(uint16_t msDuration, uint8_t steps)
 {
+	uint8_t rc = EBF_OK;
+
 	// onDuration will be used to store step duration
 	onDuration = msDuration / steps;
 	pollIntervalMs = onDuration;
@@ -109,9 +118,9 @@ uint8_t EBF_Led::FadeIn(uint16_t msDuration, uint8_t steps)
 	effectStart = micros();
 	state = LED_FADING_IN;
 
-	EBF_PwmOutput::SetValue((uint8_t)offDuration);
+	rc = EBF_PwmOutput::SetValue((uint8_t)offDuration);
 
-	return 1;
+	return rc;
 }
 
 // The led will fade out, from ON (current brightness) to OFF
@@ -119,6 +128,8 @@ uint8_t EBF_Led::FadeIn(uint16_t msDuration, uint8_t steps)
 // and will be done in the specified number of steps
 uint8_t EBF_Led::FadeOut(uint16_t msDuration, uint8_t steps)
 {
+	uint8_t rc = EBF_OK;
+
 	// onDuration will be used to store step duration
 	onDuration = msDuration / steps;
 	pollIntervalMs = onDuration;
@@ -132,14 +143,14 @@ uint8_t EBF_Led::FadeOut(uint16_t msDuration, uint8_t steps)
 	effectStart = micros();
 	state = LED_FADING_OUT;
 
-	EBF_PwmOutput::SetValue((uint8_t)offDuration);
+	rc = EBF_PwmOutput::SetValue((uint8_t)offDuration);
 
-	return 1;
+	return rc;
 }
 
 uint8_t EBF_Led::Process()
 {
-	uint8_t rc = 1;
+	uint8_t rc = EBF_OK;
 	unsigned long timePassed;
 
 	switch (state)
@@ -156,7 +167,7 @@ uint8_t EBF_Led::Process()
 
 		if (timePassed > onDuration * 1000) {
 			// On duration passed, turn the led off and set the data for BLINKING_OFF state
-			EBF_PwmOutput::SetValue(0);
+			rc = EBF_PwmOutput::SetValue(0);
 
 			state = LED_BLINKING_OFF;
 			effectStart = micros();
@@ -175,7 +186,7 @@ uint8_t EBF_Led::Process()
 
 		if (timePassed > offDuration * 1000) {
 			// Off duration passed, turn the led on and set the data for BLINKING_ON state
-			EBF_PwmOutput::SetValue(brightness);
+			rc = EBF_PwmOutput::SetValue(brightness);
 
 			state = LED_BLINKING_ON;
 			effectStart = micros();
@@ -200,7 +211,7 @@ uint8_t EBF_Led::Process()
 				offDuration = brightness;
 			}
 
-			EBF_PwmOutput::SetValue((uint8_t)offDuration);
+			rc = EBF_PwmOutput::SetValue((uint8_t)offDuration);
 
 			if (offDuration >= brightness) {
 				// We've reached max brightness
@@ -229,7 +240,7 @@ uint8_t EBF_Led::Process()
 				offDuration -= fadeStep;
 			}
 
-			EBF_PwmOutput::SetValue((uint8_t)offDuration);
+			rc = EBF_PwmOutput::SetValue((uint8_t)offDuration);
 
 			if (offDuration == 0) {
 				// We've reached min brightness
@@ -248,7 +259,7 @@ uint8_t EBF_Led::Process()
 		break;
 
 	default:
-		rc = 0;
+		rc = EBF_INVALID_STATE;
 		break;
 	}
 

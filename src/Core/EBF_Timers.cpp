@@ -11,13 +11,13 @@ uint8_t EBF_Timers::Init(uint8_t maxTimers, EBF_MessageQueue *pMsgQueue)
 
 	lastMicros = micros();
 
-	return 1;
+	return EBF_OK;
 }
 
 uint8_t EBF_Timers::InitTimer(uint8_t timerId, EBF_CallbackType callbackPtr, uint16_t milliSec)
 {
 	if (timerId >= this->maxTimers) {
-		return 0;
+		return EBF_INDEX_OUT_OF_BOUNDS;
 	}
 
 	TimerData &timer = this->timersData[timerId];
@@ -25,24 +25,24 @@ uint8_t EBF_Timers::InitTimer(uint8_t timerId, EBF_CallbackType callbackPtr, uin
 	timer.microsLeft = 0;
 	timer.milliSecTimeout = milliSec;
 
-	return 1;
+	return EBF_OK;
 }
 
 uint8_t EBF_Timers::StartTimer(uint8_t timerId)
 {
 	if (timerId >= this->maxTimers) {
-		return 0;
+		return EBF_INDEX_OUT_OF_BOUNDS;
 	}
 
 	TimerData &timer = this->timersData[timerId];
 
 	if (timer.callbackPtr == NULL) {
-		return 0;
+		return EBF_NOT_INITIALIZED;
 	}
 
 	// Timer is already running
 	if (timer.microsLeft != 0) {
-		return 0;
+		return EBF_RESOURCE_IS_IN_USE;
 	}
 
 	// Timer is not running, set ticks to be used
@@ -52,20 +52,24 @@ uint8_t EBF_Timers::StartTimer(uint8_t timerId)
 		timer.microsLeft = 1;
 	}
 
-	return 1;
+	return EBF_OK;
 }
 
 uint8_t EBF_Timers::StartTimer(uint8_t timerId, uint16_t milliSec)
 {
-	if (this->SetTimeout(timerId, milliSec) == 0) {
-		return 0;
+	uint8_t rc;
+
+	rc = this->SetTimeout(timerId, milliSec);
+	if (rc != EBF_OK) {
+		return rc;
 	}
 
-	if (this->StartTimer(timerId) == 0) {
-		return 0;
+	rc = this->StartTimer(timerId);
+	if (rc != EBF_OK) {
+		return rc;
 	}
 
-	return 1;
+	return EBF_OK;
 }
 
 uint16_t EBF_Timers::Process()
@@ -109,25 +113,25 @@ uint16_t EBF_Timers::Process()
 uint8_t EBF_Timers::StopTimer(uint8_t timerId)
 {
 	if (timerId >= this->maxTimers) {
-		return 0;
+		return EBF_INDEX_OUT_OF_BOUNDS;
 	}
 
 	TimerData &timer = this->timersData[timerId];
 
 	timer.microsLeft = 0;
 
-	return 1;
+	return EBF_OK;
 }
 
 uint8_t EBF_Timers::SetTimeout(uint8_t timerId, uint16_t milliSec)
 {
 	if (timerId >= this->maxTimers) {
-		return 0;
+		return EBF_INDEX_OUT_OF_BOUNDS;
 	}
 
 	TimerData &timer = this->timersData[timerId];
 
 	timer.milliSecTimeout = milliSec;
 
-	return 1;
+	return EBF_OK;
 }

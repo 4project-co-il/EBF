@@ -4,8 +4,13 @@ extern void EBF_EmptyCallback();
 
 uint8_t EBF_Switch::Init(uint8_t pinNumber, bool internelPullup)
 {
+	uint8_t rc;
+
 	// Use empty callback function to allow Process and ProcessCallback calls
-	EBF_DigitalInput::Init(pinNumber, EBF_EmptyCallback, EBF_DigitalInput::InterruptMode::MODE_CHANGE, internelPullup);
+	rc = EBF_DigitalInput::Init(pinNumber, EBF_EmptyCallback, EBF_DigitalInput::InterruptMode::MODE_CHANGE, internelPullup);
+	if (rc != EBF_OK) {
+		return rc;
+	}
 
 	if (EBF_DigitalInput::GetValue()) {
 		state = SWITCH_ON;
@@ -20,7 +25,7 @@ uint8_t EBF_Switch::Init(uint8_t pinNumber, bool internelPullup)
 
 	onChangeCallback = EBF_EmptyCallback;
 
-	return 1;
+	return EBF_OK;
 }
 
 // Setting polling interval in milli-seconds
@@ -57,7 +62,12 @@ void EBF_Switch::ProcessCallback()
 
 uint8_t EBF_Switch::Process()
 {
-	EBF_DigitalInput::Process();
+	uint8_t rc;
+
+	rc = EBF_DigitalInput::Process();
+	if (rc != EBF_OK) {
+		return rc;
+	}
 
 	if ((millis() - debounceStart) > debounceTime) {
 		if (state != lastState) {
@@ -69,5 +79,5 @@ uint8_t EBF_Switch::Process()
 		}
 	}
 
-	return 1;
+	return EBF_OK;
 }

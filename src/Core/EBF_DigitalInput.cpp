@@ -8,7 +8,12 @@ uint8_t EBF_DigitalInput::Init(
 	bool internelPullup
 )
 {
-	EBF_HalInstance::Init(HAL_Type::DIGITAL_INPUT, pinNumber);
+	uint8_t rc;
+
+	rc = EBF_HalInstance::Init(HAL_Type::DIGITAL_INPUT, pinNumber);
+	if (rc != EBF_OK) {
+		return rc;
+	}
 
 	this->pinNumber = pinNumber;
 	this->callbackFunc = callbackFunc;
@@ -36,7 +41,8 @@ uint8_t EBF_DigitalInput::Init(
 		// No callback. No need to poll in that case
 		pollIntervalMs = EBF_NO_POLLING;
 	}
-	return 1;
+
+	return EBF_OK;
 }
 
 void EBF_DigitalInput::SetPollInterval(uint16_t ms)
@@ -55,7 +61,7 @@ uint8_t EBF_DigitalInput::Process()
 
 	// Callback might not be set, nothing to do in that case
 	if (callbackFunc == NULL) {
-		return 0;
+		return EBF_OK;
 	}
 
 	currentValue = digitalRead(pinNumber);
@@ -90,7 +96,7 @@ uint8_t EBF_DigitalInput::Process()
 		break;
 	}
 
-	return 1;
+	return EBF_OK;
 }
 
 uint8_t EBF_DigitalInput::GetValue()

@@ -6,7 +6,12 @@ uint8_t EBF_AnalogInput::Init(
 	uint8_t changePercent
 )
 {
-	EBF_HalInstance::Init(HAL_Type::ANALOG_INPUT, pinNumber);
+	uint8_t rc;
+
+	rc = EBF_HalInstance::Init(HAL_Type::ANALOG_INPUT, pinNumber);
+	if (rc != EBF_OK) {
+		return rc;
+	}
 
 	this->pinNumber = pinNumber;
 	this->callbackFunc = callbackFunc;
@@ -19,7 +24,7 @@ uint8_t EBF_AnalogInput::Init(
 		pollIntervalMs = EBF_NO_POLLING;
 	}
 
-	return 1;
+	return EBF_OK;
 }
 
 void EBF_AnalogInput::SetPollInterval(uint16_t ms)
@@ -39,7 +44,7 @@ uint8_t EBF_AnalogInput::Process()
 
 	// Callback might not be set, nothing to do in that case
 	if (callbackFunc == NULL) {
-		return 0;
+		return EBF_OK;
 	}
 
 	currentValue = analogRead(pinNumber);
@@ -50,7 +55,7 @@ uint8_t EBF_AnalogInput::Process()
 		ProcessCallback();
 	}
 
-	return 1;
+	return EBF_OK;
 }
 
 float EBF_AnalogInput::GetValue()

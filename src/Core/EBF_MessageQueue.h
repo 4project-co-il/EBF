@@ -2,6 +2,7 @@
 #define __EBF_MESSAGE_QUEUE_H__
 
 #include <Arduino.h>
+#include "EBF_Global.h"
 
 #ifndef EBF_MESSAGE_PARAMS
 #define EBF_MESSAGE_PARAMS 1

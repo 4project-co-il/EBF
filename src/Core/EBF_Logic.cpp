@@ -21,7 +21,7 @@ uint8_t EBF_Logic::Init(uint8_t maxTimers, uint8_t queueSize)
 
 #ifdef EBF_USE_INTERRUPTS
 	rc = this->msgQueue.Init(queueSize);
-	if (rc == 0) {
+	if (rc != EBF_NO_ERROR) {
 		return rc;
 	}
 
@@ -29,27 +29,31 @@ uint8_t EBF_Logic::Init(uint8_t maxTimers, uint8_t queueSize)
 #else
 	rc = this->timers.Init(maxTimers, NULL);
 #endif
-	if (rc == 0) {
+	if (rc != EBF_OK) {
 		return rc;
 	}
 
 	if (EBF_HalInstance::GetNumberOfInstances() > 0) {
 		pHalInstances = (EBF_HalInstance**)malloc(sizeof(EBF_HalInstance*) * EBF_HalInstance::GetNumberOfInstances());
+
+		if (pHalInstances == NULL) {
+			return EBF_NOT_ENOUGH_MEMORY;
+		}
 	}
 
-	return 1;
+	return EBF_OK;
 }
 
 uint8_t EBF_Logic::AddHalInstance(EBF_HalInstance &instance)
 {
 	if (halIndex >= EBF_HalInstance::GetNumberOfInstances()) {
-		return 0;
+		return EBF_INDEX_OUT_OF_BOUNDS;
 	}
 
 	pHalInstances[halIndex] = &instance;
 	halIndex++;
 
-	return 1;
+	return EBF_OK;
 }
 
 uint8_t EBF_Logic::Process()
@@ -128,7 +132,7 @@ uint8_t EBF_Logic::Process()
 		}
 	}
 
-	return 1;
+	return EBF_OK;
 }
 
 EBF_HalInstance *EBF_Logic::GetHalInstance(EBF_HalInstance::HAL_Type type, uint8_t id)

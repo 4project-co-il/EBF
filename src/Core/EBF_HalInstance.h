@@ -29,7 +29,7 @@ class EBF_HalInstance {
 		};
 
 		uint8_t Init(HAL_Type type, uint8_t id);
-		virtual uint8_t Process() { return 1; };
+		virtual uint8_t Process() { return EBF_OK; };
 
 		static uint8_t GetNumberOfInstances();
 		uint16_t GetPollingInterval();

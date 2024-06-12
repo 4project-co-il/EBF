@@ -2,11 +2,16 @@
 
 uint8_t EBF_Relay::Init(uint8_t pinNumber)
 {
-	EBF_DigitalOutput::Init(pinNumber);
+	uint8_t rc;
+
+	rc = EBF_DigitalOutput::Init(pinNumber);
+	if (rc != EBF_OK) {
+		return rc;
+	}
 
 	state = RELAY_OFF;
 
-	return 1;
+	return EBF_OK;
 }
 
 // SetValue acts as an ON/OFF function, value == 0 will perform as OFF, any other value as ON
@@ -42,5 +47,5 @@ uint8_t EBF_Relay::Process()
 	// No polling needed
 	pollIntervalMs = EBF_NO_POLLING;
 
-	return 1;
+	return EBF_OK;
 }
