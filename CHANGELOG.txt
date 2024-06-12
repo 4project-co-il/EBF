@@ -2,3 +2,6 @@ Version 0.1.0
 	Initial Core code, implementing the EBF logic, Timers, MessageQueue, DigitalInput, DigitalOutput, AnalogInput, PwmOutput, Serial
 	Initial Products code, implementing Led, Button, Relay, Switch, Potentiometer
 	Examples for all the code
+
+Version 0.1.1
+	Adding EBF_ERROR_CODE, 0 = OK, anything else is an error code
