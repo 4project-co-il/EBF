@@ -6,6 +6,8 @@
 	#include "EBF_Config.h"
 #endif
 
+#include "EBF_Global.h"
+
 class EBF_HalInstance {
 	public:
 		friend class EBF_Logic;

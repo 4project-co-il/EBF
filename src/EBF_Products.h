@@ -14,5 +14,6 @@
 #include "Products/EBF_Switch.h"
 #include "Products/EBF_Button.h"
 #include "Products/EBF_Potentiometer.h"
+#include "Products/EBF_Servo.h"
 
 #endif
