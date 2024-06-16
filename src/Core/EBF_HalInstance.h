@@ -11,6 +11,7 @@
 class EBF_HalInstance {
 	public:
 		friend class EBF_Logic;
+		friend class EBF_Core;
 
 	public:
 		EBF_HalInstance();
