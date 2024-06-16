@@ -199,6 +199,21 @@
             "name": "Products - Potentiometer averaging",
             "base": "examples/Products-PotentiometerAveraging.ino",
             "files": ["Products-PotentiometerAveraging.ino"]
+        },
+        {
+            "name": "Products - Servo sweep with timer",
+            "base": "examples/Products-ServoSweepWithTimer.ino",
+            "files": ["Products-ServoSweepWithTimer.ino"]
+        },
+        {
+            "name": "Products - Servo slow movement",
+            "base": "examples/Products-ServoSlowMovement.ino",
+            "files": ["Products-ServoSlowMovement.ino"]
+        },
+        {
+            "name": "Products - HC-SR04 distance sensor",
+            "base": "examples/Products-EBF_HC-SR04_DistanceSensor.ino",
+            "files": ["Products-EBF_HC-SR04_DistanceSensor.ino"]
         }
     ]
 }

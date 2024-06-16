@@ -15,5 +15,6 @@
 #include "Products/EBF_Button.h"
 #include "Products/EBF_Potentiometer.h"
 #include "Products/EBF_Servo.h"
+#include "Products/EBF_HC-SR04_DistanceSensor.h"
 
 #endif
