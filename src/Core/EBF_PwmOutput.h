@@ -17,7 +17,7 @@ class EBF_PwmOutput : protected EBF_HalInstance {
 		uint8_t SetValue(int value);
 		uint8_t SetValue(float value);
 
-	private:
+	protected:
 		uint8_t pinNumber;
 };
 

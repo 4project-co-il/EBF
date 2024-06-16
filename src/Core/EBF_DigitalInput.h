@@ -35,9 +35,9 @@ class EBF_DigitalInput : protected EBF_HalInstance {
 		uint8_t Process();
 		virtual void ProcessCallback() { callbackFunc(); }
 		EBF_CallbackType callbackFunc;
+		uint8_t pinNumber;
 
 	private:
-		uint8_t pinNumber;
 		uint8_t lastValue;
 		InterruptMode isrMode;
 };

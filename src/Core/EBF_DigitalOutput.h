@@ -15,7 +15,7 @@ class EBF_DigitalOutput : protected EBF_HalInstance {
 
 		uint8_t SetValue(uint8_t value);
 
-	private:
+	protected:
 		uint8_t pinNumber;
 };
 

@@ -27,15 +27,13 @@ class EBF_AnalogInput : protected EBF_HalInstance {
 		uint8_t Process();
 		virtual void ProcessCallback() { callbackFunc(); }
 
+		uint8_t pinNumber;
 		EBF_CallbackType callbackFunc;
 		uint16_t lastValue;
 		uint8_t changePercent;
 
 		// TODO: should IFDEF here for different processors
 		const uint16_t adcResolution = 1023;
-
-	private:
-		uint8_t pinNumber;
 };
 
 #endif
