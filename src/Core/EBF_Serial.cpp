@@ -4,7 +4,7 @@ uint8_t EBF_Serial::Init(
 	uint8_t serialNumber,
 	EBF_CallbackType callbackFunc,
 	uint32_t boudRate,
-	uint8_t config
+	uint16_t config
 )
 {
 	uint8_t rc;

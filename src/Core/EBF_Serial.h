@@ -18,7 +18,7 @@ class EBF_Serial : protected EBF_HalInstance, public Stream {
 			uint8_t serialNumber = 0,
 			EBF_CallbackType callbackFunc = NULL,
 			uint32_t boudRate = 115200,
-			uint8_t config = SERIAL_8N1
+			uint16_t config = SERIAL_8N1
 		);
 		uint8_t Process();
 
