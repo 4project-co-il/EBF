@@ -44,3 +44,17 @@ void EBF_HalInstance::SetLastPollMillis(unsigned long ms)
 {
 	lastPollMillis = ms;
 }
+
+unsigned long EBF_HalInstance::micros()
+{
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
+	return pLogic->micros();
+}
+
+unsigned long EBF_HalInstance::millis()
+{
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
+	return pLogic->millis();
+}

@@ -20,6 +20,10 @@ class EBF_HalInstance {
 			this->numberOfInstances--;
 		}
 
+		// Time functions to use EBF's power-saving correction
+		unsigned long micros();
+		unsigned long millis();
+
 	protected:
 		enum HAL_Type {
 			DIGITAL_INPUT = 0,

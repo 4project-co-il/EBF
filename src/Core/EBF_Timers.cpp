@@ -9,6 +9,7 @@ uint8_t EBF_Timers::Init(uint8_t maxTimers, EBF_MessageQueue *pMsgQueue)
 	this->timersData = (TimerData*)malloc(sizeof(TimerData) * this->maxTimers);
 	memset(this->timersData, 0, sizeof(TimerData) * this->maxTimers);
 
+	// It's ok to use system micros() here, we're initializing, there is no power-saving yet
 	lastMicros = micros();
 
 	return EBF_OK;
