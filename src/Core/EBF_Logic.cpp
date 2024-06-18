@@ -8,6 +8,32 @@ EBF_Logic::EBF_Logic()
 {
 	pHalInstances = NULL;
 	halIndex = 0;
+
+#ifdef EBF_SLEEP_IMPLEMENTATION
+	sleepMode = EBF_SleepMode::EBF_NO_SLEEP;
+	microsAddition = 0;
+
+	// Disable all pins (input, no pullup, no input buffer)
+	for (uint32_t ulPin = 0 ; ulPin < NUM_DIGITAL_PINS ; ulPin++) {
+		PORT->Group[g_APinDescription[ulPin].ulPort].PINCFG[g_APinDescription[ulPin].ulPin].reg = (uint8_t)(PORT_PINCFG_RESETVALUE);
+		PORT->Group[g_APinDescription[ulPin].ulPort].DIRCLR.reg = (uint32_t)(1<<g_APinDescription[ulPin].ulPin);
+	}
+
+	// reset_gclks
+	for (uint8_t i = 1; i < GCLK_GEN_NUM; i++) {
+		GCLK->GENCTRL.reg = GCLK_GENCTRL_ID(i);
+		while (GCLK->STATUS.bit.SYNCBUSY);
+
+		GCLK->GENCTRL.reg = GCLK_GENCTRL_ID(i);
+		while (GCLK->STATUS.bit.SYNCBUSY);
+	}
+
+	// connect all peripherial to a dead clock
+	for (byte i = 1; i < 37; i++) {
+		GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(i) | GCLK_CLKCTRL_GEN(4) | GCLK_CLKCTRL_CLKEN;
+		while (GCLK->STATUS.bit.SYNCBUSY);
+	}
+#endif
 }
 
 EBF_Logic *EBF_Logic::GetInstance()
@@ -32,6 +58,10 @@ uint8_t EBF_Logic::Init(uint8_t maxTimers, uint8_t queueSize)
 	if (rc != EBF_OK) {
 		return rc;
 	}
+
+#ifdef EBF_SLEEP_IMPLEMENTATION
+		PrepareSleep();
+#endif
 
 	if (EBF_HalInstance::GetNumberOfInstances() > 0) {
 		pHalInstances = (EBF_HalInstance**)malloc(sizeof(EBF_HalInstance*) * EBF_HalInstance::GetNumberOfInstances());
@@ -64,10 +94,10 @@ uint8_t EBF_Logic::Process()
 	unsigned long ms;
 
 	// Start counting time before the execution of the callbacks, that might take some time
-	uint32_t start = micros();
+	uint32_t start = this->micros();
 
 	// Process timers
-	delayWanted = timers.Process();
+	delayWanted = timers.Process(start);
 
 	// Process HALs
 	for (i=0; i<halIndex; i++) {
@@ -77,7 +107,7 @@ uint8_t EBF_Logic::Process()
 			continue;
 		}
 
-		ms = millis();
+		ms = this->millis();
 
 		if (ms - pHal->GetLastPollMillis() > pHal->GetPollingInterval()) {
 			pHal->SetLastPollMillis(ms);
@@ -104,7 +134,17 @@ uint8_t EBF_Logic::Process()
 	//Serial.print("Wanted delay: ");
 	//Serial.println(delayWanted);
 
-	// TODO: Try to power down the CPU for some time...
+#ifdef EBF_SLEEP_IMPLEMENTATION
+	// Try to power down the CPU for some time...
+	if (delayWanted > 1 && sleepMode != EBF_SleepMode::EBF_NO_SLEEP) {
+		// Enter sleep mode for delayWanted timer
+		EnterSleep(delayWanted);
+
+		// Since we don't know how long the power save lasted, just return the control.
+		// The calculations will be done again when Process() will be called as part of the loop.
+		return EBF_OK;
+	}
+#endif
 
 	// Implementing our own delay loop, so we could check the messages from interrupts in the loop
 	while (delayWanted > 0) {
@@ -126,7 +166,7 @@ uint8_t EBF_Logic::Process()
 			}
 		}
 #endif
-		while ( delayWanted > 0 && (micros() - start) >= 1000) {
+		while ( delayWanted > 0 && (this->micros() - start) >= 1000) {
 			delayWanted--;
 			start += 1000;
 		}
@@ -184,4 +224,179 @@ uint8_t EBF_Logic::ProcessInterrupt(EBF_HalInstance *pHalInstance)
 
 	return msgQueue.AddMessage(msg);
 }
+#endif
+
+#ifdef EBF_SLEEP_IMPLEMENTATION
+void RTC_Handler(void)
+{
+	// Disable RTC
+	RTC->MODE0.CTRL.reg &= ~RTC_MODE0_CTRL_ENABLE;
+	while (RTC->MODE0.STATUS.bit.SYNCBUSY);
+
+	// And set the counter to 0, in case it moved on
+	RTC->MODE0.COUNT.reg = 0;
+	while (RTC->MODE0.STATUS.bit.SYNCBUSY);
+
+	// must clear flag at end
+	RTC->MODE0.INTFLAG.reg |= (RTC_MODE0_INTFLAG_CMP0 | RTC_MODE0_INTFLAG_OVF);
+}
+
+uint8_t EBF_Logic::PrepareSleep()
+{
+
+	// Based on ArduinoLowPower library, configGCLK6() function
+	// https://github.com/arduino-libraries/ArduinoLowPower/blob/master/src/samd/ArduinoLowPower.cpp
+	// And on ArduinoLowPower library, "Added support for Mode 0 and Mode 1" PR
+	// https://github.com/arduino-libraries/RTCZero/pull/58
+
+	// turn on digital interface clock
+	PM->APBAMASK.reg |= PM_APBAMASK_RTC;
+
+	// Generic clock 2 will have divider = 4 (/32), with 32K crystal it gives tick about every mSec
+	GCLK->GENDIV.reg = GCLK_GENDIV_ID(2) | GCLK_GENDIV_DIV(4);
+	while (GCLK->STATUS.bit.SYNCBUSY);
+
+	// Using UltraLowPower 32K internal crystal for generic clock 2
+	GCLK->GENCTRL.reg = (GCLK_GENCTRL_GENEN | GCLK_GENCTRL_SRC_OSCULP32K | GCLK_GENCTRL_ID(2) | GCLK_GENCTRL_DIVSEL | GCLK_GENCTRL_RUNSTDBY);
+	while (GCLK->STATUS.bit.SYNCBUSY);
+
+	GCLK->CLKCTRL.reg = (uint32_t)((GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK2 | GCLK_GENCTRL_ID(RTC_GCLK_ID)));
+	while (GCLK->STATUS.bit.SYNCBUSY);
+
+	// Disable RTC after initialization
+	RTC->MODE0.CTRL.reg &= ~RTC_MODE0_CTRL_ENABLE;
+	while (RTC->MODE0.STATUS.bit.SYNCBUSY);
+
+	// SW reset
+	RTC->MODE0.CTRL.reg |= RTC_MODE0_CTRL_SWRST;
+	while (RTC->MODE0.STATUS.bit.SYNCBUSY);
+
+	// Configure MODE0 with prescaler=1, tick per about 1 mSec
+	RTC->MODE0.CTRL.reg = RTC_MODE0_CTRL_MODE_COUNT32 | RTC_MODE0_CTRL_PRESCALER_DIV1;
+	while (RTC->MODE0.STATUS.bit.SYNCBUSY);
+
+	// We will use overflow interrupt to wake the CPU
+	RTC->MODE0.INTENSET.reg |= RTC_MODE0_INTENSET_OVF;
+	while (RTC->MODE0.STATUS.bit.SYNCBUSY);
+
+	// Enable RTC interrupt in interrupt controller
+	NVIC_EnableIRQ(RTC_IRQn);
+
+	// Clear SW reset
+	RTC->MODE0.CTRL.reg &= ~RTC_MODE0_CTRL_SWRST;
+	while (RTC->MODE0.STATUS.bit.SYNCBUSY);
+
+	/* Errata: Make sure that the Flash does not power all the way down
+     	* when in sleep mode. */
+
+	NVMCTRL->CTRLB.bit.SLEEPPRM = NVMCTRL_CTRLB_SLEEPPRM_DISABLED_Val;
+
+	// TODO: Check if other modules can be disabled to save more power
+
+	return EBF_OK;
+}
+
+// Based on ArduinoLowPower
+// https://github.com/arduino-libraries/ArduinoLowPower/blob/master/src/samd/ArduinoLowPower.cpp
+uint8_t EBF_Logic::EnterSleep(uint16_t msSleep)
+{
+	uint32_t timerCnt;
+	bool restoreUSBDevice = false;
+	uint32_t apbBMask;
+	uint32_t apbCMask;
+
+	// No sleep needed
+	if (sleepMode == EBF_SleepMode::EBF_NO_SLEEP) {
+		return EBF_OK;
+	}
+	/* Errata: Make sure that the Flash does not power all the way down
+     	* when in sleep mode. */
+
+	NVMCTRL->CTRLB.bit.SLEEPPRM = NVMCTRL_CTRLB_SLEEPPRM_DISABLED_Val;
+
+	// Count up to the overflow (-1)
+	RTC->MODE0.COUNT.reg = (uint32_t)(-1) - msSleep;
+	while (RTC->MODE0.STATUS.bit.SYNCBUSY);
+
+	// Save the sleep time for micros/millis correction
+	this->sleepMs = msSleep;
+
+	// Enable the RTC
+	RTC->MODE0.CTRL.reg |= RTC_MODE0_CTRL_ENABLE;
+	while (RTC->MODE0.STATUS.bit.SYNCBUSY);
+
+	switch (sleepMode)
+	{
+	case EBF_SleepMode::EBF_SLEEP_LIGHT:
+		SCB->SCR &= ~SCB_SCR_SLEEPDEEP_Msk;
+		PM->SLEEP.reg = 2;
+		__DSB();
+		__WFI();
+		break;
+
+	case EBF_SleepMode::EBF_SLEEP_DEEP:
+	    // Turn down anything that will not be used during deep sleep
+		SYSCTRL->OSC8M.bit.ENABLE = 0;
+    	SYSCTRL->BOD33.bit.ENABLE = 0;
+
+		// Save currently running modules setup
+		apbBMask = PM->APBBMASK.reg;
+		apbCMask = PM->APBCMASK.reg;
+
+		PM->APBBMASK.bit.DMAC_ = 0;
+		PM->APBBMASK.bit.USB_ = 0;
+		PM->APBCMASK.reg = 0;
+
+		if (SERIAL_PORT_USBVIRTUAL) {
+			USBDevice.standby();
+		} else {
+			USBDevice.detach();
+			restoreUSBDevice = true;
+		}
+		// Disable systick interrupt:  See https://www.avrfreaks.net/forum/samd21-samd21e16b-sporadically-locks-and-does-not-wake-standby-sleep-mode
+		SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
+		SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
+		__DSB();
+		__WFI();
+		// Enable systick interrupt
+		SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
+		if (restoreUSBDevice) {
+			USBDevice.attach();
+		}
+
+		// Restore currently running modules
+		PM->APBCMASK.reg = apbCMask;
+		PM->APBBMASK.reg = apbBMask;
+		break;
+
+	default:
+		break;
+	}
+
+
+	// We're after the sleep
+	// Disable the RTC
+	RTC->MODE0.CTRL.reg &= ~RTC_MODE0_CTRL_ENABLE;
+	while (RTC->MODE0.STATUS.bit.SYNCBUSY);
+
+	// Get RTC counter
+	RTC->MODE0.READREQ.reg = RTC_READREQ_RREQ;
+	while (RTC->MODE0.STATUS.bit.SYNCBUSY);
+
+  	timerCnt = RTC->MODE0.COUNT.reg;
+	if (timerCnt == 0) {
+		// RTC timer overflow, the ISR stops and zeroes the counter, so we can be sure it will be 0 in that case
+		// We slept the whole period we wanted, advance the additions counter
+		microsAddition += sleepMs*1000;
+	} else {
+		// RTC didn't overflow yet, some other reason woke the CPU from sleep
+		// Advance the additions counter with the delta
+		microsAddition += (sleepMs - ((uint32_t)(-1) - timerCnt)) * 1000;
+	}
+
+	// Back to normal CPU oreration
+
+	return EBF_OK;
+}
+
 #endif

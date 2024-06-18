@@ -29,6 +29,14 @@ class EBF_Logic {
 		uint8_t StartTimer(uint8_t timerId, uint16_t milliSec);
 		uint8_t StopTimer(uint8_t timerId);
 
+#ifdef EBF_SLEEP_IMPLEMENTATION
+		inline unsigned long micros() { return ::micros() + microsAddition; }
+		inline unsigned long millis() { return ::millis() + microsAddition/1000; }
+#else
+		inline unsigned long micros() { return ::micros(); }
+		inline unsigned long millis() { return ::millis(); }
+#endif
+
 #ifdef EBF_USE_INTERRUPTS
 		// Message queue functions
 		uint8_t ProcessInterrupt(EBF_HalInstance *pHalInstance);
@@ -38,6 +46,10 @@ class EBF_Logic {
 		uint8_t GetMaxNumberOfMessages() { return msgQueue.GetMaxMessagesNumber(); }
 #endif
 
+#ifdef EBF_SLEEP_IMPLEMENTATION
+		void SetSleepMode(EBF_SleepMode mode) { sleepMode = mode; }
+#endif
+
 	private:
 		static EBF_Logic *pStaticInstance;
 		EBF_Timers timers;
@@ -45,6 +57,16 @@ class EBF_Logic {
 		EBF_MessageQueue msgQueue;
 #endif
 
+#ifdef EBF_SLEEP_IMPLEMENTATION
+		uint8_t PrepareSleep();
+		uint8_t EnterSleep(uint16_t msSleep);
+
+		EBF_SleepMode sleepMode;
+		uint32_t sleepMs;	// The time in mSec sleep was intended
+
+		// microSeconds that have to be added to Arduino's micros() and millis() due to sleeping time
+		unsigned long microsAddition;
+#endif
 		EBF_HalInstance **pHalInstances;
 		uint8_t halIndex;
 };

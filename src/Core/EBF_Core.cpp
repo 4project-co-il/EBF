@@ -85,6 +85,20 @@ uint8_t EBF_Core::StopTimer(uint8_t timerId)
 	return pLogic->StopTimer(timerId);
 }
 
+unsigned long EBF_Core::micros()
+{
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
+	return pLogic->micros();
+}
+
+unsigned long EBF_Core::millis()
+{
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
+	return pLogic->millis();
+}
+
 #ifdef EBF_USE_INTERRUPTS
 uint8_t EBF_Core::ProcessInterrupt(EBF_DigitalInput &digitalInput)
 {
@@ -105,5 +119,14 @@ uint8_t EBF_Core::InInterrupt()
 	} else {
 		return 0;
 	}
+}
+#endif
+
+#ifdef EBF_SLEEP_IMPLEMENTATION
+void EBF_Core::SetSleepMode(EBF_SleepMode mode)
+{
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
+	pLogic->SetSleepMode(mode);
 }
 #endif
