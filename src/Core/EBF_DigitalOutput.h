@@ -16,6 +16,10 @@ class EBF_DigitalOutput : protected EBF_HalInstance {
 		uint8_t SetValue(uint8_t value);
 
 	protected:
+		// No processing is needed for digital outputs
+		uint8_t Process() { return EBF_OK; }
+
+	protected:
 		uint8_t pinNumber;
 };
 

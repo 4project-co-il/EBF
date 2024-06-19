@@ -36,7 +36,10 @@ class EBF_HalInstance {
 		};
 
 		uint8_t Init(HAL_Type type, uint8_t id);
-		virtual uint8_t Process() { return EBF_OK; };
+		// Virtual function that will be called to process the data
+		virtual uint8_t Process() = 0;
+		// Virtual function that will be called to process the callback function
+		virtual void ProcessCallback() { }
 
 		static uint8_t GetNumberOfInstances();
 		uint16_t GetPollingInterval();
