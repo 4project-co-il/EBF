@@ -32,8 +32,15 @@ class EBF_AnalogInput : protected EBF_HalInstance {
 		uint16_t lastValue;
 		uint8_t changePercent;
 
-		// TODO: should IFDEF here for different processors
+#if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328__) || defined(__AVR_ATmega88) || defined(__AVR_ATmega8__) || defined(__AVR_ATmega88__)
+		// Those boards have 10bit ADC
 		const uint16_t adcResolution = 1023;
+#elif defined(ARDUINO_ARCH_SAMD)
+		// Those boards have 12bit ADC
+		const uint16_t adcResolution = 4095;
+#else
+	#error Current board type is not supported
+#endif
 };
 
 #endif
