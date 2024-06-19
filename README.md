@@ -2,7 +2,9 @@
 EBF is a framework for Arduino environment, providing the timers infrastructure and C++ abstraction layers for the services provided by the Arduino device.
 Development with such framework allows you to concentrate on the logic of your project, creates cleaner code and easier for the beginners.
 
-Currently only boards based on the ATMega328 chip are supported (Arduino UNO, Arduino Nano).
+Currently only boards based on the ATMega328 chip are supported (Arduino UNO, Arduino Nano), as well as boards based on the SAMD21 chip.
+There are many SAMD based boards since this chip is very powerfull compared to the ATMega328 and gain more and more popularity.
+We use SparkFun's SAMD21 Mini board (SKU: DEV-13664) for the development and testing of the code, but there are many other good boards, such as Arduino's MKR line, SeedStudio XIAO SAMD21, Adafruit Feather M0 and few others that should work with EBF.
 
 # The problem
 The Arduino envirnment is based on "linear" execution of the code, meaning each line is executed one after the another.
@@ -74,8 +76,8 @@ void onSerial()
 
 ## No more polling
 The EBF core will do all the polling needed to detect those changes for you, will check when the right time passes to call your function.
-That implementation allows power saving (TODO) since all the timing is done in a cetralized code. When the EBF core knows that there is enough time to save some power, it might put the CPU into IDLE or PowerDown mode.
-You have control over the polling intervals, so instead of adding `delay()` to different parts of the code if you don't need an input to be polled too fast, just call to the 'SetPollInterval()' function during setup.
+That implementation allows power saving since all the timing is done in a cetralized code. When the EBF core knows that there is enough time to save some power, it might put the CPU into IDLE or PowerDown mode.
+You have control over the polling intervals, so instead of adding `delay()` to different parts of the code if you don't need an input to be polled too fast, just call the 'SetPollInterval()' function during setup.
 ```
 // Initialize knock sensor on A0, for 1% change
 analogInput.Init(A0, onAnalogChange, 1);
@@ -87,7 +89,7 @@ analogInput.SetPollInterval(10);
 Want to utilize the hardware interrupts instead of polling the ports to detect the change? No problem! 
 There's almost no code should be changed. Just compile the EBF library with interrupts support and your callback functions will be called the same way as they were done while polling method was used.
 The only change needed is to return the interrupt call (ISR) back to the EBF core, so it will call your function again from the normal run, where you can use Serial and other peripherials without blocking other interrupts.
-This is mainly needed due to the limitations of the ATMega328 to recognize what interrupt is currently handled. Might not be needed with other, more advanced microcontroller types.
+If you need faster execution with some small code, like counting pulses from an encoder, you might want to execute that code in the first call to the callback function, so there might not be a need to pass the control back to the EBF.
 ```
 void onButtonChange()
 {
@@ -115,12 +117,12 @@ void onButtonChange()
 ```
 
 # Power save
-Power saving is currently not implemented, but the core of the EBF is ready for the implementation and there are plans to add power saving functionality.
-The main reason power saving is not yet implemented and got lower priority, is the fact that the Arduino UNO board hardware is not able to save the power due to the components on the board (leds, power regulator, oscilator and other).
-Power saving logic will be implemented when the support for additional microcontrollers will be added.
+Power saving is currently implemented for the SAMD21 chips. 
+With the SparkFun's SAMD21 Mini board with power LED jumper open, in configuration with one pin as digital output (to show some signs of life), we managed to get down to 530 uA power consumtion in deep sleep mode.
+With onboard voltage regulator disconnected the consumtion was only **22 uA**!
 
-Your code will only have to enable the power saving, all the implementation will be done in the core of the EBF.
-The EBF keeps track of the time it will be idle till the next event, so it might put the CPU into sleep mode for those times.
+The only thing that your code have to do is enable the power saving by calling the `EBF.SetSleepMode()` function, all the implementation will be done in the core of the EBF.
+The EBF keeps track of the time it will be idle till the next event, so it might put the CPU into sleep mode during those times.
 For example, if there is a 1 second timer and digital input with 50 mSec polling interval, the core will know that it have only 50 mSec till the next task that should be executed.
 When interrupts are enabled and the digital input uses inerrupt enabled pin, there will be no need for polling, since the interrupt will trigger the event, so the EBF might sleep for the whole 1 second in that case.
 
