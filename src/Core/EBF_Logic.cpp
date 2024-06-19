@@ -4,10 +4,54 @@
 /// EBF_Logic implementation
 EBF_Logic *EBF_Logic::pStaticInstance = new EBF_Logic();
 
+#ifdef EBF_USE_INTERRUPTS
+
+#define IMPLEMENT_EBF_ISR(interrupt) \
+	void EBF_ISR_Handler_ ## interrupt() { \
+		EBF_Logic::GetInstance()->HandleIsr(interrupt); \
+	}
+
+#if defined(ARDUINO_ARCH_AVR)
+#if EXTERNAL_NUM_INTERRUPTS > 8
+    #error Up to 8 external interrupts are currently supported for AVR platform
+#endif
+#if EXTERNAL_NUM_INTERRUPTS > 7
+    IMPLEMENT_EBF_ISR(7)
+#endif
+#if EXTERNAL_NUM_INTERRUPTS > 6
+    IMPLEMENT_EBF_ISR(6)
+#endif
+#if EXTERNAL_NUM_INTERRUPTS > 5
+    IMPLEMENT_EBF_ISR(5)
+#endif
+#if EXTERNAL_NUM_INTERRUPTS > 4
+    IMPLEMENT_EBF_ISR(4)
+#endif
+#if EXTERNAL_NUM_INTERRUPTS > 3
+    IMPLEMENT_EBF_ISR(3)
+#endif
+#if EXTERNAL_NUM_INTERRUPTS > 2
+    IMPLEMENT_EBF_ISR(2)
+#endif
+#if EXTERNAL_NUM_INTERRUPTS > 1
+    IMPLEMENT_EBF_ISR(1)
+#endif
+#if EXTERNAL_NUM_INTERRUPTS > 0
+    IMPLEMENT_EBF_ISR(0)
+#endif
+#else
+	#error Current board type is not supported
+#endif
+
+#endif
+
 EBF_Logic::EBF_Logic()
 {
 	pHalInstances = NULL;
 	halIndex = 0;
+#ifdef EBF_USE_INTERRUPTS
+	isRunFromISR = 0;
+#endif
 
 #ifdef EBF_SLEEP_IMPLEMENTATION
 	this->SleepConstructor();
@@ -24,8 +68,12 @@ uint8_t EBF_Logic::Init(uint8_t maxTimers, uint8_t queueSize)
 	uint8_t rc;
 
 #ifdef EBF_USE_INTERRUPTS
+	for (uint8_t i=0; i<EXTERNAL_NUM_INTERRUPTS; i++) {
+		pHalIsr[i] = NULL;
+	}
+
 	rc = this->msgQueue.Init(queueSize);
-	if (rc != EBF_NO_ERROR) {
+	if (rc != EBF_OK) {
 		return rc;
 	}
 
@@ -137,7 +185,7 @@ uint8_t EBF_Logic::Process()
 		if (msgQueue.GetMessagesNumber() > 0) {
 			rc = msgQueue.GetMessage(msg);
 
-			if (rc > 0) {
+			if (rc == EBF_OK) {
 				pHalInstance = (EBF_HalInstance*)msg.param1;
 
 				pHalInstance->Process();
@@ -166,16 +214,82 @@ EBF_HalInstance *EBF_Logic::GetHalInstance(EBF_HalInstance::HAL_Type type, uint8
 	return NULL;
 }
 
-{
-
-
-
-}
-
-{
-}
-
 #ifdef EBF_USE_INTERRUPTS
+uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode)
+{
+	if (interruptNumber > EXTERNAL_NUM_INTERRUPTS) {
+		return EBF_INDEX_OUT_OF_BOUNDS;
+	}
+
+	pHalIsr[interruptNumber] = pHalInstance;
+
+#if defined(ARDUINO_ARCH_AVR)
+	switch (interruptNumber)
+	{
+#if EXTERNAL_NUM_INTERRUPTS > 8
+    #error Up to 8 external interrupts are currently supported for AVR platform
+#endif
+#if EXTERNAL_NUM_INTERRUPTS > 7
+	case 7:
+		attachInterrupt(7, EBF_ISR_Handler_7, mode);
+		break;
+#endif
+#if EXTERNAL_NUM_INTERRUPTS > 6
+	case 6:
+		attachInterrupt(6, EBF_ISR_Handler_6, mode);
+		break;
+#endif
+#if EXTERNAL_NUM_INTERRUPTS > 5
+	case 5:
+		attachInterrupt(5, EBF_ISR_Handler_5, mode);
+		break;
+#endif
+#if EXTERNAL_NUM_INTERRUPTS > 4
+	case 4:
+		attachInterrupt(4, EBF_ISR_Handler_4, mode);
+		break;
+#endif
+#if EXTERNAL_NUM_INTERRUPTS > 3
+	case 3:
+		attachInterrupt(3, EBF_ISR_Handler_3, mode);
+		break;
+#endif
+#if EXTERNAL_NUM_INTERRUPTS > 2
+	case 2:
+		attachInterrupt(2, EBF_ISR_Handler_2, mode);
+		break;
+#endif
+#if EXTERNAL_NUM_INTERRUPTS > 1
+	case 1:
+		attachInterrupt(1, EBF_ISR_Handler_1, mode);
+		break;
+#endif
+#if EXTERNAL_NUM_INTERRUPTS > 0
+	case 0:
+		attachInterrupt(0, EBF_ISR_Handler_0, mode);
+		break;
+#endif
+
+	default:
+		break;
+	}
+#else
+	#error Current board type is not supported
+#endif
+
+	return EBF_OK;
+}
+
+void EBF_Logic::HandleIsr(uint8_t interruptNumber)
+{
+	if (pHalIsr[interruptNumber] != NULL) {
+		// Next process call is done from ISR
+		isRunFromISR = 1;
+		pHalIsr[interruptNumber]->ProcessCallback();
+		isRunFromISR = 0;
+	}
+}
+
 uint8_t EBF_Logic::ProcessInterrupt(EBF_HalInstance *pHalInstance)
 {
 	EBF_MessageQueue::MessageEntry msg;

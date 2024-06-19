@@ -39,12 +39,6 @@ class EBF_Serial : protected EBF_HalInstance, public Stream {
 
 		operator bool();
 
-#ifdef EBF_USE_INTERRUPTS
-		uint8_t IsInInterrupt();
-#else
-		using EBF_HalInstance::IsInInterrupt;
-#endif
-
 	private:
 		enum SerialType : uint8_t {
 			SERIAL_HW = 0,

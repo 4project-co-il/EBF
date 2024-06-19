@@ -2,6 +2,7 @@
 #define __EBF_LOGIC_H__
 
 #include <Arduino.h>
+#include <wiring_private.h>		// For EXTERNAL_NUM_INTERRUPTS
 #if __has_include("EBF_Config.h")
 	#include "EBF_Config.h"
 #endif
@@ -58,7 +59,10 @@ class EBF_Logic {
 
 #ifdef EBF_USE_INTERRUPTS
 		// Message queue functions
+		uint8_t IsRunFromIsr() { return isRunFromISR; }
+		uint8_t AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode);
 		uint8_t ProcessInterrupt(EBF_HalInstance *pHalInstance);
+		void HandleIsr(uint8_t interruptNumber);
 
 		// Message queue debug functions
 		uint8_t GetNumberOfMessages() { return msgQueue.GetMessagesNumber(); }
@@ -74,6 +78,11 @@ class EBF_Logic {
 		EBF_Timers timers;
 #ifdef EBF_USE_INTERRUPTS
 		EBF_MessageQueue msgQueue;
+		// Flag specifying when the HAL Process() calls are from ISR
+		uint8_t isRunFromISR;
+
+		// Table of HAL pointers that have to be called from ISRs
+		EBF_HalInstance* pHalIsr[EXTERNAL_NUM_INTERRUPTS];
 #endif
 
 #ifdef EBF_SLEEP_IMPLEMENTATION
