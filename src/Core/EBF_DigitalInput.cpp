@@ -1,4 +1,6 @@
+#include <wiring_private.h>		// For EXTERNAL_NUM_INTERRUPTS
 #include "EBF_DigitalInput.h"
+#include "EBF_Logic.h"
 #include "EBF_Core.h"
 
 uint8_t EBF_DigitalInput::Init(
@@ -28,15 +30,22 @@ uint8_t EBF_DigitalInput::Init(
 	if (callbackFunc != NULL) {
 		lastValue = digitalRead(pinNumber);
 
+#ifdef EBF_USE_INTERRUPTS
+		uint8_t interruptNumber = NOT_AN_INTERRUPT;
+
 		if (EBF_Core::UseInterrupts()) {
-			if (digitalPinToInterrupt(pinNumber) != NOT_AN_INTERRUPT) {
+			interruptNumber = digitalPinToInterrupt(pinNumber);
+			if (interruptNumber != NOT_AN_INTERRUPT) {
+				EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
 				// We can use interrupt for that pin
-				attachInterrupt(digitalPinToInterrupt(pinNumber), callbackFunc, isrMode);
+				pLogic->AttachInterrupt(interruptNumber, this, isrMode);
 
 				// No need to poll
 				pollIntervalMs = EBF_NO_POLLING;
 			}
 		}
+#endif
 	} else {
 		// No callback. No need to poll in that case
 		pollIntervalMs = EBF_NO_POLLING;
@@ -108,3 +117,4 @@ uint8_t EBF_DigitalInput::GetLastValue()
 {
 	return lastValue;
 }
+

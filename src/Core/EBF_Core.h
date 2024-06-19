@@ -18,9 +18,8 @@ class EBF_Core {
 	public:
 		uint8_t Init();
 		uint8_t Init(uint8_t maxTimers);
-#ifdef EBF_USE_INTERRUPTS
 		uint8_t Init(uint8_t maxTimers, uint8_t queueSize);
-#endif
+
 		uint8_t AddHalInstance(EBF_HalInstance &instance);
 		uint8_t Process();
 
@@ -40,10 +39,16 @@ class EBF_Core {
 #ifdef EBF_USE_INTERRUPTS
 		// Message queue functions
 		uint8_t ProcessInterrupt(EBF_DigitalInput &digitalInput);
-		uint8_t InInterrupt();
 		static uint8_t UseInterrupts() { return 1; }
+		uint8_t InInterrupt();
+
+		// Message queue debug functions
+		uint8_t GetNumberOfMessages();
+		uint8_t GetMaxNumberOfMessages();
 #else
+		uint8_t ProcessInterrupt(EBF_DigitalInput &digitalInput) { return EBF_INVALID_STATE; }
 		static uint8_t UseInterrupts() { return 0; }
+		uint8_t InInterrupt() { return 0; }
 #endif
 
 #ifdef EBF_SLEEP_IMPLEMENTATION

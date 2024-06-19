@@ -56,10 +56,6 @@ void onTimer()
 // To solve that problem, you can return the control to EBF, which will use internal
 // message queue to pass the execution from ISR level to normal run, and will call the
 // same function again to process the logic of the digital input change
-// Since there is no way to know which interrupt is currectly executed in the ATMega328
-// processor (the CPU for Arduino UNO and other boards), EBF can't determine which
-// callback function should be called, hence your help is needed to return the control
-// to EBF, while specifying which HAL object should be called after that.
 void onButtonChange()
 {
 	uint8_t buttonState;

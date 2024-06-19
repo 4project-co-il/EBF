@@ -178,18 +178,3 @@ int EBF_Serial::read(void)
 		break;
 	}
 }
-
-#ifdef EBF_USE_INTERRUPTS
-uint8_t EBF_Serial::IsInInterrupt()
-{
-#if defined(ARDUINO_ARCH_AVR)
-	// ATMEga's don't expose interrupts for serial port
-	return 0;
-#elif defined(ARDUINO_ARCH_SAMD)
-	// TODO: Should check corresponding SERCOM INFLAG register
-	#error TODO
-#else
-	#error Current board type is not supported
-#endif
-}
-#endif

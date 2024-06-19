@@ -19,14 +19,12 @@ uint8_t EBF_Core::Init(uint8_t maxTimers)
 	return pLogic->Init(maxTimers, 0);
 }
 
-#ifdef EBF_USE_INTERRUPTS
 uint8_t EBF_Core::Init(uint8_t maxTimers, uint8_t queueSize)
 {
 	EBF_Logic *pLogic = EBF_Logic::GetInstance();
 
 	return pLogic->Init(maxTimers, queueSize);
 }
-#endif
 
 uint8_t EBF_Core::AddHalInstance(EBF_HalInstance &instance)
 {
@@ -99,7 +97,16 @@ unsigned long EBF_Core::millis()
 	return pLogic->millis();
 }
 
+
 #ifdef EBF_USE_INTERRUPTS
+// Returns 1 when HAL's Process() function (and any HAL callback()) is run from the interrupt (ISR mode)
+uint8_t EBF_Core::InInterrupt()
+{
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
+	return pLogic->IsRunFromIsr();
+}
+
 uint8_t EBF_Core::ProcessInterrupt(EBF_DigitalInput &digitalInput)
 {
 	EBF_Logic *pLogic = EBF_Logic::GetInstance();
@@ -107,19 +114,20 @@ uint8_t EBF_Core::ProcessInterrupt(EBF_DigitalInput &digitalInput)
 	return pLogic->ProcessInterrupt(&digitalInput);
 }
 
-uint8_t EBF_Core::InInterrupt()
+uint8_t EBF_Core::GetNumberOfMessages()
 {
-	// Arduino based on ATMega328 doesn't have any register that shows which interrupt is currently running
-	// But the CPU clears the Global Interrupt Enable (bit7) of the AVR Status Register (SREG) on
-	// ISR entry and sets it back to 1 on ISR exit to allow next interrupt execution
-	// That method might be ok to use if interrupts are not disabled manually and the EBF HAL functions are
-	// called manually. Should be ok for regular usage.
-	if ((SREG & bit(7)) == 0) {
-		return 1;
-	} else {
-		return 0;
-	}
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
+	return pLogic->GetNumberOfMessages();
 }
+
+uint8_t EBF_Core::GetMaxNumberOfMessages()
+{
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
+	return pLogic->GetMaxNumberOfMessages();
+}
+
 #endif
 
 #ifdef EBF_SLEEP_IMPLEMENTATION
