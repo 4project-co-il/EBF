@@ -166,30 +166,13 @@ EBF_HalInstance *EBF_Logic::GetHalInstance(EBF_HalInstance::HAL_Type type, uint8
 	return NULL;
 }
 
-// Timers access functions
-uint8_t EBF_Logic::InitTimer(uint8_t timerId, EBF_CallbackType callbackPtr, uint16_t milliSec)
 {
-	return timers.InitTimer(timerId, callbackPtr, milliSec);
+
+
+
 }
 
-uint8_t EBF_Logic::SetTimeout(uint8_t timerId, uint16_t milliSec)
 {
-	return timers.SetTimeout(timerId, milliSec);
-}
-
-uint8_t EBF_Logic::StartTimer(uint8_t timerId)
-{
-	return timers.StartTimer(timerId);
-}
-
-uint8_t EBF_Logic::StartTimer(uint8_t timerId, uint16_t milliSec)
-{
-	return timers.StartTimer(timerId, milliSec);
-}
-
-uint8_t EBF_Logic::StopTimer(uint8_t timerId)
-{
-	return timers.StopTimer(timerId);
 }
 
 #ifdef EBF_USE_INTERRUPTS

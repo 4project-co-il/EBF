@@ -23,11 +23,30 @@ class EBF_Logic {
 
 	public:
 		// Timer functions
-		uint8_t InitTimer(uint8_t timerId, EBF_CallbackType callbackPtr, uint16_t milliSec);
-		uint8_t SetTimeout(uint8_t timerId, uint16_t milliSec);
-		uint8_t StartTimer(uint8_t timerId);
-		uint8_t StartTimer(uint8_t timerId, uint16_t milliSec);
-		uint8_t StopTimer(uint8_t timerId);
+		inline uint8_t InitTimer(uint8_t timerId, EBF_CallbackType callbackPtr, uint16_t milliSec)
+		{
+			return timers.InitTimer(timerId, callbackPtr, milliSec);
+		}
+
+		inline uint8_t SetTimeout(uint8_t timerId, uint16_t milliSec)
+		{
+			return timers.SetTimeout(timerId, milliSec);
+		}
+
+		inline uint8_t StartTimer(uint8_t timerId)
+		{
+			return timers.StartTimer(timerId);
+		}
+
+		inline uint8_t StartTimer(uint8_t timerId, uint16_t milliSec)
+		{
+			return timers.StartTimer(timerId, milliSec);
+		}
+
+		inline uint8_t StopTimer(uint8_t timerId)
+		{
+			return timers.StopTimer(timerId);
+		}
 
 #ifdef EBF_SLEEP_IMPLEMENTATION
 		inline unsigned long micros() { return ::micros() + microsAddition; }
