@@ -12,8 +12,10 @@
 
 class EBF_Serial : protected EBF_HalInstance, public Stream {
 	public:
-		EBF_Serial(HardwareSerial &serialInstance) : Stream(serialInstance), serial(serialInstance) {};
-
+		EBF_Serial(HardwareSerial &serialInstance);
+#if defined(ARDUINO_ARCH_SAMD)
+		EBF_Serial(Serial_ &serialInstance);
+#endif
 		uint8_t Init(
 			uint8_t serialNumber = 0,
 			EBF_CallbackType callbackFunc = NULL,
@@ -25,23 +27,40 @@ class EBF_Serial : protected EBF_HalInstance, public Stream {
 		void SetPollInterval(uint16_t ms);
 
 		// Stream and Print interfaces
-		inline size_t write(unsigned long n) { return serial.write((uint8_t)n); }
-		inline size_t write(long n) { return serial.write((uint8_t)n); }
-		inline size_t write(unsigned int n) { return serial.write((uint8_t)n); }
-		inline size_t write(int n) { return serial.write((uint8_t)n); }
-		inline size_t write(uint8_t n) { return serial.write((uint8_t)n); }
+		inline size_t write(unsigned long n) { return write((uint8_t)n); }
+		inline size_t write(long n) { return write((uint8_t)n); }
+		inline size_t write(unsigned int n) { return write((uint8_t)n); }
+		inline size_t write(int n) { return write((uint8_t)n); }
+		size_t write(uint8_t n);
 
-		inline int available(void) { return serial.available(); }
-		inline int peek(void) { return serial.peek(); }
-		inline int read(void) { return serial.read(); }
+		int available(void);
+		int peek(void);
+		int read(void);
 
-		operator bool() { return (serial); }
+		operator bool();
+
+#ifdef EBF_USE_INTERRUPTS
+		uint8_t IsInInterrupt();
+#else
+		using EBF_HalInstance::IsInInterrupt;
+#endif
 
 	private:
+		enum SerialType {
+			SERIAL_HW = 0,
+			SERIAL_USB,
+		};
+
 		uint8_t hwNumber;
 		EBF_CallbackType callbackFunc;
 
-		HardwareSerial &serial;
+		// Need to keep different pointer types for initialization
+		SerialType type;
+		HardwareSerial* pHwSerial;
+#if defined(ARDUINO_ARCH_SAMD)
+		Serial_* pUsbSerial;
+#endif
+
 
 };
 
