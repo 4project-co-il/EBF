@@ -11,7 +11,7 @@
 
 class EBF_Switch : protected EBF_DigitalInput {
 	public:
-		enum SwitchState {
+		enum SwitchState : uint8_t {
 			SWITCH_OFF = 0,
 			SWITCH_ON,
 		};

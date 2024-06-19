@@ -21,7 +21,7 @@ class EBF_Servo : protected EBF_HalInstance {
 		uint8_t GetPosition() { return lastPercent; }
 
 	private:
-		enum ServoState {
+		enum ServoState : uint8_t {
 			SERVO_IDLE = 0,
 			SERVO_MOVING,
 		};

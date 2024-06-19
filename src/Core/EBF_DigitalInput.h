@@ -13,7 +13,7 @@ class EBF_DigitalInput : protected EBF_HalInstance {
 	public:
 		friend class EBF_Core;
 
-		enum InterruptMode {
+		enum InterruptMode : uint8_t {
 			MODE_CHANGE = CHANGE,
 			MODE_RISING = RISING,
 			MODE_FALLING = FALLING

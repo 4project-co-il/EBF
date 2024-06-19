@@ -11,7 +11,7 @@
 
 class EBF_Button : public EBF_Switch {
 	public:
-		enum ButtonState {
+		enum ButtonState : uint8_t {
 			BUTTON_OFF = 0,
 			BUTTON_ON,
 			BUTTON_WAITING_FOR_LONG_PRESS

@@ -22,7 +22,7 @@ class EBF_Led : protected EBF_PwmOutput {
 		uint8_t FadeOut(uint16_t msDuration, uint8_t steps);
 
 	private:
-		enum LedState {
+		enum LedState : uint8_t {
 			LED_OFF = 0,
 			LED_ON,
 			LED_BLINKING_ON,

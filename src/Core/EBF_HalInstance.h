@@ -25,7 +25,7 @@ class EBF_HalInstance {
 		unsigned long millis();
 
 	protected:
-		enum HAL_Type {
+		enum HAL_Type : uint8_t {
 			DIGITAL_INPUT = 0,
 			DIGITAL_OUTPUT,
 			ANALOG_INPUT,

@@ -46,7 +46,7 @@ class EBF_Serial : protected EBF_HalInstance, public Stream {
 #endif
 
 	private:
-		enum SerialType {
+		enum SerialType : uint8_t {
 			SERIAL_HW = 0,
 			SERIAL_USB,
 		};
