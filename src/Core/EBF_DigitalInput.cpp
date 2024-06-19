@@ -1,3 +1,4 @@
+#include <wiring_private.h>		// For EXTERNAL_NUM_INTERRUPTS
 #include "EBF_DigitalInput.h"
 #include "EBF_Logic.h"
 #include "EBF_Core.h"
