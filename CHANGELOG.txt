@@ -1,7 +1,15 @@
+Version 0.1.2
+	Adding EBF_Servo product abstraction layer class. Requires installation of Arduino's Servo library
+	Adding HC-SR04 ultrasonic distance sensor product abstraction layer class
+	Adding SAMD21 support
+	Adding SAMD21 power saving
+	Change EBF_Serial implementation to support both HardwareSerial instances (Serial, Serial0, Serial1 etc.) and SAMD's SerialUSB instance
+	Changes in interrupts implementation to get it closer to SAMD implementation needs. Current code doesn't implement SAMD's interrupts.
+
+Version 0.1.1
+	Adding EBF_ERROR_CODE, 0 = OK, anything else is an error code
+
 Version 0.1.0
 	Initial Core code, implementing the EBF logic, Timers, MessageQueue, DigitalInput, DigitalOutput, AnalogInput, PwmOutput, Serial
 	Initial Products code, implementing Led, Button, Relay, Switch, Potentiometer
 	Examples for all the code
-
-Version 0.1.1
-	Adding EBF_ERROR_CODE, 0 = OK, anything else is an error code
