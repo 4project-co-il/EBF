@@ -14,41 +14,6 @@ EBF_Logic::EBF_Logic()
 #endif
 }
 
-#ifdef EBF_SLEEP_IMPLEMENTATION
-
-#if defined(ARDUINO_ARCH_SAMD)
-void EBF_Logic::SleepConstructor()
-{
-	sleepMode = EBF_SleepMode::EBF_NO_SLEEP;
-	microsAddition = 0;
-
-	// Disable all pins (input, no pullup, no input buffer)
-	for (uint32_t ulPin = 0 ; ulPin < NUM_DIGITAL_PINS ; ulPin++) {
-		PORT->Group[g_APinDescription[ulPin].ulPort].PINCFG[g_APinDescription[ulPin].ulPin].reg = (uint8_t)(PORT_PINCFG_RESETVALUE);
-		PORT->Group[g_APinDescription[ulPin].ulPort].DIRCLR.reg = (uint32_t)(1<<g_APinDescription[ulPin].ulPin);
-	}
-
-	// reset_gclks
-	for (uint8_t i = 1; i < GCLK_GEN_NUM; i++) {
-		GCLK->GENCTRL.reg = GCLK_GENCTRL_ID(i);
-		while (GCLK->STATUS.bit.SYNCBUSY);
-
-		GCLK->GENCTRL.reg = GCLK_GENCTRL_ID(i);
-		while (GCLK->STATUS.bit.SYNCBUSY);
-	}
-
-	// connect all peripherial to a dead clock
-	for (byte i = 1; i < 37; i++) {
-		GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(i) | GCLK_CLKCTRL_GEN(4) | GCLK_CLKCTRL_CLKEN;
-		while (GCLK->STATUS.bit.SYNCBUSY);
-	}
-}
-#else
-	#error Current board type is not supported
-#endif
-
-#endif
-
 EBF_Logic *EBF_Logic::GetInstance()
 {
 	return pStaticInstance;
@@ -242,6 +207,33 @@ uint8_t EBF_Logic::ProcessInterrupt(EBF_HalInstance *pHalInstance)
 #ifdef EBF_SLEEP_IMPLEMENTATION
 
 #if defined(ARDUINO_ARCH_SAMD)
+void EBF_Logic::SleepConstructor()
+{
+	sleepMode = EBF_SleepMode::EBF_NO_SLEEP;
+	microsAddition = 0;
+
+	// Disable all pins (input, no pullup, no input buffer)
+	for (uint32_t ulPin = 0 ; ulPin < NUM_DIGITAL_PINS ; ulPin++) {
+		PORT->Group[g_APinDescription[ulPin].ulPort].PINCFG[g_APinDescription[ulPin].ulPin].reg = (uint8_t)(PORT_PINCFG_RESETVALUE);
+		PORT->Group[g_APinDescription[ulPin].ulPort].DIRCLR.reg = (uint32_t)(1<<g_APinDescription[ulPin].ulPin);
+	}
+
+	// reset_gclks
+	for (uint8_t i = 1; i < GCLK_GEN_NUM; i++) {
+		GCLK->GENCTRL.reg = GCLK_GENCTRL_ID(i);
+		while (GCLK->STATUS.bit.SYNCBUSY);
+
+		GCLK->GENCTRL.reg = GCLK_GENCTRL_ID(i);
+		while (GCLK->STATUS.bit.SYNCBUSY);
+	}
+
+	// connect all peripherial to a dead clock
+	for (byte i = 1; i < 37; i++) {
+		GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(i) | GCLK_CLKCTRL_GEN(4) | GCLK_CLKCTRL_CLKEN;
+		while (GCLK->STATUS.bit.SYNCBUSY);
+	}
+}
+
 void RTC_Handler(void)
 {
 	// Disable RTC
