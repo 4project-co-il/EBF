@@ -10,6 +10,15 @@ EBF_Logic::EBF_Logic()
 	halIndex = 0;
 
 #ifdef EBF_SLEEP_IMPLEMENTATION
+	this->SleepConstructor();
+#endif
+}
+
+#ifdef EBF_SLEEP_IMPLEMENTATION
+
+#if defined(ARDUINO_ARCH_SAMD)
+void EBF_Logic::SleepConstructor()
+{
 	sleepMode = EBF_SleepMode::EBF_NO_SLEEP;
 	microsAddition = 0;
 
@@ -33,8 +42,12 @@ EBF_Logic::EBF_Logic()
 		GCLK->CLKCTRL.reg = GCLK_CLKCTRL_ID(i) | GCLK_CLKCTRL_GEN(4) | GCLK_CLKCTRL_CLKEN;
 		while (GCLK->STATUS.bit.SYNCBUSY);
 	}
-#endif
 }
+#else
+	#error Current board type is not supported
+#endif
+
+#endif
 
 EBF_Logic *EBF_Logic::GetInstance()
 {
@@ -60,7 +73,7 @@ uint8_t EBF_Logic::Init(uint8_t maxTimers, uint8_t queueSize)
 	}
 
 #ifdef EBF_SLEEP_IMPLEMENTATION
-		PrepareSleep();
+		InitSleep();
 #endif
 
 	if (EBF_HalInstance::GetNumberOfInstances() > 0) {
@@ -227,6 +240,8 @@ uint8_t EBF_Logic::ProcessInterrupt(EBF_HalInstance *pHalInstance)
 #endif
 
 #ifdef EBF_SLEEP_IMPLEMENTATION
+
+#if defined(ARDUINO_ARCH_SAMD)
 void RTC_Handler(void)
 {
 	// Disable RTC
@@ -241,7 +256,7 @@ void RTC_Handler(void)
 	RTC->MODE0.INTFLAG.reg |= (RTC_MODE0_INTFLAG_CMP0 | RTC_MODE0_INTFLAG_OVF);
 }
 
-uint8_t EBF_Logic::PrepareSleep()
+uint8_t EBF_Logic::InitSleep()
 {
 
 	// Based on ArduinoLowPower library, configGCLK6() function
@@ -398,5 +413,8 @@ uint8_t EBF_Logic::EnterSleep(uint16_t msSleep)
 
 	return EBF_OK;
 }
+#else
+	#error Current board type is not supported
+#endif
 
 #endif

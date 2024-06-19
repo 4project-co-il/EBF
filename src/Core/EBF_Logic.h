@@ -58,7 +58,8 @@ class EBF_Logic {
 #endif
 
 #ifdef EBF_SLEEP_IMPLEMENTATION
-		uint8_t PrepareSleep();
+		void SleepConstructor();
+		uint8_t InitSleep();
 		uint8_t EnterSleep(uint16_t msSleep);
 
 		EBF_SleepMode sleepMode;
