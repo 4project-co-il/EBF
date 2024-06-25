@@ -12,8 +12,11 @@
 
 class EBF_Serial : protected EBF_HalInstance, public Stream {
 	public:
+#if defined(ARDUINO_ARCH_AVR)
 		EBF_Serial(HardwareSerial &serialInstance);
+#endif
 #if defined(ARDUINO_ARCH_SAMD)
+		EBF_Serial(Uart &serialInstance);
 		EBF_Serial(Serial_ &serialInstance);
 #endif
 		uint8_t Init(
@@ -43,6 +46,7 @@ class EBF_Serial : protected EBF_HalInstance, public Stream {
 		enum SerialType : uint8_t {
 			SERIAL_HW = 0,
 			SERIAL_USB,
+			SERIAL_UART
 		};
 
 		uint8_t hwNumber;
@@ -50,8 +54,11 @@ class EBF_Serial : protected EBF_HalInstance, public Stream {
 
 		// Need to keep different pointer types for initialization
 		SerialType type;
+#if defined(ARDUINO_ARCH_AVR)
 		HardwareSerial* pHwSerial;
+#endif
 #if defined(ARDUINO_ARCH_SAMD)
+		Uart* pUartSerial;
 		Serial_* pUsbSerial;
 #endif
 

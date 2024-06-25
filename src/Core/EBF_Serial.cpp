@@ -1,16 +1,24 @@
 #include "EBF_Serial.h"
 
+#if defined(ARDUINO_ARCH_AVR)
 EBF_Serial::EBF_Serial(HardwareSerial &serialInstance) : Stream(serialInstance)
 {
 	type = SERIAL_HW;
 	pHwSerial = &serialInstance;
 }
+#endif
 
 #if defined(ARDUINO_ARCH_SAMD)
 EBF_Serial::EBF_Serial(Serial_ &serialInstance) : Stream(serialInstance)
 {
 	type = SERIAL_USB;
 	pUsbSerial = &serialInstance;
+}
+
+EBF_Serial::EBF_Serial(Uart &serialInstance) : Stream(serialInstance)
+{
+	type = SERIAL_UART;
+	pUartSerial = &serialInstance;
 }
 #endif
 
@@ -38,12 +46,18 @@ uint8_t EBF_Serial::Init(
 
 	switch (type)
 	{
+#if defined(ARDUINO_ARCH_AVR)
 	case SERIAL_HW:
 		pHwSerial->begin(boudRate, config);
 		break;
+#endif
 #if defined(ARDUINO_ARCH_SAMD)
 	case SERIAL_USB:
 		pUsbSerial->begin(boudRate, config);
+		break;
+
+	case SERIAL_UART:
+		pUartSerial->begin(boudRate, config);
 		break;
 #endif
 
@@ -83,13 +97,19 @@ EBF_Serial::operator bool()
 {
 	switch (type)
 	{
+#if defined(ARDUINO_ARCH_AVR)
 	case SERIAL_HW:
 		return *pHwSerial;
 		break;
+#endif
 
 #if defined(ARDUINO_ARCH_SAMD)
 	case SERIAL_USB:
 		return *pUsbSerial;
+		break;
+
+	case SERIAL_UART:
+		return *pUartSerial;
 		break;
 #endif
 
@@ -103,13 +123,19 @@ size_t EBF_Serial::write(uint8_t n)
 {
 	switch (type)
 	{
+#if defined(ARDUINO_ARCH_AVR)
 	case SERIAL_HW:
 		return pHwSerial->write((uint8_t)n);
 		break;
+#endif
 
 #if defined(ARDUINO_ARCH_SAMD)
 	case SERIAL_USB:
 		return pUsbSerial->write((uint8_t)n);
+		break;
+
+	case SERIAL_UART:
+		return pUartSerial->write((uint8_t)n);
 		break;
 #endif
 
@@ -123,13 +149,19 @@ int EBF_Serial::available(void)
 {
 	switch (type)
 	{
+#if defined(ARDUINO_ARCH_AVR)
 	case SERIAL_HW:
 		return pHwSerial->available();
 		break;
+#endif
 
 #if defined(ARDUINO_ARCH_SAMD)
 	case SERIAL_USB:
 		return pUsbSerial->available();
+		break;
+
+	case SERIAL_UART:
+		return pUartSerial->available();
 		break;
 #endif
 
@@ -143,13 +175,19 @@ int EBF_Serial::peek(void)
 {
 	switch (type)
 	{
+#if defined(ARDUINO_ARCH_AVR)
 	case SERIAL_HW:
 		return pHwSerial->peek();
 		break;
+#endif
 
 #if defined(ARDUINO_ARCH_SAMD)
 	case SERIAL_USB:
 		return pUsbSerial->peek();
+		break;
+
+	case SERIAL_UART:
+		return pUartSerial->peek();
 		break;
 #endif
 
@@ -163,12 +201,18 @@ int EBF_Serial::read(void)
 {
 	switch (type)
 	{
+#if defined(ARDUINO_ARCH_AVR)
 	case SERIAL_HW:
 		return pHwSerial->read();
 		break;
+#endif
 
 #if defined(ARDUINO_ARCH_SAMD)
 	case SERIAL_USB:
+		return pUsbSerial->read();
+		break;
+
+	case SERIAL_UART:
 		return pUsbSerial->read();
 		break;
 #endif
