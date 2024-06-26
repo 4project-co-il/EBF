@@ -6,12 +6,12 @@ EBF_Logic *EBF_Logic::pStaticInstance = new EBF_Logic();
 
 #ifdef EBF_USE_INTERRUPTS
 
+#if defined(ARDUINO_ARCH_AVR)
 #define IMPLEMENT_EBF_ISR(interrupt) \
 	void EBF_ISR_Handler_ ## interrupt() { \
 		EBF_Logic::GetInstance()->HandleIsr(interrupt); \
 	}
 
-#if defined(ARDUINO_ARCH_AVR)
 #if EXTERNAL_NUM_INTERRUPTS > 8
     #error Up to 8 external interrupts are currently supported for AVR platform
 #endif
@@ -39,6 +39,39 @@ EBF_Logic *EBF_Logic::pStaticInstance = new EBF_Logic();
 #if EXTERNAL_NUM_INTERRUPTS > 0
     IMPLEMENT_EBF_ISR(0)
 #endif
+#elif defined(ARDUINO_ARCH_SAMD)
+	// TODO: Possible optimization
+	// Since we use Arduino's attachInterrupt functionality, we will have only one ISR function registered to it
+	// so there is a need to loop again on the INTFLAG register to find what interrupt fired
+	void EBF_ISR_Handler() {
+		uint8_t in;
+
+		// Optimization: exit right away if the INTFLAG is empty
+		// Might happen when more than one interrupt is waiting.
+		// Arduino code will call the handler for every interrupt, while we handle all the interrupts in a single run
+		if (EIC->INTFLAG.reg == 0) {
+			return;
+		}
+
+		for (uint8_t i=0; i<EXTERNAL_NUM_INTERRUPTS; i++) {
+			#if defined(ARDUINO_ARCH_SAMD)
+			// For SAMD there is a converstion table
+			#if ARDUINO_SAMD_VARIANT_COMPLIANCE >= 10606
+				in = g_APinDescription[i].ulExtInt;
+			#else
+				in = digitalPinToInterrupt(i);
+			#endif
+			#endif
+
+			if ((EIC->INTFLAG.reg & 1<<in) != 0) {
+				EBF_Logic::GetInstance()->HandleIsr(in);
+
+				// Clear the interrupt flag, so we will not handle the same interrupt in the next call of the
+				// handler from the Arduino's processing functions
+				EIC->INTFLAG.reg = 1<<in;
+			}
+		}
+	}
 #else
 	#error Current board type is not supported
 #endif
@@ -217,6 +250,15 @@ EBF_HalInstance *EBF_Logic::GetHalInstance(EBF_HalInstance::HAL_Type type, uint8
 #ifdef EBF_USE_INTERRUPTS
 uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode)
 {
+#if defined(ARDUINO_ARCH_SAMD)
+	uint8_t pinNumber = interruptNumber;
+
+// For SAMD there is a converstion table
+#if ARDUINO_SAMD_VARIANT_COMPLIANCE >= 10606
+	interruptNumber = g_APinDescription[interruptNumber].ulExtInt;
+#endif
+#endif
+
 	if (interruptNumber > EXTERNAL_NUM_INTERRUPTS) {
 		return EBF_INDEX_OUT_OF_BOUNDS;
 	}
@@ -273,6 +315,12 @@ uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHa
 	default:
 		break;
 	}
+#elif defined(ARDUINO_ARCH_SAMD)
+	// TODO: Possible optimization
+	// We will use Arduino's attachInterrupt for now
+	// PROs: All the initialization is done there (EIC clock, WAKEUP flag, mode)
+	// CONs: There will be one more function call on the way and the loop in the ISR to determine what interrupt is processed now
+	attachInterrupt(pinNumber, EBF_ISR_Handler, mode);
 #else
 	#error Current board type is not supported
 #endif
