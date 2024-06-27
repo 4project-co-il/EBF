@@ -29,7 +29,7 @@ class EBF_DigitalInput : protected EBF_HalInstance {
 		uint8_t GetValue();
 		uint8_t GetLastValue();
 
-		void SetPollInterval(uint16_t ms);
+		void SetPollInterval(uint32_t ms);
 
 	protected:
 		uint8_t Process();

@@ -42,14 +42,14 @@ class EBF_HalInstance {
 		virtual void ProcessCallback() { }
 
 		static uint8_t GetNumberOfInstances();
-		uint16_t GetPollingInterval();
+		uint32_t GetPollingInterval();
 		unsigned long GetLastPollMillis();
 		void SetLastPollMillis(unsigned long ms);
 
 		HAL_Type GetType() { return type; };
 		uint8_t GetId() { return id; };
 
-		uint16_t pollIntervalMs;		// in milli-Sec
+		uint32_t pollIntervalMs;		// in milli-Sec
 		unsigned long lastPollMillis;
 
 	private:

@@ -1,7 +1,7 @@
 #ifndef __EBF_GLOBAL_H__
 #define __EBF_GLOBAL_H__
 
-#define EBF_NO_POLLING 0xFFFF
+#define EBF_NO_POLLING 0xFFFFFFFF
 typedef void (*EBF_CallbackType)();
 
 enum EBF_ERROR_CODE : uint8_t {

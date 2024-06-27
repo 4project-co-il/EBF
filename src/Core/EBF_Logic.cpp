@@ -148,7 +148,7 @@ uint8_t EBF_Logic::AddHalInstance(EBF_HalInstance &instance)
 uint8_t EBF_Logic::Process()
 {
 	uint8_t i;
-	uint16_t delayWanted = EBF_NO_POLLING;
+	uint32_t delayWanted = EBF_NO_POLLING;
 	EBF_HalInstance *pHal;
 	unsigned long ms;
 

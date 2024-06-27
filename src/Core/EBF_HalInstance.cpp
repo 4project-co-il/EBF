@@ -30,7 +30,7 @@ uint8_t EBF_HalInstance::GetNumberOfInstances()
 	return EBF_HalInstance::numberOfInstances;
 }
 
-uint16_t EBF_HalInstance::GetPollingInterval()
+uint32_t EBF_HalInstance::GetPollingInterval()
 {
 	return pollIntervalMs;
 }

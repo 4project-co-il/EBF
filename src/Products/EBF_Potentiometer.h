@@ -16,7 +16,7 @@ class EBF_Potentiometer : protected EBF_AnalogInput {
 		uint16_t GetRawValue() { return averageRawValue; }
 
 		// Setting polling interval in milli-seconds
-		void SetPollInterval(uint16_t ms) { pollIntervalMs = ms; }
+		void SetPollInterval(uint32_t ms) { pollIntervalMs = ms; }
 
 		void SetOnChange(EBF_CallbackType onChangeCallback) { this->callbackFunc = onChangeCallback; }
 

@@ -27,7 +27,7 @@ class EBF_Serial : protected EBF_HalInstance, public Stream {
 		);
 		uint8_t Process();
 
-		void SetPollInterval(uint16_t ms);
+		void SetPollInterval(uint32_t ms);
 
 		// Stream and Print interfaces
 		inline size_t write(unsigned long n) { return write((uint8_t)n); }

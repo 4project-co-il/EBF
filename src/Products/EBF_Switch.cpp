@@ -29,7 +29,7 @@ uint8_t EBF_Switch::Init(uint8_t pinNumber, bool internelPullup)
 }
 
 // Setting polling interval in milli-seconds
-void EBF_Switch::SetPollInterval(uint16_t ms) {
+void EBF_Switch::SetPollInterval(uint32_t ms) {
 	pollIntervalMs = ms;
 	savedPollingInterval = pollIntervalMs;
 }

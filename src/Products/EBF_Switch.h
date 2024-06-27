@@ -22,7 +22,7 @@ class EBF_Switch : protected EBF_DigitalInput {
 		// Setting debounce time in milli-seconds
 		void SetDebounceTime(uint8_t ms) { debounceTime = ms; }
 		// Setting polling interval in milli-seconds
-		void SetPollInterval(uint16_t ms);
+		void SetPollInterval(uint32_t ms);
 
 		void SetOnChange(EBF_CallbackType onChangeCallback) { this->onChangeCallback = onChangeCallback; }
 
@@ -40,7 +40,7 @@ class EBF_Switch : protected EBF_DigitalInput {
 		EBF_CallbackType onChangeCallback;
 
 	private:
-		uint16_t savedPollingInterval;
+		uint32_t savedPollingInterval;
 };
 
 #endif

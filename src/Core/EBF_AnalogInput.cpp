@@ -27,7 +27,7 @@ uint8_t EBF_AnalogInput::Init(
 	return EBF_OK;
 }
 
-void EBF_AnalogInput::SetPollInterval(uint16_t ms)
+void EBF_AnalogInput::SetPollInterval(uint32_t ms)
 {
 	// No polling needed if there is no callback to call
 	if (callbackFunc == NULL) {

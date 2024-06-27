@@ -73,10 +73,10 @@ uint8_t EBF_Timers::StartTimer(uint8_t timerId, uint16_t milliSec)
 	return EBF_OK;
 }
 
-uint16_t EBF_Timers::Process(unsigned long current)
+uint32_t EBF_Timers::Process(unsigned long current)
 {
 	uint8_t i;
-	uint16_t nextMillis = 0xFFFF;
+	uint32_t nextMillis = 0xFFFFFFFF;
 	uint32_t microsPassed;
 
 	microsPassed = current - lastMicros;
