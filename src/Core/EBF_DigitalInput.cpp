@@ -102,6 +102,27 @@ uint8_t EBF_DigitalInput::Process()
 			lastValue = currentValue;
 		}
 		break;
+
+#if defined(ARDUINO_ARCH_SAMD)
+	case InterruptMode::MODE_LOW:
+		if (currentValue == 0) {
+			lastValue = currentValue;
+			ProcessCallback();
+		} else {
+			lastValue = currentValue;
+		}
+		break;
+
+	case InterruptMode::MODE_HIGH:
+		if (currentValue == 1) {
+			lastValue = currentValue;
+			ProcessCallback();
+		} else {
+			lastValue = currentValue;
+		}
+		break;
+#endif
+
 	}
 
 	return EBF_OK;

@@ -14,6 +14,10 @@ class EBF_DigitalInput : protected EBF_HalInstance {
 		friend class EBF_Core;
 
 		enum InterruptMode : uint8_t {
+#if defined(ARDUINO_ARCH_SAMD)
+			MODE_LOW = LOW,
+			MODE_HIGH = HIGH,
+#endif
 			MODE_CHANGE = CHANGE,
 			MODE_RISING = RISING,
 			MODE_FALLING = FALLING
