@@ -118,8 +118,8 @@ void onButtonChange()
 
 # Power save
 Power saving is currently implemented for the SAMD21 chips. 
-With the SparkFun's SAMD21 Mini board with power LED jumper open, in configuration with one pin as digital output (to show some signs of life), we managed to get down to 530 uA power consumtion in deep sleep mode.
-With onboard voltage regulator disconnected the consumtion was only **22 uA**!
+With the SparkFun's SAMD21 Mini board with power LED jumper open, in configuration with one pin as digital output (to show some signs of life), we managed to get down to 530 uA power consumption in deep sleep mode.
+With onboard voltage regulator disconnected the consumption was only **22 uA**!
 
 The only thing that your code have to do is enable the power saving by calling the `EBF.SetSleepMode()` function, all the implementation will be done in the core of the EBF.
 The EBF keeps track of the time it will be idle till the next event, so it might put the CPU into sleep mode during those times.
