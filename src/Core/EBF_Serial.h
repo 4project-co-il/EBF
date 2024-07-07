@@ -13,9 +13,11 @@
 class EBF_Serial : protected EBF_HalInstance, public Stream {
 	public:
 #if defined(ARDUINO_ARCH_AVR)
+		EBF_Serial();
 		EBF_Serial(HardwareSerial &serialInstance);
 #endif
 #if defined(ARDUINO_ARCH_SAMD)
+		EBF_Serial();
 		EBF_Serial(Uart &serialInstance);
 		EBF_Serial(Serial_ &serialInstance);
 #endif

@@ -1,6 +1,12 @@
 #include "EBF_Serial.h"
 
 #if defined(ARDUINO_ARCH_AVR)
+EBF_Serial::EBF_Serial() : Stream(Serial)
+{
+	type = SERIAL_HW;
+	pHwSerial = &Serial;
+}
+
 EBF_Serial::EBF_Serial(HardwareSerial &serialInstance) : Stream(serialInstance)
 {
 	type = SERIAL_HW;
@@ -9,6 +15,12 @@ EBF_Serial::EBF_Serial(HardwareSerial &serialInstance) : Stream(serialInstance)
 #endif
 
 #if defined(ARDUINO_ARCH_SAMD)
+EBF_Serial::EBF_Serial() : Stream(SerialUSB)
+{
+	type = SERIAL_USB;
+	pUsbSerial = &SerialUSB;
+}
+
 EBF_Serial::EBF_Serial(Serial_ &serialInstance) : Stream(serialInstance)
 {
 	type = SERIAL_USB;
