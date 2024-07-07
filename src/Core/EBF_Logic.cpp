@@ -450,7 +450,7 @@ uint8_t EBF_Logic::InitSleep()
 
 // Based on ArduinoLowPower
 // https://github.com/arduino-libraries/ArduinoLowPower/blob/master/src/samd/ArduinoLowPower.cpp
-uint8_t EBF_Logic::EnterSleep(uint16_t msSleep)
+uint8_t EBF_Logic::EnterSleep(uint32_t msSleep)
 {
 	uint32_t timerCnt;
 	bool restoreUSBDevice = false;

@@ -88,7 +88,7 @@ class EBF_Logic {
 #ifdef EBF_SLEEP_IMPLEMENTATION
 		void SleepConstructor();
 		uint8_t InitSleep();
-		uint8_t EnterSleep(uint16_t msSleep);
+		uint8_t EnterSleep(uint32_t msSleep);
 
 		EBF_SleepMode sleepMode;
 		uint32_t sleepMs;	// The time in mSec sleep was intended
