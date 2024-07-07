@@ -44,8 +44,6 @@ EBF_Logic *EBF_Logic::pStaticInstance = new EBF_Logic();
 	// Since we use Arduino's attachInterrupt functionality, we will have only one ISR function registered to it
 	// so there is a need to loop again on the INTFLAG register to find what interrupt fired
 	void EBF_ISR_Handler() {
-		uint8_t in;
-
 		// Optimization: exit right away if the INTFLAG is empty
 		// Might happen when more than one interrupt is waiting.
 		// Arduino code will call the handler for every interrupt, while we handle all the interrupts in a single run
@@ -54,21 +52,12 @@ EBF_Logic *EBF_Logic::pStaticInstance = new EBF_Logic();
 		}
 
 		for (uint8_t i=0; i<EXTERNAL_NUM_INTERRUPTS; i++) {
-			#if defined(ARDUINO_ARCH_SAMD)
-			// For SAMD there is a converstion table
-			#if ARDUINO_SAMD_VARIANT_COMPLIANCE >= 10606
-				in = g_APinDescription[i].ulExtInt;
-			#else
-				in = digitalPinToInterrupt(i);
-			#endif
-			#endif
-
-			if ((EIC->INTFLAG.reg & 1<<in) != 0) {
-				EBF_Logic::GetInstance()->HandleIsr(in);
+			if ((EIC->INTFLAG.reg & 1<<i) != 0) {
+				EBF_Logic::GetInstance()->HandleIsr(i);
 
 				// Clear the interrupt flag, so we will not handle the same interrupt in the next call of the
 				// handler from the Arduino's processing functions
-				EIC->INTFLAG.reg = 1<<in;
+				EIC->INTFLAG.reg = 1<<i;
 			}
 		}
 	}
@@ -198,10 +187,6 @@ uint8_t EBF_Logic::Process()
 	if (delayWanted > 1 && sleepMode != EBF_SleepMode::EBF_NO_SLEEP) {
 		// Enter sleep mode for delayWanted timer
 		EnterSleep(delayWanted);
-
-		// Since we don't know how long the power save lasted, just return the control.
-		// The calculations will be done again when Process() will be called as part of the loop.
-		return EBF_OK;
 	}
 #endif
 
@@ -215,7 +200,7 @@ uint8_t EBF_Logic::Process()
 		EBF_HalInstance *pHalInstance;
 
 		// Messages are used to pass information from interrupts to normal run
-		if (msgQueue.GetMessagesNumber() > 0) {
+		while (msgQueue.GetMessagesNumber() > 0) {
 			rc = msgQueue.GetMessage(msg);
 
 			if (rc == EBF_OK) {
@@ -363,11 +348,8 @@ void EBF_Logic::SleepConstructor()
 		PORT->Group[g_APinDescription[ulPin].ulPort].DIRCLR.reg = (uint32_t)(1<<g_APinDescription[ulPin].ulPin);
 	}
 
-	// reset_gclks
+	// reset_gclks, leave only clock ID(0), the 48MHz
 	for (uint8_t i = 1; i < GCLK_GEN_NUM; i++) {
-		GCLK->GENCTRL.reg = GCLK_GENCTRL_ID(i);
-		while (GCLK->STATUS.bit.SYNCBUSY);
-
 		GCLK->GENCTRL.reg = GCLK_GENCTRL_ID(i);
 		while (GCLK->STATUS.bit.SYNCBUSY);
 	}
@@ -395,14 +377,13 @@ void RTC_Handler(void)
 
 uint8_t EBF_Logic::InitSleep()
 {
-
 	// Based on ArduinoLowPower library, configGCLK6() function
 	// https://github.com/arduino-libraries/ArduinoLowPower/blob/master/src/samd/ArduinoLowPower.cpp
 	// And on ArduinoLowPower library, "Added support for Mode 0 and Mode 1" PR
 	// https://github.com/arduino-libraries/RTCZero/pull/58
 
 	// turn on digital interface clock
-	PM->APBAMASK.reg |= PM_APBAMASK_RTC;
+	PM->APBAMASK.reg |= PM_APBAMASK_RTC | PM_APBAMASK_EIC;
 
 	// Generic clock 2 will have divider = 4 (/32), with 32K crystal it gives tick about every mSec
 	GCLK->GENDIV.reg = GCLK_GENDIV_ID(2) | GCLK_GENDIV_DIV(4);
@@ -412,7 +393,12 @@ uint8_t EBF_Logic::InitSleep()
 	GCLK->GENCTRL.reg = (GCLK_GENCTRL_GENEN | GCLK_GENCTRL_SRC_OSCULP32K | GCLK_GENCTRL_ID(2) | GCLK_GENCTRL_DIVSEL | GCLK_GENCTRL_RUNSTDBY);
 	while (GCLK->STATUS.bit.SYNCBUSY);
 
-	GCLK->CLKCTRL.reg = (uint32_t)((GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK2 | GCLK_GENCTRL_ID(RTC_GCLK_ID)));
+	// Connect RTC to generic clock 2
+	GCLK->CLKCTRL.reg = (uint16_t)((GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK2 | GCLK_CLKCTRL_ID(GCM_RTC)));
+	while (GCLK->STATUS.bit.SYNCBUSY);
+
+	// Connect EIC to generic clock 2
+	GCLK->CLKCTRL.reg = (uint16_t)((GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK2 | GCLK_CLKCTRL_ID(GCM_EIC)));
 	while (GCLK->STATUS.bit.SYNCBUSY);
 
 	// Disable RTC after initialization
@@ -433,6 +419,8 @@ uint8_t EBF_Logic::InitSleep()
 
 	// Enable RTC interrupt in interrupt controller
 	NVIC_EnableIRQ(RTC_IRQn);
+	// Enable EIC interrupt in interrupt controller
+	NVIC_EnableIRQ(EIC_IRQn);
 
 	// Clear SW reset
 	RTC->MODE0.CTRL.reg &= ~RTC_MODE0_CTRL_SWRST;
@@ -461,10 +449,11 @@ uint8_t EBF_Logic::EnterSleep(uint32_t msSleep)
 	if (sleepMode == EBF_SleepMode::EBF_NO_SLEEP) {
 		return EBF_OK;
 	}
-	/* Errata: Make sure that the Flash does not power all the way down
-     	* when in sleep mode. */
 
-	NVMCTRL->CTRLB.bit.SLEEPPRM = NVMCTRL_CTRLB_SLEEPPRM_DISABLED_Val;
+	// Move IEC (External Interrupt Controller) to GCLK2, which is running on low power internal 32K oscilator
+	// Something else in the Arduino code touches that register (attachInterrupt?), so have to do it on every sleep entry
+	GCLK->CLKCTRL.reg = (uint16_t) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK2 | GCLK_CLKCTRL_ID(GCM_EIC));
+	while (GCLK->STATUS.bit.SYNCBUSY);
 
 	// Count up to the overflow (-1)
 	RTC->MODE0.COUNT.reg = (uint32_t)(-1) - msSleep;
@@ -525,8 +514,12 @@ uint8_t EBF_Logic::EnterSleep(uint32_t msSleep)
 		break;
 	}
 
-
 	// We're after the sleep
+
+	// Move IEC (External Interrupt Controller) back to the main GCLK0 (48MHz)
+	GCLK->CLKCTRL.reg = (uint16_t) (GCLK_CLKCTRL_CLKEN | GCLK_CLKCTRL_GEN_GCLK0 | GCLK_CLKCTRL_ID(GCM_EIC));
+	while (GCLK->STATUS.bit.SYNCBUSY);
+
 	// Disable the RTC
 	RTC->MODE0.CTRL.reg &= ~RTC_MODE0_CTRL_ENABLE;
 	while (RTC->MODE0.STATUS.bit.SYNCBUSY);
