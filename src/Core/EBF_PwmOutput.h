@@ -18,6 +18,10 @@ class EBF_PwmOutput : protected EBF_HalInstance {
 		uint8_t SetValue(float value);
 
 	protected:
+		// No processing is needed for PWM outputs
+		uint8_t Process() { return EBF_OK; }
+
+	protected:
 		uint8_t pinNumber;
 };
 

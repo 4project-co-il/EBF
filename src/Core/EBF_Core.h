@@ -53,6 +53,8 @@ class EBF_Core {
 
 #ifdef EBF_SLEEP_IMPLEMENTATION
 		void SetSleepMode(EBF_SleepMode mode);
+#else
+		void SetSleepMode(EBF_SleepMode mode) {}
 #endif
 };
 
