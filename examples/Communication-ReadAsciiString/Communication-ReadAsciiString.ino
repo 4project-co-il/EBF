@@ -7,8 +7,10 @@ EBF_PwmOutput redPWM;
 EBF_PwmOutput greenPWM;
 EBF_PwmOutput bluePWM;
 
-// EBF serial object will use the Arduino's Serial (Hardware Serial) for communication
-EBF_Serial serial(Serial);
+// EBF serial object will use the Arduino's Serial (Hardware Serial) for communication by default
+EBF_Serial serial;
+// You can use any other Serial interface if availalbe for your device
+//EBF_Serial serial(Serial2);
 
 // Serial data callback function
 // Pay attention that we use EBF's serial instance instead of Arduino's global Serial (with capital S)

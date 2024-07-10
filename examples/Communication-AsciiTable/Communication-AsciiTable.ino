@@ -4,8 +4,10 @@
 // EBF objects creation, should be global
 EBF_Core EBF;
 
-// EBF serial object will use the Arduino's Serial (Hardware Serial) for communication
-EBF_Serial serial(Serial);
+// EBF serial object will use the Arduino's Serial (Hardware Serial) for communication by default
+EBF_Serial serial;
+// You can use any other Serial interface if availalbe for your device
+//EBF_Serial serial(Serial2);
 
 // first visible ASCIIcharacter '!' is number 33:
 uint8_t thisByte = 33;

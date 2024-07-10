@@ -6,8 +6,10 @@ EBF_Core EBF;
 EBF_AnalogInput sensor;
 EBF_DigitalOutput led;
 
-// EBF serial object will use the Arduino's Serial (Hardware Serial) for communication
-EBF_Serial serial(Serial);
+// EBF serial object will use the Arduino's Serial (Hardware Serial) for communication by default
+EBF_Serial serial;
+// You can use any other Serial interface if availalbe for your device
+//EBF_Serial serial(Serial2);
 
 // threshold value to decide when the detected sound is a knock or not
 const int threshold = 100;

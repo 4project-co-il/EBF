@@ -5,8 +5,10 @@
 EBF_Core EBF;
 EBF_AnalogInput a0;
 
-// EBF serial object will use the Arduino's Serial (Hardware Serial) for communication
-EBF_Serial serial(Serial);
+// EBF serial object will use the Arduino's Serial (Hardware Serial) for communication by default
+EBF_Serial serial;
+// You can use any other Serial interface if availalbe for your device
+//EBF_Serial serial(Serial2);
 
 // Analog input change
 void onAnalog0Change()
