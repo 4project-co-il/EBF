@@ -27,8 +27,10 @@ class EBF_DigitalInput : protected EBF_HalInstance {
 			uint8_t pinNumber,
 			EBF_CallbackType callbackFunc,
 			InterruptMode isrMode = InterruptMode::MODE_CHANGE,
-			bool internelPullup = false
+			bool internalPullup = false
 		);
+		// Call to attach the device to an interrupt line
+		uint8_t AttachInterrupt();
 
 		uint8_t GetValue();
 		uint8_t GetLastValue();
@@ -37,6 +39,7 @@ class EBF_DigitalInput : protected EBF_HalInstance {
 
 	protected:
 		uint8_t Process();
+		void ProcessInterrupt();
 		virtual void ProcessCallback() { callbackFunc(); }
 		EBF_CallbackType callbackFunc;
 		uint8_t pinNumber;

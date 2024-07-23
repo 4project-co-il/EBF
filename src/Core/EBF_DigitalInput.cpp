@@ -28,7 +28,16 @@ uint8_t EBF_DigitalInput::Init(
 
 	if (callbackFunc != NULL) {
 		lastValue = digitalRead(pinNumber);
+	} else {
+		// No callback. No need to poll in that case
+		pollIntervalMs = EBF_NO_POLLING;
+	}
 
+	return EBF_OK;
+}
+
+uint8_t EBF_DigitalInput::AttachInterrupt()
+{
 #ifdef EBF_USE_INTERRUPTS
 		uint8_t interruptNumber = NOT_AN_INTERRUPT;
 
@@ -43,14 +52,12 @@ uint8_t EBF_DigitalInput::Init(
 				// No need to poll
 				pollIntervalMs = EBF_NO_POLLING;
 			}
+
+			return EBF_OK;
 		}
 #endif
-	} else {
-		// No callback. No need to poll in that case
-		pollIntervalMs = EBF_NO_POLLING;
-	}
 
-	return EBF_OK;
+	return EBF_INVALID_STATE;
 }
 
 void EBF_DigitalInput::SetPollInterval(uint32_t ms)
@@ -126,6 +133,17 @@ uint8_t EBF_DigitalInput::Process()
 	}
 
 	return EBF_OK;
+}
+
+void EBF_DigitalInput::ProcessInterrupt()
+{
+	// This function is called from ISR.
+	// For DigitalInput, call the callback function to pass the pcontrol to user
+	// The user can call EBF.ProcessInterrupt() function to pass the control
+	// back to the EBF, which will call user callback again from normal run
+	ProcessCallback();
+
+	// The interrupt register is cleared by the arduino code
 }
 
 uint8_t EBF_DigitalInput::GetValue()
