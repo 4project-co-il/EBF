@@ -1,6 +1,6 @@
 #include "EBF_STTS22H_TemperatureSensor.h"
-#include "wiring_private.h" // pinPeripheral() function
-
+#include "../Core/EBF_Logic.h"
+#include "../Core/EBF_DigitalInput.h"
 
 // Part of the code is based on the SparkFun_STTS22H_Arduino_Library
 // https://github.com/sparkfun/SparkFun_STTS22H_Arduino_Library/tree/main
@@ -14,8 +14,11 @@ extern void EBF_EmptyCallback();
 uint8_t EBF_STTS22H_TemperatureSensor::Init(uint8_t i2cAddress, OperationMode mode)
 {
 	uint8_t rc;
+	StatusRegister_t status;
 
 	this->state = InstanceState::STATE_IDLE;
+	this->interruptAttached = 0;
+	this->postProcessingFlags = 0;
 	this->highThresholdSet = 0;
 	this->lowThresholdSet = 0;
 	this->i2cAddress = i2cAddress;
@@ -30,12 +33,90 @@ uint8_t EBF_STTS22H_TemperatureSensor::Init(uint8_t i2cAddress, OperationMode mo
 		return rc;
 	}
 
+	// Reading status register to reset the interrupt line
+	rc = GetStatusRegister(status);
+	if (rc != EBF_OK) {
+		return rc;
+	}
+
 	rc = SetOperationMode(mode);
 	if (rc != EBF_OK) {
 		return rc;
 	}
 
 	return EBF_OK;
+}
+
+uint8_t EBF_STTS22H_TemperatureSensor::AttachInterrupt(uint8_t interruptPin)
+{
+	uint8_t rc;
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
+	rc = pLogic->AttachInterrupt(interruptPin, this, EBF_DigitalInput::InterruptMode::MODE_LOW);
+	if (rc != EBF_OK) {
+		return rc;
+	}
+
+	interruptAttached = 1;
+
+	UpdatePollInterval();
+
+	return EBF_OK;
+}
+
+void EBF_STTS22H_TemperatureSensor::UpdatePollInterval()
+{
+	uint8_t needPolling = 0;
+
+	// No need to poll, unless some callbacks are needed and there is no interrupt attached
+	pollIntervalMs = EBF_NO_POLLING;
+
+	if (onChangeCallback != NULL && onChangeCallback != EBF_EmptyCallback) {
+		needPolling = 1;
+	}
+
+	if (!interruptAttached) {
+		if (onThresholdHigh != NULL && onThresholdHigh != EBF_EmptyCallback) {
+			needPolling = 1;
+		}
+
+		if (onThresholdLow != NULL && onThresholdLow != EBF_EmptyCallback) {
+			needPolling = 1;
+		}
+	}
+
+	if (needPolling) {
+		switch (operationMode)
+		{
+		case OperationMode::POWER_DOWN:
+			pollIntervalMs = EBF_NO_POLLING;
+			break;
+
+		case OperationMode::MODE_ONE_SHOT:
+			pollIntervalMs = 0;
+			break;
+
+		case OperationMode::MODE_1HZ:
+			pollIntervalMs = 1000;
+			break;
+
+		case OperationMode::MODE_25HZ:
+			pollIntervalMs = 1000 / 25;
+			break;
+
+		case OperationMode::MODE_50HZ:
+			pollIntervalMs = 1000 / 50;
+			break;
+
+		case OperationMode::MODE_100HZ:
+			pollIntervalMs = 1000 / 100;
+			break;
+
+		case OperationMode::MODE_200HZ:
+			pollIntervalMs = 1000 / 200;
+			break;
+		}
+	}
 }
 
 uint8_t EBF_STTS22H_TemperatureSensor::GetControlRegister(ControlRegister_t &ctrl)
@@ -102,6 +183,8 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetOperationMode(OperationMode mode)
 	uint8_t rc;
 	ControlRegister_t ctrl = {};
 
+	operationMode = mode;
+
 	// Any change should be done after the device is moved to power down mode
 	ctrl.fields.freeRun = 0;
 	ctrl.fields.mode_1Hz = 0;
@@ -110,23 +193,20 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetOperationMode(OperationMode mode)
 		return rc;
 	}
 
-	switch (mode)
+	switch (operationMode)
 	{
 	case OperationMode::POWER_DOWN:
 		state = InstanceState::STATE_IDLE;
-		pollIntervalMs = EBF_NO_POLLING;
 		break;
 
 	case OperationMode::MODE_ONE_SHOT:
 		state = InstanceState::STATE_ONE_SHOT;
-		pollIntervalMs = 0;
 
 		ctrl.fields.oneShot = 1;
 		break;
 
 	case OperationMode::MODE_1HZ:
 		state = InstanceState::STATE_MEASURING;
-		pollIntervalMs = 1000;
 
 		ctrl.fields.mode_1Hz = 1;
 		ctrl.fields.freeRun = 0;
@@ -134,7 +214,6 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetOperationMode(OperationMode mode)
 
 	case OperationMode::MODE_25HZ:
 		state = InstanceState::STATE_MEASURING;
-		pollIntervalMs = 1000 / 25;
 
 		ctrl.fields.mode_1Hz = 0;
 		ctrl.fields.freeRun = 1;
@@ -143,7 +222,6 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetOperationMode(OperationMode mode)
 
 	case OperationMode::MODE_50HZ:
 		state = InstanceState::STATE_MEASURING;
-		pollIntervalMs = 1000 / 50;
 
 		ctrl.fields.mode_1Hz = 0;
 		ctrl.fields.freeRun = 1;
@@ -152,7 +230,6 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetOperationMode(OperationMode mode)
 
 	case OperationMode::MODE_100HZ:
 		state = InstanceState::STATE_MEASURING;
-		pollIntervalMs = 1000 / 100;
 
 		ctrl.fields.mode_1Hz = 0;
 		ctrl.fields.freeRun = 1;
@@ -161,7 +238,6 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetOperationMode(OperationMode mode)
 
 	case OperationMode::MODE_200HZ:
 		state = InstanceState::STATE_MEASURING;
-		pollIntervalMs = 1000 / 200;
 
 		ctrl.fields.mode_1Hz = 0;
 		ctrl.fields.freeRun = 1;
@@ -173,6 +249,8 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetOperationMode(OperationMode mode)
 	if (mode != OperationMode::POWER_DOWN) {
 		SetControlRegister(ctrl);
 	}
+
+	UpdatePollInterval();
 
 	return EBF_OK;
 }
@@ -237,6 +315,19 @@ uint8_t EBF_STTS22H_TemperatureSensor::Process()
 	float change;
 	StatusRegister_t status;
 
+	// Process interrupt detected logic
+	if(postProcessingFlags) {
+		if(postProcessingFlags & postProcessHighThreshold) {
+			onThresholdHigh();
+		}
+
+		if(postProcessingFlags & postProcessLowThreshold) {
+			onThresholdLow();
+		}
+
+		postProcessingFlags = 0;
+	}
+
 	switch (state)
 	{
 	case InstanceState::STATE_IDLE:
@@ -280,6 +371,30 @@ uint8_t EBF_STTS22H_TemperatureSensor::Process()
 	}
 
 	return EBF_OK;
+}
+
+void EBF_STTS22H_TemperatureSensor::ProcessInterrupt()
+{
+	StatusRegister_t status;
+
+	// Status register is cleared on read
+	GetStatusRegister(status);
+
+	// Set the relevant post-processing flags
+	if(status.fields.overThreshold) {
+		postProcessingFlags |= postProcessHighThreshold;
+	}
+
+	if(status.fields.underThreshold) {
+		postProcessingFlags |= postProcessLowThreshold;
+	}
+
+	if (postProcessingFlags) {
+		// Pass the control back to EBF, so it will call the Process() function from normal run
+		EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
+		pLogic->ProcessInterrupt(this);
+	}
 }
 
 // Sets high threshold value

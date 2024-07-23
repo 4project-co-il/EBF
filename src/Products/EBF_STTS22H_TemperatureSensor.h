@@ -28,6 +28,8 @@ class EBF_STTS22H_TemperatureSensor : protected EBF_HalInstance {
 		uint8_t Init(uint8_t i2cAddress, OperationMode mode = POWER_DOWN);
 		// Setting polling interval in milli-seconds
 		void SetPollInterval(uint32_t ms) { pollIntervalMs = ms; }
+		// Call to attach the device to an interrupt line
+		uint8_t AttachInterrupt(uint8_t interruptPin);
 
 		void SetOnChange(EBF_CallbackType onChangeCallback, uint8_t changePercent = 5)
 		{
@@ -69,10 +71,19 @@ class EBF_STTS22H_TemperatureSensor : protected EBF_HalInstance {
 		EBF_I2C &i2c;
 		uint8_t i2cAddress;
 		InstanceState state;
+		OperationMode operationMode;
 		uint8_t highThresholdSet;
 		uint8_t lowThresholdSet;
 		float lastValue;
 		uint8_t changePercent;
+		uint8_t interruptAttached;
+
+		// Post processing that should be done after interrupt handler
+		volatile uint8_t postProcessingFlags;
+
+		const uint8_t postProcessHighThreshold	= 1<<0;
+		const uint8_t postProcessLowThreshold	= 1<<1;
+
 
 		// Callbacks
 		EBF_CallbackType onChangeCallback;
@@ -81,6 +92,8 @@ class EBF_STTS22H_TemperatureSensor : protected EBF_HalInstance {
 		EBF_CallbackType onThresholdLow;
 
 		uint8_t Process();
+		void ProcessInterrupt();
+		void UpdatePollInterval();
 
 	private:
 		// Device registers data
