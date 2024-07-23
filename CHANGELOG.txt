@@ -1,3 +1,8 @@
+Version 0.1.5
+	I2C and API related fixes
+	Change in interrupt registering and processing flow
+	EBF_STTS22H_TemperatureSensor implementation, which can use interrupts and call the callback function on temperature high/low level detection
+
 Version 0.1.4
 	EBF_I2C class implementation
 	All timers related APIs moved to 32bit to increase possible sleep timer
