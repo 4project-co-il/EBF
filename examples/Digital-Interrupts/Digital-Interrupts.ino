@@ -33,8 +33,10 @@ EBF_Core EBF;
 EBF_DigitalOutput led;
 EBF_DigitalInput button;
 
-// EBF serial object will use the Arduino's Serial (Hardware Serial) for communication
-EBF_Serial serial(Serial);
+// EBF serial object will use the Arduino's Serial (Hardware Serial) for communication by default
+EBF_Serial serial;
+// You can use any other Serial interface if availalbe for your device
+//EBF_Serial serial(Serial2);
 
 // LED Timer callback function
 void onTimer()
@@ -114,16 +116,17 @@ void setup()
 	// Built-in LED on digital output #13 will be used
 	led.Init(13);
 
-	// Initialize button on digital input 2
+	// Initialize button on digital input 2 for any change of the value
 	// Internal pullup resistor will be used to minimize bouncing
 	button.Init(2, onButtonChange, EBF_DigitalInput::InterruptMode::MODE_CHANGE, true);
 
-	// Since interrupts processing is enabled for that example, EBF will try to use
-	// hardware interrupts for the button digital input since it's using interrupt
-	// enabled line 2. On Arduino UNO lines 2 and 3 are capable to produce interrupts
+	// AttachInterrupt() should be called for the button instance to utilize
+	// the hardware interrupt line based on the configuration passed in Init() function
+	// On Arduino UNO lines 2 and 3 are capable to produce interrupts.
 	// When interrupts are used, polling is disabled on those pins
 	// Pay attention that there is no change in the initialization of the digital input
 	// object. The same onButtonChange function will be called.
+	button.AttachInterrupt();
 }
 
 void loop()

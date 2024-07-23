@@ -318,7 +318,7 @@ void EBF_Logic::HandleIsr(uint8_t interruptNumber)
 	if (pHalIsr[interruptNumber] != NULL) {
 		// Next process call is done from ISR
 		isRunFromISR = 1;
-		pHalIsr[interruptNumber]->ProcessCallback();
+		pHalIsr[interruptNumber]->ProcessInterrupt();
 		isRunFromISR = 0;
 	}
 }

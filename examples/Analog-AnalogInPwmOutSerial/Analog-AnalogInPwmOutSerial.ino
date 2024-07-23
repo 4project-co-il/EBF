@@ -6,8 +6,10 @@ EBF_Core EBF;
 EBF_AnalogInput analongInput;
 EBF_PwmOutput pwmOutput;
 
-// EBF serial object will use the Arduino's Serial (Hardware Serial) for communication
-EBF_Serial serial(Serial);
+// EBF serial object will use the Arduino's Serial (Hardware Serial) for communication by default
+EBF_Serial serial;
+// You can use any other Serial interface if availalbe for your device
+//EBF_Serial serial(Serial2);
 
 int sensorValue = 0;        // value read from the pot
 int outputValue = 0;        // value output to the PWM (analog out)

@@ -14,9 +14,10 @@
 class EBF_I2C : protected EBF_HalInstance, public Stream {
 	public:
 		EBF_I2C() : Stream(Wire), i2c(Wire) {}
-		EBF_I2C(TwoWire i2cInstance) : Stream(i2cInstance), i2c(i2cInstance) {}
+		EBF_I2C(TwoWire &i2cInstance) : Stream(i2cInstance), i2c(i2cInstance) { }
 
 		uint8_t Init(EBF_CallbackType callbackFunc = NULL, uint8_t address = 0);
+		void SetClock(uint32_t clock) { i2c.setClock(clock); }
 
 		uint8_t Process();
 
@@ -42,7 +43,7 @@ class EBF_I2C : protected EBF_HalInstance, public Stream {
 
 	private:
 		EBF_CallbackType callbackFunc;
-		TwoWire i2c;
+		TwoWire &i2c;
 
 };
 

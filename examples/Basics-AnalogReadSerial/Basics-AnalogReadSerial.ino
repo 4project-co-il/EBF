@@ -3,7 +3,7 @@
 
 // EBF objects creation, should be global
 EBF_Core EBF;
-EBF_Serial serial(Serial);
+EBF_Serial serial;
 EBF_AnalogInput analog0;
 
 void onAnalog0Change()
