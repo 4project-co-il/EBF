@@ -12,3 +12,6 @@
 
 // Uncomment the EBF_USE_INTERRUPTS definition to enable usage of the interrupts when possible
 //#define EBF_USE_INTERRUPTS
+
+// Uncomment the EBF_SLEEP_IMPLEMENTATION to allow power down modes for supported CPUs
+//#define EBF_SLEEP_IMPLEMENTATION
