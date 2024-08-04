@@ -13,7 +13,8 @@
 
 class EBF_STTS22H_TemperatureSensor : protected EBF_HalInstance {
 	public:
-		EBF_STTS22H_TemperatureSensor(EBF_I2C &i2cInterface) : i2c(i2cInterface) { }
+		EBF_STTS22H_TemperatureSensor(EBF_I2C &i2cInterface) : pI2C(&i2cInterface) { }
+		EBF_STTS22H_TemperatureSensor(EBF_I2C *pI2cInterface) : pI2C(pI2cInterface) { }
 
 		typedef enum : uint8_t {
 			POWER_DOWN = 0,
@@ -68,7 +69,7 @@ class EBF_STTS22H_TemperatureSensor : protected EBF_HalInstance {
 			STATE_MEASURING
 		};
 
-		EBF_I2C &i2c;
+		EBF_I2C *pI2C;
 		uint8_t i2cAddress;
 		InstanceState state;
 		OperationMode operationMode;

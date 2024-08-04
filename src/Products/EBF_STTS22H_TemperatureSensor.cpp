@@ -123,16 +123,16 @@ uint8_t EBF_STTS22H_TemperatureSensor::GetControlRegister(ControlRegister_t &ctr
 {
 	uint8_t rc;
 
-	i2c.beginTransmission(i2cAddress);
-	i2c.write(regControl);
-	rc = i2c.endTransmission(false);
+	pI2C->beginTransmission(i2cAddress);
+	pI2C->write(regControl);
+	rc = pI2C->endTransmission(false);
 	if (rc != 0) {
 		return EBF_COMMUNICATION_PROBLEM;
 	}
 
-	i2c.requestFrom(i2cAddress, 1);
+	pI2C->requestFrom(i2cAddress, 1);
 
-	ctrl.reg = i2c.read();
+	ctrl.reg = pI2C->read();
 
 	return EBF_OK;
 }
@@ -144,10 +144,10 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetControlRegister(ControlRegister_t ctrl
 	// Address increment should be turned ON for all operations
 	ctrl.fields.addrInc = 1;
 
-	i2c.beginTransmission(i2cAddress);
-	i2c.write(regControl);
-	i2c.write((uint8_t)ctrl.reg);
-	rc = i2c.endTransmission();
+	pI2C->beginTransmission(i2cAddress);
+	pI2C->write(regControl);
+	pI2C->write((uint8_t)ctrl.reg);
+	rc = pI2C->endTransmission();
 	if (rc != 0) {
 		return EBF_COMMUNICATION_PROBLEM;
 	}
@@ -159,19 +159,19 @@ uint8_t EBF_STTS22H_TemperatureSensor::GetValueRaw(int16_t &value)
 {
 	uint8_t rc;
 
-	i2c.beginTransmission(i2cAddress);
-	i2c.write(regTempOutput);
-	rc = i2c.endTransmission(false);
+	pI2C->beginTransmission(i2cAddress);
+	pI2C->write(regTempOutput);
+	rc = pI2C->endTransmission(false);
 	if (rc != 0) {
 		return EBF_COMMUNICATION_PROBLEM;
 	}
 
-	i2c.requestFrom(i2cAddress, 2);
+	pI2C->requestFrom(i2cAddress, 2);
 
-	rc = i2c.read();
+	rc = pI2C->read();
 	value = rc;
 
-	rc = i2c.read();
+	rc = pI2C->read();
 	value |= rc << 8;
 
 	return EBF_OK;
@@ -270,16 +270,16 @@ uint8_t EBF_STTS22H_TemperatureSensor::GetStatusRegister(StatusRegister_t &statu
 {
 	uint8_t rc;
 
-	i2c.beginTransmission(i2cAddress);
-	i2c.write(regStatus);
-	rc = i2c.endTransmission(false);
+	pI2C->beginTransmission(i2cAddress);
+	pI2C->write(regStatus);
+	rc = pI2C->endTransmission(false);
 	if (rc != 0) {
 		return EBF_COMMUNICATION_PROBLEM;
 	}
 
-	i2c.requestFrom(i2cAddress, 1);
+	pI2C->requestFrom(i2cAddress, 1);
 
-	status.reg = i2c.read();
+	status.reg = pI2C->read();
 
 	return EBF_OK;
 }
@@ -404,11 +404,11 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetThresholdHigh(float temp)
 
 	highThresholdSet = 1;
 
-	i2c.beginTransmission(i2cAddress);
-	i2c.write(regTempHighLimit);
+	pI2C->beginTransmission(i2cAddress);
+	pI2C->write(regTempHighLimit);
 	// Threshold = (temp_limit_reg -63) *0.64°C
-	i2c.write((uint8_t)floor((temp / 0.64 + 63 + 0.5)));
-	rc = i2c.endTransmission();
+	pI2C->write((uint8_t)floor((temp / 0.64 + 63 + 0.5)));
+	rc = pI2C->endTransmission();
 	if (rc != 0) {
 		return EBF_COMMUNICATION_PROBLEM;
 	}
@@ -423,11 +423,11 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetThresholdLow(float temp)
 
 	lowThresholdSet = 1;
 
-	i2c.beginTransmission(i2cAddress);
-	i2c.write(regTempLowLimit);
+	pI2C->beginTransmission(i2cAddress);
+	pI2C->write(regTempLowLimit);
 	// Threshold = (temp_limit_reg -63) *0.64°C
-	i2c.write((uint8_t)floor((temp / 0.64 + 63 + 0.5)));
-	rc = i2c.endTransmission();
+	pI2C->write((uint8_t)floor((temp / 0.64 + 63 + 0.5)));
+	rc = pI2C->endTransmission();
 	if (rc != 0) {
 		return EBF_COMMUNICATION_PROBLEM;
 	}
@@ -442,11 +442,11 @@ uint8_t EBF_STTS22H_TemperatureSensor::DisableThresholdHigh()
 
 	highThresholdSet = 0;
 
-	i2c.beginTransmission(i2cAddress);
-	i2c.write(regTempHighLimit);
+	pI2C->beginTransmission(i2cAddress);
+	pI2C->write(regTempHighLimit);
 	// Value 0 disables the threshold
-	i2c.write(0);
-	rc = i2c.endTransmission();
+	pI2C->write(0);
+	rc = pI2C->endTransmission();
 	if (rc != 0) {
 		return EBF_COMMUNICATION_PROBLEM;
 	}
@@ -461,11 +461,11 @@ uint8_t EBF_STTS22H_TemperatureSensor::DisableThresholdLow()
 
 	lowThresholdSet = 0;
 
-	i2c.beginTransmission(i2cAddress);
-	i2c.write(regTempLowLimit);
+	pI2C->beginTransmission(i2cAddress);
+	pI2C->write(regTempLowLimit);
 	// Value 0 disables the threshold
-	i2c.write(0);
-	rc = i2c.endTransmission();
+	pI2C->write(0);
+	rc = pI2C->endTransmission();
 	if (rc != 0) {
 		return EBF_COMMUNICATION_PROBLEM;
 	}
