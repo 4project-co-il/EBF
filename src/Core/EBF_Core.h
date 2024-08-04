@@ -41,6 +41,7 @@ class EBF_Core {
 		uint8_t ProcessInterrupt(EBF_DigitalInput &digitalInput);
 		static uint8_t UseInterrupts() { return 1; }
 		uint8_t InInterrupt();
+		uint32_t GetInterruptHint();
 
 		// Message queue debug functions
 		uint8_t GetNumberOfMessages();
@@ -49,6 +50,7 @@ class EBF_Core {
 		uint8_t ProcessInterrupt(EBF_DigitalInput &digitalInput) { return EBF_INVALID_STATE; }
 		static uint8_t UseInterrupts() { return 0; }
 		uint8_t InInterrupt() { return 0; }
+		uint32_t GetInterruptHint() { return 0; }
 #endif
 
 #ifdef EBF_SLEEP_IMPLEMENTATION

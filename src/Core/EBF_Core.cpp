@@ -107,6 +107,13 @@ uint8_t EBF_Core::InInterrupt()
 	return pLogic->IsRunFromIsr();
 }
 
+uint32_t EBF_Core::GetInterruptHint()
+{
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
+	return pLogic->GetInterruptHint();
+}
+
 uint8_t EBF_Core::ProcessInterrupt(EBF_DigitalInput &digitalInput)
 {
 	EBF_Logic *pLogic = EBF_Logic::GetInstance();

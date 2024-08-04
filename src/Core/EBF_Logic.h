@@ -60,7 +60,9 @@ class EBF_Logic {
 #ifdef EBF_USE_INTERRUPTS
 		// Message queue functions
 		uint8_t IsRunFromIsr() { return isRunFromISR; }
+		uint32_t GetInterruptHint() { return interruptHint; }
 		uint8_t AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode);
+		uint8_t AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode, uint32_t hint);
 		uint8_t ProcessInterrupt(EBF_HalInstance *pHalInstance);
 		void HandleIsr(uint8_t interruptNumber);
 
@@ -79,10 +81,12 @@ class EBF_Logic {
 #ifdef EBF_USE_INTERRUPTS
 		EBF_MessageQueue msgQueue;
 		// Flag specifying when the HAL Process() calls are from ISR
-		uint8_t isRunFromISR;
+		volatile uint8_t isRunFromISR;
+		volatile uint32_t interruptHint;
 
 		// Table of HAL pointers that have to be called from ISRs
 		EBF_HalInstance* pHalIsr[EXTERNAL_NUM_INTERRUPTS];
+		uint32_t isrHint[EXTERNAL_NUM_INTERRUPTS];
 #endif
 
 #ifdef EBF_SLEEP_IMPLEMENTATION

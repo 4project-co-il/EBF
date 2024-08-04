@@ -1,7 +1,7 @@
 #include "EBF_Logic.h"
 #include "EBF_HalInstance.h"
 
-/// EBF_Logic implementation
+// EBF_Logic implementation
 EBF_Logic *EBF_Logic::pStaticInstance = new EBF_Logic();
 
 #ifdef EBF_USE_INTERRUPTS
@@ -51,9 +51,11 @@ EBF_Logic *EBF_Logic::pStaticInstance = new EBF_Logic();
 			return;
 		}
 
+		EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
 		for (uint8_t i=0; i<EXTERNAL_NUM_INTERRUPTS; i++) {
 			if ((EIC->INTFLAG.reg & 1<<i) != 0) {
-				EBF_Logic::GetInstance()->HandleIsr(i);
+				pLogic->HandleIsr(i);
 
 				// Clear the interrupt flag, so we will not handle the same interrupt in the next call of the
 				// handler from the Arduino's processing functions
@@ -235,6 +237,12 @@ EBF_HalInstance *EBF_Logic::GetHalInstance(EBF_HalInstance::HAL_Type type, uint8
 #ifdef EBF_USE_INTERRUPTS
 uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode)
 {
+	// Use interrupt number as the hint
+	return AttachInterrupt(interruptNumber, pHalInstance, mode, interruptNumber);
+}
+
+uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode, uint32_t hint)
+{
 #if defined(ARDUINO_ARCH_SAMD)
 	uint8_t pinNumber = interruptNumber;
 
@@ -249,6 +257,7 @@ uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHa
 	}
 
 	pHalIsr[interruptNumber] = pHalInstance;
+	isrHint[interruptNumber] = hint;
 
 #if defined(ARDUINO_ARCH_AVR)
 	switch (interruptNumber)
@@ -318,7 +327,10 @@ void EBF_Logic::HandleIsr(uint8_t interruptNumber)
 	if (pHalIsr[interruptNumber] != NULL) {
 		// Next process call is done from ISR
 		isRunFromISR = 1;
+		interruptHint = isrHint[interruptNumber];
+
 		pHalIsr[interruptNumber]->ProcessInterrupt();
+
 		isRunFromISR = 0;
 	}
 }
