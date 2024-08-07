@@ -15,3 +15,8 @@
 
 // Uncomment the EBF_SLEEP_IMPLEMENTATION to allow power down modes for supported CPUs
 //#define EBF_SLEEP_IMPLEMENTATION
+
+// Plug-n-Play system configuration
+// Uncomment the relevant line to the used PnP HUB board (only 1 line should be uncommented from the list)
+//#define PNP_USE_SAMD21_MINI_DIRECT_SERCOM2
+//#define PNP_USE_SAMD21_MINI_HUB

@@ -34,14 +34,14 @@ class EBF_I2C : protected EBF_HalInstance, public Stream {
 		inline int peek(void) { return i2c.peek(); }
 		inline int read(void) { return i2c.read(); }
 
-		inline void beginTransmission(uint8_t address) { i2c.beginTransmission(address); }
+		virtual void beginTransmission(uint8_t address) { i2c.beginTransmission(address); }
 		inline uint8_t endTransmission(void) { return i2c.endTransmission(); }
 		inline uint8_t endTransmission(uint8_t sendStop) { return i2c.endTransmission(sendStop); }
 		inline uint8_t requestFrom(uint8_t address, uint8_t quantity) { return i2c.requestFrom(address, quantity); }
 		inline uint8_t requestFrom(int address, int quantity, int sendStop) { return i2c.requestFrom(address, quantity, sendStop); }
 
 
-	private:
+	protected:
 		EBF_CallbackType callbackFunc;
 		TwoWire &i2c;
 
