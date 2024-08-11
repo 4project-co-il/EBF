@@ -29,6 +29,7 @@ class EBF_I2C : protected EBF_HalInstance, public Stream {
 		inline size_t write(unsigned int n) { return i2c.write((uint8_t)n); }
 		inline size_t write(int n) { return i2c.write((uint8_t)n); }
 		inline size_t write(uint8_t data) { return i2c.write(data); }
+		inline size_t write(uint8_t* pData, uint8_t dataSize) { return i2c.write(pData, dataSize); }
 
 		inline int available(void) { return i2c.available(); }
 		inline int peek(void) { return i2c.peek(); }
