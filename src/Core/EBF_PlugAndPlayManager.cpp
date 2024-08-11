@@ -8,7 +8,7 @@
 // EBF_PlugAndPlay implementation
 EBF_PlugAndPlayManager *EBF_PlugAndPlayManager::pStaticInstance = NULL;
 
-#if defined(PNP_USE_SAMD21_MINI_DIRECT_SERCOM2) || defined(PNP_USE_SAMD21_MINI_HUB)
+#if defined(PNP_USE_SAMD21_MINI_DIRECT_SERCOM2_INT10) || defined(PNP_USE_SAMD21_MINI_HUB)
 // SERCOM2 is used
 TwoWire pnpWire(&sercom2, 4, 3);
 #endif
@@ -37,7 +37,7 @@ uint8_t EBF_PlugAndPlayManager::Init()
 	pnpI2C.Init();
 	pnpI2C.SetClock(400000);
 
-#if defined(PNP_USE_SAMD21_MINI_HUB) || defined(PNP_USE_SAMD21_MINI_DIRECT_SERCOM2)
+#if defined(PNP_USE_SAMD21_MINI_HUB) || defined(PNP_USE_SAMD21_MINI_DIRECT_SERCOM2_INT10)
 	// SERCOM2 is used
 	// PIN re-assignment is required since SERCOM2 lines were configured for other usage by the Arduino code
 	pinPeripheral(4, PIO_SERCOM_ALT);
@@ -49,7 +49,7 @@ uint8_t EBF_PlugAndPlayManager::Init()
 		return EBF_NOT_ENOUGH_MEMORY;
 	}
 
-#if defined(PNP_USE_SAMD21_MINI_DIRECT_SERCOM2)
+#if defined(PNP_USE_SAMD21_MINI_DIRECT_SERCOM2_INT10)
 	// Prepare device information for direct connection
 	interruptMapping[0] = 10;
 	interruptMapping[1] = (uint8_t)(-1);

@@ -18,5 +18,5 @@
 
 // Plug-n-Play system configuration
 // Uncomment the relevant line to the used PnP HUB board (only 1 line should be uncommented from the list)
-//#define PNP_USE_SAMD21_MINI_DIRECT_SERCOM2
+//#define PNP_USE_SAMD21_MINI_DIRECT_SERCOM2_INT10
 //#define PNP_USE_SAMD21_MINI_HUB
