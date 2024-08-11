@@ -57,6 +57,7 @@ uint8_t EBF_PlugAndPlayManager::Init()
 
 	deviceInfo.deviceId = PNP_ID_EMBEDDED_HUB;
 	deviceInfo.version = 1;
+	deviceInfo.numberOfPorts = 1;
 	deviceInfo.numberOfEndpoints = 0;
 	deviceInfo.paramsLength = 2;			// 2 interrupts for one port
 
@@ -105,7 +106,11 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 
 	// Loop over all the ports of that HUB
 	for (uint8_t i=0; i<pHub->numberOfPorts; i++) {
-		pHub->SwitchToPort(pnpI2C, i);
+		rc = pHub->SwitchToPort(pnpI2C, i);
+		if (rc != EBF_OK) {
+			// Something is wrong...
+			return rc;
+		}
 
 		// Read a regular PnP device info
 		rc = GetDeviceInfo(deviceInfo, 0);

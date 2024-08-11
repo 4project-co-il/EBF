@@ -20,6 +20,8 @@ uint8_t PnP_STTS22H_TemperatureSensor::Init()
 		return rc;
 	}
 
+	pI2C = &pPnpManager->GetI2CInterface();
+
 	// Initialize the device
 	rc = EBF_STTS22H_TemperatureSensor::Init(deviceInfo.endpointData[0].i2cAddress);
 	if (rc != EBF_OK) {

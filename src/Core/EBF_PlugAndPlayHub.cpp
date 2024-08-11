@@ -12,6 +12,7 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 
 	this->switchI2CAddress = 0;
 	this->interruptControllerI2CAddress = 0;
+	this->numberOfPorts = deviceInfo.numberOfPorts;
 
 	// This class handles only the HUB devices
 	if (deviceInfo.deviceId == PnP_DeviceId::PNP_ID_EMBEDDED_HUB &&
@@ -36,6 +37,7 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 	// Fix type and ID after the EBF_Instance init
 	this->type = HAL_Type::PnP;
 	this->id = deviceInfo.deviceId;
+
 	// Allocate pointers to HAL instances. Will be used to pass the interrrupts to connected instances
 	pConnectedInstances = (EBF_HalInstance**)malloc(sizeof(EBF_HalInstance*) * numberOfPorts);
 	if(pConnectedInstances == NULL) {
@@ -46,8 +48,7 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 
 	// Endpoints specify switch chip and interrupt controller (if exist)
 	// Addresses should be shifted by the routing level to prevent collision between the hubs
-	this->numberOfPorts = deviceInfo.numberOfEndpoints;
-	for (uint8_t i=0; i<this->numberOfPorts; i++) {
+	for (uint8_t i=0; i<deviceInfo.numberOfEndpoints; i++) {
 		if (deviceInfo.endpointData[i].endpointId == 0) {
 			// 0 is for the HUB switch
 			this->switchI2CAddress = deviceInfo.endpointData[i].i2cAddress + this->routingLevel;
@@ -95,7 +96,10 @@ void EBF_PlugAndPlayHub::ProcessInterrupt()
 		EBF_Logic *pLogic = EBF_Logic::GetInstance();
 		uint8_t port = pLogic->GetInterruptHint() >> 1;
 
-		pConnectedInstances[port]->ProcessInterrupt();
+
+		if (pConnectedInstances[port] != NULL) {
+			pConnectedInstances[port]->ProcessInterrupt();
+		}
 	}
 }
 
