@@ -57,11 +57,4 @@ typedef struct {
 } PnP_DeviceInfo;
 
 
-class EBF_PlugAndPlayDevice {
-	public:
-		EBF_PlugAndPlayDevice(PnP_DeviceId id) : deviceId(id) {};
-
-		PnP_DeviceId deviceId;
-};
-
 #endif

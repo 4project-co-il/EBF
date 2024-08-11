@@ -11,9 +11,9 @@
 #include "../Products/EBF_STTS22H_TemperatureSensor.h"
 #include <Wire.h>
 
-class PnP_STTS22H_TemperatureSensor : public EBF_STTS22H_TemperatureSensor, public EBF_PlugAndPlayDevice {
+class PnP_STTS22H_TemperatureSensor : public EBF_STTS22H_TemperatureSensor {
 	public:
-		PnP_STTS22H_TemperatureSensor() : EBF_STTS22H_TemperatureSensor(NULL), EBF_PlugAndPlayDevice(PNP_ID_STTS22H_TEMPERATURE_SENSOR) {}
+		PnP_STTS22H_TemperatureSensor();
 
 		uint8_t Init();
 

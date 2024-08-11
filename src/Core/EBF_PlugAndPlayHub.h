@@ -13,13 +13,13 @@
 
 class EBF_PlugAndPlayManager;
 
-class EBF_PlugAndPlayHub : protected EBF_HalInstance, public EBF_PlugAndPlayDevice {
+class EBF_PlugAndPlayHub : protected EBF_HalInstance {
 	public:
 		friend class EBF_PlugAndPlayManager;
 
 		static const uint8_t maxPorts = 8;
 
-		EBF_PlugAndPlayHub() : EBF_PlugAndPlayDevice(PnP_DeviceId::PNP_ID_GENERIC_HUB) {};
+		EBF_PlugAndPlayHub();
 
 		uint8_t Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentPort, PnP_DeviceInfo &deviceInfo, uint8_t *pParams);
 		uint8_t SwitchToPort(EBF_I2C &pnpI2C, uint8_t portNumber);

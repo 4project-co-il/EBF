@@ -253,17 +253,16 @@ uint8_t EBF_PlugAndPlayManager::AssignDevice(
 		}
 
 		// If the connected device is a HUB, search there
-		if (pConnectedInstance != NULL &&
-			((EBF_PlugAndPlayDevice*)(pConnectedInstance))->deviceId == PnP_DeviceId::PNP_ID_GENERIC_HUB) {
-			rc = AssignDevice(pHalInstance, deviceInfo, pI2CRouter, (EBF_PlugAndPlayHub*)(pConnectedInstance));
-			if (rc == EBF_OK) {
-				// Device was found by inner HUB instance
-				return EBF_OK;
+		if (pConnectedInstance != NULL) {
+			if (pConnectedInstance->GetId() == PnP_DeviceId::PNP_ID_GENERIC_HUB) {
+				rc = AssignDevice(pHalInstance, deviceInfo, pI2CRouter, (EBF_PlugAndPlayHub*)(pConnectedInstance));
+				if (rc == EBF_OK) {
+					// Device was found by inner HUB instance
+					return EBF_OK;
+				}
 			}
-		}
 
 		// That port was already assigned to a HAL instance
-		if (pConnectedInstance != NULL) {
 			continue;
 		}
 
@@ -275,7 +274,7 @@ uint8_t EBF_PlugAndPlayManager::AssignDevice(
 		}
 
 		// Not the needed device
-		if (deviceInfo.deviceId != ((EBF_PlugAndPlayDevice*)pConnectedInstance)->deviceId) {
+		if (deviceInfo.deviceId != pHalInstance->GetId()) {
 			continue;
 		}
 

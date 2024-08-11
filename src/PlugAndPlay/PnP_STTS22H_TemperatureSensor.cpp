@@ -1,6 +1,12 @@
 #include "PnP_STTS22H_TemperatureSensor.h"
 #include "../Core/EBF_PlugAndPlayManager.h"
 
+PnP_STTS22H_TemperatureSensor::PnP_STTS22H_TemperatureSensor() : EBF_STTS22H_TemperatureSensor(NULL)
+{
+	this->type = HAL_Type::PnP;
+	this->id = PnP_DeviceId::PNP_ID_STTS22H_TEMPERATURE_SENSOR;
+}
+
 uint8_t PnP_STTS22H_TemperatureSensor::Init()
 {
 	uint8_t rc = EBF_OK;
@@ -19,6 +25,10 @@ uint8_t PnP_STTS22H_TemperatureSensor::Init()
 	if (rc != EBF_OK) {
 		return rc;
 	}
+
+	// Fix type and ID after the EBF_Instance init
+	this->type = HAL_Type::PnP;
+	this->id = PnP_DeviceId::PNP_ID_STTS22H_TEMPERATURE_SENSOR;
 
 	return rc;
 }

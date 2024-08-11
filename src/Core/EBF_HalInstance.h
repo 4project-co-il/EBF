@@ -25,7 +25,7 @@ class EBF_HalInstance {
 		unsigned long micros();
 		unsigned long millis();
 
-	protected:
+	public:
 		enum HAL_Type : uint8_t {
 			DIGITAL_INPUT = 0,
 			DIGITAL_OUTPUT,
@@ -33,10 +33,15 @@ class EBF_HalInstance {
 			PWM_OUTPUT,
 			UART,
 			I2C,
-			SPI
+			SPI,
+			PnP
 		};
 
-		uint8_t Init(HAL_Type type, uint8_t id);
+		HAL_Type GetType() { return type; };
+		uint32_t GetId() { return id; };
+
+	protected:
+		uint8_t Init(HAL_Type type, uint32_t id);
 		// Virtual function that will be called to process the data
 		virtual uint8_t Process() = 0;
 		// Virtual function that will be called to process the interrupt
@@ -47,17 +52,15 @@ class EBF_HalInstance {
 		unsigned long GetLastPollMillis();
 		void SetLastPollMillis(unsigned long ms);
 
-		HAL_Type GetType() { return type; };
-		uint8_t GetId() { return id; };
-
 		uint32_t pollIntervalMs;		// in milli-Sec
 		unsigned long lastPollMillis;
+
+		HAL_Type type;
+		uint32_t id;
 
 	private:
 		static uint8_t numberOfInstances;
 
-		HAL_Type type;
-		uint8_t id;
 };
 
 #endif

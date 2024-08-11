@@ -16,7 +16,7 @@ EBF_HalInstance::EBF_HalInstance() {
 	this->numberOfInstances++;
 }
 
-uint8_t EBF_HalInstance::Init(HAL_Type type, uint8_t id)
+uint8_t EBF_HalInstance::Init(HAL_Type type, uint32_t id)
 {
 	this->pollIntervalMs = 0;
 	this->type = type;

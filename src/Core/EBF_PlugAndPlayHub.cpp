@@ -1,13 +1,17 @@
 #include "EBF_PlugAndPlayHub.h"
 #include "EBF_Logic.h"
 
+EBF_PlugAndPlayHub::EBF_PlugAndPlayHub()
+{
+	this->type = HAL_Type::PnP;
+}
+
 uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentPort, PnP_DeviceInfo &deviceInfo, uint8_t *pParams)
 {
 	uint8_t rc;
 
 	this->switchI2CAddress = 0;
 	this->interruptControllerI2CAddress = 0;
-	this->deviceId = deviceInfo.deviceId;
 
 	// This class handles only the HUB devices
 	if (deviceInfo.deviceId == PnP_DeviceId::PNP_ID_EMBEDDED_HUB &&
@@ -29,6 +33,9 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 		return rc;
 	}
 
+	// Fix type and ID after the EBF_Instance init
+	this->type = HAL_Type::PnP;
+	this->id = deviceInfo.deviceId;
 	// Allocate pointers to HAL instances. Will be used to pass the interrrupts to connected instances
 	pConnectedInstances = (EBF_HalInstance**)malloc(sizeof(EBF_HalInstance*) * numberOfPorts);
 	if(pConnectedInstances == NULL) {
@@ -55,7 +62,7 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 
 	// For embedded HUBs without interrupt controller, attach specified interrupts to the EBF logic
 	// Additional parameters will specify ports to interrupt lines mapping for embedded HUBs
-	if (deviceId == PnP_DeviceId::PNP_ID_EMBEDDED_HUB && interruptControllerI2CAddress == 0) {
+	if (this->GetId() == PnP_DeviceId::PNP_ID_EMBEDDED_HUB && interruptControllerI2CAddress == 0) {
 		for (uint8_t i=0; i<this->numberOfPorts; i+=2) {
 			// interrupt hint will include port number shifted one bit left and the LSB specifying
 			// if it's the first interrupt for the device or the second
