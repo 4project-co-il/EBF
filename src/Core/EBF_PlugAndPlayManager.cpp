@@ -232,7 +232,8 @@ uint8_t EBF_PlugAndPlayManager::GetDeviceParameters(uint8_t routingLevel, uint8_
 uint8_t EBF_PlugAndPlayManager::AssignDevice(
 	EBF_HalInstance *pHalInstance,
 	PnP_DeviceInfo &deviceInfo,
-	EBF_I2C** pI2CRouter,
+	EBF_PlugAndPlayI2C** pI2CRouter,
+	EBF_PlugAndPlayHub** pAssignedHub,
 	EBF_PlugAndPlayHub* pHub)
 {
 	uint8_t rc;
@@ -260,7 +261,7 @@ uint8_t EBF_PlugAndPlayManager::AssignDevice(
 		// If the connected device is a HUB, search there
 		if (pConnectedInstance != NULL) {
 			if (pConnectedInstance->GetId() == PnP_DeviceId::PNP_ID_GENERIC_HUB) {
-				rc = AssignDevice(pHalInstance, deviceInfo, pI2CRouter, (EBF_PlugAndPlayHub*)(pConnectedInstance));
+				rc = AssignDevice(pHalInstance, deviceInfo, pI2CRouter, pAssignedHub, (EBF_PlugAndPlayHub*)(pConnectedInstance));
 				if (rc == EBF_OK) {
 					// Device was found by inner HUB instance
 					return EBF_OK;
@@ -287,6 +288,7 @@ uint8_t EBF_PlugAndPlayManager::AssignDevice(
 		// Store it's pointer in the HUB and create PnP I2C linkage that can route to the needed port
 		pHub->pConnectedInstances[i] = pHalInstance;
 		*pI2CRouter = new EBF_PlugAndPlayI2C(pnpI2C, pHub, i);
+		*pAssignedHub = pHub;
 
 		return EBF_OK;
 	}

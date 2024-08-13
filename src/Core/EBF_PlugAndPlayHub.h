@@ -23,6 +23,7 @@ class EBF_PlugAndPlayHub : protected EBF_HalInstance {
 
 		uint8_t Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentPort, PnP_DeviceInfo &deviceInfo, uint8_t *pParams);
 		uint8_t SwitchToPort(EBF_I2C &pnpI2C, uint8_t portNumber);
+		uint8_t AttachInterrupt(uint8_t portNumber, uint8_t int1Mode, uint8_t int2Mode);
 
 	protected:
 		uint8_t Process();
@@ -35,6 +36,7 @@ class EBF_PlugAndPlayHub : protected EBF_HalInstance {
 		uint8_t numberOfPorts;
 		uint8_t switchI2CAddress;
 		uint8_t interruptControllerI2CAddress;
+		uint8_t interruptMapping[maxPorts * 2];		// For embedded HUBs, 2 interrupts for each port
 };
 
 #endif

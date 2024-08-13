@@ -37,6 +37,7 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 	// Fix type and ID after the EBF_Instance init
 	this->type = HAL_Type::PnP;
 	this->id = deviceInfo.deviceId;
+	this->pollIntervalMs = EBF_NO_POLLING;	// No polling is needed for HUBs
 
 	// Allocate pointers to HAL instances. Will be used to pass the interrrupts to connected instances
 	pConnectedInstances = (EBF_HalInstance**)malloc(sizeof(EBF_HalInstance*) * numberOfPorts);
@@ -59,21 +60,48 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 		}
 	}
 
-	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+	// Copy interrupt mapping from the params, if specified
+	// It will be used later by the embedded HUBs to connect needed interrrupt lines
+	memset(interruptMapping, 0, sizeof(interruptMapping));
+	if (deviceInfo.paramsLength > 0) {
+		memcpy(interruptMapping, pParams, deviceInfo.paramsLength);
+	}
+
+	return EBF_OK;
+}
+
+uint8_t EBF_PlugAndPlayHub::AttachInterrupt(uint8_t portNumber, uint8_t int1Mode, uint8_t int2Mode)
+{
+	uint8_t rc;
 
 	// For embedded HUBs without interrupt controller, attach specified interrupts to the EBF logic
 	// Additional parameters will specify ports to interrupt lines mapping for embedded HUBs
 	if (this->GetId() == PnP_DeviceId::PNP_ID_EMBEDDED_HUB && interruptControllerI2CAddress == 0) {
-		for (uint8_t i=0; i<this->numberOfPorts; i+=2) {
-			// interrupt hint will include port number shifted one bit left and the LSB specifying
-			// if it's the first interrupt for the device or the second
-			if (pParams[i] != (uint8_t)(-1)) {
-				pLogic->AttachInterrupt(pParams[i], this, CHANGE, (i<<1));
-			}
-			if (pParams[i+1] != (uint8_t)(-1)) {
-				pLogic->AttachInterrupt(pParams[i+1], this, CHANGE, (i<<1) + 1);
+		EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
+		// interrupt hint will include port number shifted one bit left and the LSB specifying
+		// if it's the first interrupt for the device or the second
+		if (interruptMapping[portNumber*2 + 0] != (uint8_t)(-1)) {
+			rc = pLogic->AttachInterrupt(interruptMapping[portNumber*2 + 0], this, int1Mode, (portNumber<<1));
+			if (rc != EBF_OK) {
+				return rc;
 			}
 		}
+
+		if (interruptMapping[portNumber*2 + 1] != (uint8_t)(-1)) {
+			rc = pLogic->AttachInterrupt(interruptMapping[portNumber*2 + 1], this, int2Mode, (portNumber<<1) + 1);
+			if (rc != EBF_OK) {
+				return rc;
+			}
+		}
+	} else {
+		// This HUB have interrupt controller
+		// Connect parent HUBs first, then open the interrupt controller port
+		rc = pParentHub->AttachInterrupt(parentPortNumber, int1Mode, int2Mode);
+		if (rc != EBF_OK) {
+			return rc;
+		}
+		// TODO: Configure portNumber lines for specified modes
 	}
 
 	return EBF_OK;
