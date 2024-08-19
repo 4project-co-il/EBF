@@ -70,7 +70,7 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 	return EBF_OK;
 }
 
-uint8_t EBF_PlugAndPlayHub::AttachInterrupt(uint8_t portNumber, uint8_t int1Mode, uint8_t int2Mode)
+uint8_t EBF_PlugAndPlayHub::AttachInterrupt(uint8_t portNumber, PnP_InterruptMode int1Mode, PnP_InterruptMode int2Mode)
 {
 	uint8_t rc;
 
@@ -81,15 +81,19 @@ uint8_t EBF_PlugAndPlayHub::AttachInterrupt(uint8_t portNumber, uint8_t int1Mode
 
 		// interrupt hint will include port number shifted one bit left and the LSB specifying
 		// if it's the first interrupt for the device or the second
-		if (interruptMapping[portNumber*2 + 0] != (uint8_t)(-1)) {
-			rc = pLogic->AttachInterrupt(interruptMapping[portNumber*2 + 0], this, int1Mode, (portNumber<<1));
+		if (interruptMapping[portNumber*2 + 0] != (uint8_t)(-1) &&
+			int1Mode != PNP_NO_INTERRUPT) {
+			rc = pLogic->AttachInterrupt(interruptMapping[portNumber*2 + 0], this, GetArduinoInterruptMode(int1Mode), (portNumber<<1));
+
 			if (rc != EBF_OK) {
 				return rc;
 			}
 		}
 
-		if (interruptMapping[portNumber*2 + 1] != (uint8_t)(-1)) {
-			rc = pLogic->AttachInterrupt(interruptMapping[portNumber*2 + 1], this, int2Mode, (portNumber<<1) + 1);
+		if (interruptMapping[portNumber*2 + 1] != (uint8_t)(-1) &&
+			int2Mode != PNP_NO_INTERRUPT) {
+			rc = pLogic->AttachInterrupt(interruptMapping[portNumber*2 + 1], this, GetArduinoInterruptMode(int2Mode), (portNumber<<1) + 1);
+
 			if (rc != EBF_OK) {
 				return rc;
 			}
@@ -105,6 +109,38 @@ uint8_t EBF_PlugAndPlayHub::AttachInterrupt(uint8_t portNumber, uint8_t int1Mode
 	}
 
 	return EBF_OK;
+}
+
+// We can't rely that Arduino's enumeration will not change some day
+// So we'll have our own enumaration in the EEPROM and convert it to Arduino's equivalent when needed
+uint8_t EBF_PlugAndPlayHub::GetArduinoInterruptMode(PnP_InterruptMode intMode)
+{
+	switch (intMode)
+	{
+	case PNP_NO_INTERRUPT:
+		// should not happen
+		return (uint8_t)(-1);
+
+	case PNP_INTERRUPT_ON_CHANGE:
+		return CHANGE;
+
+	case PNP_INTERRUPT_LOW:
+		return LOW;
+
+	case PNP_INTERRUPT_HIGH:
+		return HIGH;
+
+	case PNP_INTERRUPT_RISING:
+		return RISING;
+
+	case PNP_INTERRUPT_FALLING:
+		return FALLING;
+
+	default:
+		// Should not happen
+		return (uint8_t)(-1);
+		break;
+	}
 }
 
 uint8_t EBF_PlugAndPlayHub::Process()
@@ -123,7 +159,6 @@ void EBF_PlugAndPlayHub::ProcessInterrupt()
 		// Embedded HUB instance without interrupt controller
 		EBF_Logic *pLogic = EBF_Logic::GetInstance();
 		uint8_t port = pLogic->GetInterruptHint() >> 1;
-
 
 		if (pConnectedInstances[port] != NULL) {
 			pConnectedInstances[port]->ProcessInterrupt();

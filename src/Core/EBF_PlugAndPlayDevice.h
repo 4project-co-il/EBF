@@ -59,8 +59,8 @@ typedef struct {
 	uint8_t numberOfInterrupts : 2;		// Number of interrupts needed for the device (up to 2)
 	uint8_t numberOfEndpoints : 3;		// Number of endpoints on the device (up to 8)
 	uint8_t paramsLength;				// 1 byte - number of bytes for the parameters data after the endpoints
-	uint8_t interrupt1Mode : 3;			// Mode of the first interrupt line
-	uint8_t interrupt2Mode : 3;			// Mode of the second interrupt line
+	uint8_t interrupt1Mode : 3;			// Mode of the first interrupt line (PnP_InterruptMode enumeration)
+	uint8_t interrupt2Mode : 3;			// Mode of the second interrupt line (PnP_InterruptMode enumeration)
 	uint8_t reserved1 : 2;
 	uint32_t reserved2;
 	// 16 bytes

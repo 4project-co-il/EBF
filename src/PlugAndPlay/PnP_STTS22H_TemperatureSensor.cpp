@@ -1,5 +1,6 @@
 #include "PnP_STTS22H_TemperatureSensor.h"
 #include "../Core/EBF_PlugAndPlayManager.h"
+#include "../Core/EBF_PlugAndPlayI2C.h"
 
 PnP_STTS22H_TemperatureSensor::PnP_STTS22H_TemperatureSensor() : EBF_STTS22H_TemperatureSensor(NULL)
 {
@@ -35,7 +36,7 @@ uint8_t PnP_STTS22H_TemperatureSensor::Init()
 	this->id = PnP_DeviceId::PNP_ID_STTS22H_TEMPERATURE_SENSOR;
 
 	// Attach interrupt lines for that device
-	rc = pAssignedHub->AttachInterrupt(pPnPI2C->GetPortNumber(), deviceInfo.interrupt1Mode, deviceInfo.interrupt2Mode);
+	rc = pAssignedHub->AttachInterrupt(pPnPI2C->GetPortNumber(), (PnP_InterruptMode)deviceInfo.interrupt1Mode, (PnP_InterruptMode)deviceInfo.interrupt2Mode);
 	if (rc != EBF_OK) {
 		return rc;
 	}

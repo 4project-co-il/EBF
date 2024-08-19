@@ -23,11 +23,14 @@ class EBF_PlugAndPlayHub : protected EBF_HalInstance {
 
 		uint8_t Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentPort, PnP_DeviceInfo &deviceInfo, uint8_t *pParams);
 		uint8_t SwitchToPort(EBF_I2C &pnpI2C, uint8_t portNumber);
-		uint8_t AttachInterrupt(uint8_t portNumber, uint8_t int1Mode, uint8_t int2Mode);
+		uint8_t AttachInterrupt(uint8_t portNumber, PnP_InterruptMode int1Mode, PnP_InterruptMode int2Mode);
 
 	protected:
 		uint8_t Process();
 		void ProcessInterrupt();
+
+		uint8_t GetArduinoInterruptMode(PnP_InterruptMode intMode);
+
 
 		EBF_PlugAndPlayHub* pParentHub;
 		uint8_t parentPortNumber;
