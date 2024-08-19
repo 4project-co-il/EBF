@@ -120,60 +120,75 @@ void EBF_STTS22H_TemperatureSensor::UpdatePollInterval()
 
 uint8_t EBF_STTS22H_TemperatureSensor::GetControlRegister(ControlRegister_t &ctrl)
 {
-	uint8_t rc;
+	uint8_t rc = EBF_OK;
 
-	pI2C->beginTransmission(i2cAddress);
-	pI2C->write(regControl);
-	rc = pI2C->endTransmission(false);
-	if (rc != 0) {
-		return EBF_COMMUNICATION_PROBLEM;
-	}
+	noInterrupts();
+	do {
+		pI2C->beginTransmission(i2cAddress);
+		pI2C->write(regControl);
+		rc = pI2C->endTransmission(false);
+		if (rc != 0) {
+			rc = EBF_COMMUNICATION_PROBLEM;
+			break;
+		}
 
-	pI2C->requestFrom(i2cAddress, 1);
+		pI2C->requestFrom(i2cAddress, 1);
 
-	ctrl.reg = pI2C->read();
+		ctrl.reg = pI2C->read();
+	} while(0);
+	interrupts();
 
-	return EBF_OK;
+	return rc;
 }
 
 uint8_t EBF_STTS22H_TemperatureSensor::SetControlRegister(ControlRegister_t ctrl)
 {
-	uint8_t rc;
+	uint8_t rc = EBF_OK;
 
-	// Address increment should be turned ON for all operations
-	ctrl.fields.addrInc = 1;
+	noInterrupts();
+	do {
+		// Address increment should be turned ON for all operations
+		ctrl.fields.addrInc = 1;
 
-	pI2C->beginTransmission(i2cAddress);
-	pI2C->write(regControl);
-	pI2C->write((uint8_t)ctrl.reg);
-	rc = pI2C->endTransmission();
-	if (rc != 0) {
-		return EBF_COMMUNICATION_PROBLEM;
-	}
+		pI2C->beginTransmission(i2cAddress);
+		pI2C->write(regControl);
+		pI2C->write((uint8_t)ctrl.reg);
+		rc = pI2C->endTransmission();
+		if (rc != 0) {
+			rc = EBF_COMMUNICATION_PROBLEM;
+			break;
+		}
+	} while (0);
+	interrupts();
 
-	return EBF_OK;
+	return rc;
 }
 
 uint8_t EBF_STTS22H_TemperatureSensor::GetValueRaw(int16_t &value)
 {
-	uint8_t rc;
+	uint8_t rc = EBF_OK;
 
-	pI2C->beginTransmission(i2cAddress);
-	pI2C->write(regTempOutput);
-	rc = pI2C->endTransmission(false);
-	if (rc != 0) {
-		return EBF_COMMUNICATION_PROBLEM;
-	}
+	noInterrupts();
+	do {
+		pI2C->beginTransmission(i2cAddress);
+		pI2C->write(regTempOutput);
+		rc = pI2C->endTransmission(false);
+		if (rc != 0) {
+			rc = EBF_COMMUNICATION_PROBLEM;
+			break;
+		}
 
-	pI2C->requestFrom(i2cAddress, 2);
+		pI2C->requestFrom(i2cAddress, 2);
 
-	rc = pI2C->read();
-	value = rc;
+		rc = pI2C->read();
+		value = rc;
 
-	rc = pI2C->read();
-	value |= rc << 8;
+		rc = pI2C->read();
+		value |= rc << 8;
+	} while (0);
+	interrupts();
 
-	return EBF_OK;
+	return rc;
 }
 
 // Changes device operation mode
@@ -267,18 +282,23 @@ uint8_t EBF_STTS22H_TemperatureSensor::IsBusy()
 // Returns Status register content
 uint8_t EBF_STTS22H_TemperatureSensor::GetStatusRegister(StatusRegister_t &status)
 {
-	uint8_t rc;
+	uint8_t rc = EBF_OK;
 
-	pI2C->beginTransmission(i2cAddress);
-	pI2C->write(regStatus);
-	rc = pI2C->endTransmission(false);
-	if (rc != 0) {
-		return EBF_COMMUNICATION_PROBLEM;
-	}
+	noInterrupts();
+	do {
+		pI2C->beginTransmission(i2cAddress);
+		pI2C->write(regStatus);
+		rc = pI2C->endTransmission(false);
+		if (rc != 0) {
+			rc = EBF_COMMUNICATION_PROBLEM;
+			break;
+		}
 
-	pI2C->requestFrom(i2cAddress, 1);
+		pI2C->requestFrom(i2cAddress, 1);
 
-	status.reg = pI2C->read();
+		status.reg = pI2C->read();
+	} while (0);
+	interrupts();
 
 	return EBF_OK;
 }
@@ -391,75 +411,95 @@ void EBF_STTS22H_TemperatureSensor::ProcessInterrupt()
 // Sets high threshold value
 uint8_t EBF_STTS22H_TemperatureSensor::SetThresholdHigh(float temp)
 {
-	uint8_t rc;
+	uint8_t rc = EBF_OK;
 
-	highThresholdSet = 1;
+	noInterrupts();
+	do {
+		highThresholdSet = 1;
 
-	pI2C->beginTransmission(i2cAddress);
-	pI2C->write(regTempHighLimit);
-	// Threshold = (temp_limit_reg -63) *0.64°C
-	pI2C->write((uint8_t)floor((temp / 0.64 + 63 + 0.5)));
-	rc = pI2C->endTransmission();
-	if (rc != 0) {
-		return EBF_COMMUNICATION_PROBLEM;
-	}
+		pI2C->beginTransmission(i2cAddress);
+		pI2C->write(regTempHighLimit);
+		// Threshold = (temp_limit_reg -63) *0.64°C
+		pI2C->write((uint8_t)floor((temp / 0.64 + 63 + 0.5)));
+		rc = pI2C->endTransmission();
+		if (rc != 0) {
+			rc = EBF_COMMUNICATION_PROBLEM;
+			break;
+		}
+	} while (0);
+	interrupts();
 
-	return EBF_OK;
+	return rc;
 }
 
 // Sets low threshold value
 uint8_t EBF_STTS22H_TemperatureSensor::SetThresholdLow(float temp)
 {
-	uint8_t rc;
+	uint8_t rc = EBF_OK;
 
-	lowThresholdSet = 1;
+	noInterrupts();
+	do {
+		lowThresholdSet = 1;
 
-	pI2C->beginTransmission(i2cAddress);
-	pI2C->write(regTempLowLimit);
-	// Threshold = (temp_limit_reg -63) *0.64°C
-	pI2C->write((uint8_t)floor((temp / 0.64 + 63 + 0.5)));
-	rc = pI2C->endTransmission();
-	if (rc != 0) {
-		return EBF_COMMUNICATION_PROBLEM;
-	}
+		pI2C->beginTransmission(i2cAddress);
+		pI2C->write(regTempLowLimit);
+		// Threshold = (temp_limit_reg -63) *0.64°C
+		pI2C->write((uint8_t)floor((temp / 0.64 + 63 + 0.5)));
+		rc = pI2C->endTransmission();
+		if (rc != 0) {
+			rc = EBF_COMMUNICATION_PROBLEM;
+			break;
+		}
+	} while (0);
+	interrupts();
 
-	return EBF_OK;
+	return rc;
 }
 
 // Disable high threshold triggering
 uint8_t EBF_STTS22H_TemperatureSensor::DisableThresholdHigh()
 {
-	uint8_t rc;
+	uint8_t rc = EBF_OK;
 
-	highThresholdSet = 0;
+	noInterrupts();
+	do {
+		highThresholdSet = 0;
 
-	pI2C->beginTransmission(i2cAddress);
-	pI2C->write(regTempHighLimit);
-	// Value 0 disables the threshold
-	pI2C->write(0);
-	rc = pI2C->endTransmission();
-	if (rc != 0) {
-		return EBF_COMMUNICATION_PROBLEM;
-	}
+		pI2C->beginTransmission(i2cAddress);
+		pI2C->write(regTempHighLimit);
+		// Value 0 disables the threshold
+		pI2C->write(0);
+		rc = pI2C->endTransmission();
+		if (rc != 0) {
+			rc = EBF_COMMUNICATION_PROBLEM;
+			break;
+		}
+	} while (0);
+	interrupts();
 
-	return EBF_OK;
+	return rc;
 }
 
 // Disable low threshold triggering
 uint8_t EBF_STTS22H_TemperatureSensor::DisableThresholdLow()
 {
-	uint8_t rc;
+	uint8_t rc = EBF_OK;
 
-	lowThresholdSet = 0;
+	noInterrupts();
+	do {
+		lowThresholdSet = 0;
 
-	pI2C->beginTransmission(i2cAddress);
-	pI2C->write(regTempLowLimit);
-	// Value 0 disables the threshold
-	pI2C->write(0);
-	rc = pI2C->endTransmission();
-	if (rc != 0) {
-		return EBF_COMMUNICATION_PROBLEM;
-	}
+		pI2C->beginTransmission(i2cAddress);
+		pI2C->write(regTempLowLimit);
+		// Value 0 disables the threshold
+		pI2C->write(0);
+		rc = pI2C->endTransmission();
+		if (rc != 0) {
+			rc = EBF_COMMUNICATION_PROBLEM;
+			break;
+		}
+	} while (0);
+	interrupts();
 
-	return EBF_OK;
+	return rc;
 }
