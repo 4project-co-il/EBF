@@ -67,8 +67,6 @@ uint8_t EBF_PlugAndPlayManager::Init()
 	}
 #else
 
-	!!! Probably wrong approach... Main HUBs should be initialized hard-coded and not from EEPROM.
-
 	// Read the configuration of the main hub
 	rc = GetDeviceInfo(deviceInfo);
 	if (rc != 0) {
@@ -114,6 +112,7 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 
 		// Read a regular PnP device info
 		rc = GetDeviceInfo(deviceInfo, 0);
+
 		if (rc != EBF_OK) {
 			// There is no PnP device connected to that port, check maybe there's another HUB set up for the next routing level
 			if (pHub->routingLevel + 1 >= maxRoutingLevels) {
@@ -268,12 +267,13 @@ uint8_t EBF_PlugAndPlayManager::AssignDevice(
 				}
 			}
 
-		// That port was already assigned to a HAL instance
+			// That port was already assigned to a HAL instance
 			continue;
 		}
 
 		// Check if current port is connected to the needed device
 		rc = GetDeviceInfo(deviceInfo);
+
 		if (rc != EBF_OK) {
 			// Should not happen since we already communicated with that device before...
 			continue;
@@ -313,7 +313,6 @@ uint8_t EBF_PlugAndPlayManager::WriteDeviceEEPROM(PnP_DeviceInfo &deviceInfo, ui
 		}
 
 		rc = pInstance->WriteDeviceEepromPage(pageOffset, pData+pageOffset, size);
-
 
 		if (rc != EBF_OK) {
 			return rc;

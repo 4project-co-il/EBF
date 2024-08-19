@@ -76,6 +76,9 @@ class EBF_Logic {
 
 #ifdef EBF_SLEEP_IMPLEMENTATION
 		void SetSleepMode(EBF_SleepMode mode) { sleepMode = mode; }
+
+		// Will be called from ISR to restore HW after sleep
+		void ExitSleep();
 #endif
 
 	private:
@@ -105,6 +108,9 @@ class EBF_Logic {
 
 		// microSeconds that have to be added to Arduino's micros() and millis() due to sleeping time
 		unsigned long microsAddition;
+		uint8_t restoreUSBDevice;
+		uint32_t apbBMask;
+		uint32_t apbCMask;
 #endif
 		EBF_HalInstance **pHalInstances;
 		uint8_t halIndex;

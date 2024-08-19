@@ -53,6 +53,8 @@ EBF_Logic *EBF_Logic::pStaticInstance = new EBF_Logic();
 
 		EBF_Logic *pLogic = EBF_Logic::GetInstance();
 
+		pLogic->ExitSleep();
+
 		for (uint8_t i=0; i<EXTERNAL_NUM_INTERRUPTS; i++) {
 			if ((EIC->INTFLAG.reg & 1<<i) != 0) {
 				pLogic->HandleIsr(i);
@@ -162,7 +164,6 @@ uint8_t EBF_Logic::Process()
 
 		if (ms - pHal->GetLastPollMillis() > pHal->GetPollingInterval()) {
 			pHal->SetLastPollMillis(ms);
-
 			pHal->Process();
 
 			if (pHal->GetPollingInterval() < delayWanted) {
@@ -182,12 +183,12 @@ uint8_t EBF_Logic::Process()
 		delayWanted = 1;
 	}
 
-	//Serial.print("Wanted delay: ");
-	//Serial.println(delayWanted);
+	//SerialUSB.print("Wanted delay: ");
+	//SerialUSB.println(delayWanted);
 
 #ifdef EBF_SLEEP_IMPLEMENTATION
 	// Try to power down the CPU for some time...
-	if (delayWanted > 1 && sleepMode != EBF_SleepMode::EBF_NO_SLEEP) {
+	if (delayWanted > 1 && sleepMode != EBF_SleepMode::EBF_NO_SLEEP && msgQueue.GetMessagesNumber() == 0) {
 		// Enter sleep mode for delayWanted timer
 		EnterSleep(delayWanted);
 
@@ -481,9 +482,6 @@ uint8_t EBF_Logic::InitSleep()
 uint8_t EBF_Logic::EnterSleep(uint32_t msSleep)
 {
 	uint32_t timerCnt;
-	bool restoreUSBDevice = false;
-	uint32_t apbBMask;
-	uint32_t apbCMask;
 
 	// No sleep needed
 	if (sleepMode == EBF_SleepMode::EBF_NO_SLEEP) {
@@ -530,24 +528,23 @@ uint8_t EBF_Logic::EnterSleep(uint32_t msSleep)
 
 		if (SERIAL_PORT_USBVIRTUAL) {
 			USBDevice.standby();
+			restoreUSBDevice = 0;
 		} else {
 			USBDevice.detach();
-			restoreUSBDevice = true;
+			restoreUSBDevice = 1;
 		}
+
 		// Disable systick interrupt:  See https://www.avrfreaks.net/forum/samd21-samd21e16b-sporadically-locks-and-does-not-wake-standby-sleep-mode
 		SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
 		SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
+
 		__DSB();
 		__WFI();
-		// Enable systick interrupt
-		SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
-		if (restoreUSBDevice) {
-			USBDevice.attach();
-		}
 
-		// Restore currently running modules
-		PM->APBCMASK.reg = apbCMask;
-		PM->APBBMASK.reg = apbBMask;
+		noInterrupts();
+		ExitSleep();
+		interrupts();
+
 		break;
 
 	default:
@@ -580,8 +577,23 @@ uint8_t EBF_Logic::EnterSleep(uint32_t msSleep)
 	}
 
 	// Back to normal CPU oreration
-
 	return EBF_OK;
+}
+
+void EBF_Logic::ExitSleep()
+{
+	// We're in deep sleep, restore the registers
+	if (PM->APBCMASK.reg == 0) {
+		// Enable systick interrupt
+		SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
+		if (restoreUSBDevice) {
+			USBDevice.attach();
+		}
+
+		// Restore currently running modules
+		PM->APBCMASK.reg = apbCMask;
+		PM->APBBMASK.reg = apbBMask;
+	}
 }
 #else
 	#error Current board type is not supported
