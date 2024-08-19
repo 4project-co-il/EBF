@@ -61,9 +61,12 @@ class EBF_Logic {
 		// Message queue functions
 		uint8_t IsRunFromIsr() { return isRunFromISR; }
 		uint32_t GetInterruptHint() { return interruptHint; }
+		uint8_t IsPostInterruptProcessing() { return isPostInterruptProcessing; }
 		uint8_t AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode);
 		uint8_t AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode, uint32_t hint);
 		uint8_t ProcessInterrupt(EBF_HalInstance *pHalInstance);
+		uint8_t ProcessInterrupt(EBF_HalInstance *pHalInstance, uint32_t param1);
+		uint32_t GetLastMessageParam1() { return lastMessage.param1; }
 		void HandleIsr(uint8_t interruptNumber);
 
 		// Message queue debug functions
@@ -80,9 +83,12 @@ class EBF_Logic {
 		EBF_Timers timers;
 #ifdef EBF_USE_INTERRUPTS
 		EBF_MessageQueue msgQueue;
+		EBF_MessageQueue::MessageEntry lastMessage;
 		// Flag specifying when the HAL Process() calls are from ISR
 		volatile uint8_t isRunFromISR;
 		volatile uint32_t interruptHint;
+		// Flag specifiying that the HAL Process() is called after interrupt processing
+		uint8_t isPostInterruptProcessing;
 
 		// Table of HAL pointers that have to be called from ISRs
 		EBF_HalInstance* pHalIsr[EXTERNAL_NUM_INTERRUPTS];

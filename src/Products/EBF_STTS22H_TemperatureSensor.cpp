@@ -18,7 +18,6 @@ uint8_t EBF_STTS22H_TemperatureSensor::Init(uint8_t i2cAddress, OperationMode mo
 
 	this->state = InstanceState::STATE_IDLE;
 	this->interruptAttached = 0;
-	this->postProcessingFlags = 0;
 	this->highThresholdSet = 0;
 	this->lowThresholdSet = 0;
 	this->i2cAddress = i2cAddress;
@@ -315,17 +314,18 @@ uint8_t EBF_STTS22H_TemperatureSensor::Process()
 	float change;
 	StatusRegister_t status;
 
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
 	// Process interrupt detected logic
-	if(postProcessingFlags) {
-		if(postProcessingFlags & postProcessHighThreshold) {
+	if (pLogic->IsPostInterruptProcessing()) {
+		status.reg = pLogic->GetLastMessageParam1();
+
+		if(status.fields.overThreshold) {
 			onThresholdHigh();
 		}
 
-		if(postProcessingFlags & postProcessLowThreshold) {
+		if(status.fields.underThreshold) {
 			onThresholdLow();
 		}
-
-		postProcessingFlags = 0;
 	}
 
 	switch (state)
@@ -380,20 +380,11 @@ void EBF_STTS22H_TemperatureSensor::ProcessInterrupt()
 	// Status register is cleared on read
 	GetStatusRegister(status);
 
-	// Set the relevant post-processing flags
-	if(status.fields.overThreshold) {
-		postProcessingFlags |= postProcessHighThreshold;
-	}
-
-	if(status.fields.underThreshold) {
-		postProcessingFlags |= postProcessLowThreshold;
-	}
-
-	if (postProcessingFlags) {
+	if (status.fields.overThreshold || status.fields.underThreshold) {
 		// Pass the control back to EBF, so it will call the Process() function from normal run
 		EBF_Logic *pLogic = EBF_Logic::GetInstance();
 
-		pLogic->ProcessInterrupt(this);
+		pLogic->ProcessInterrupt(this, status.reg);
 	}
 }
 

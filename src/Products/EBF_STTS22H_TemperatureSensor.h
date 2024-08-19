@@ -79,13 +79,6 @@ class EBF_STTS22H_TemperatureSensor : protected EBF_HalInstance {
 		uint8_t changePercent;
 		uint8_t interruptAttached;
 
-		// Post processing that should be done after interrupt handler
-		volatile uint8_t postProcessingFlags;
-
-		const uint8_t postProcessHighThreshold	= 1<<0;
-		const uint8_t postProcessLowThreshold	= 1<<1;
-
-
 		// Callbacks
 		EBF_CallbackType onChangeCallback;
 		EBF_CallbackType onMeasureComplete;

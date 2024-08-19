@@ -75,6 +75,7 @@ EBF_Logic::EBF_Logic()
 	halIndex = 0;
 #ifdef EBF_USE_INTERRUPTS
 	isRunFromISR = 0;
+	isPostInterruptProcessing = 0;
 #endif
 
 #ifdef EBF_SLEEP_IMPLEMENTATION
@@ -189,6 +190,23 @@ uint8_t EBF_Logic::Process()
 	if (delayWanted > 1 && sleepMode != EBF_SleepMode::EBF_NO_SLEEP) {
 		// Enter sleep mode for delayWanted timer
 		EnterSleep(delayWanted);
+
+#ifdef EBF_USE_INTERRUPTS
+		uint8_t rc;
+
+		// Messages are used to pass information from interrupts to normal run
+		while (msgQueue.GetMessagesNumber() > 0) {
+			rc = msgQueue.GetMessage(lastMessage);
+
+			if (rc == EBF_OK) {
+				isPostInterruptProcessing = 1;
+				lastMessage.pHalInstance->Process();
+				isPostInterruptProcessing = 0;
+			}
+		}
+
+		return EBF_OK;
+#endif
 	}
 #endif
 
@@ -197,18 +215,16 @@ uint8_t EBF_Logic::Process()
 		yield();
 
 #ifdef EBF_USE_INTERRUPTS
-		EBF_MessageQueue::MessageEntry msg;
-		uint16_t rc;
-		EBF_HalInstance *pHalInstance;
+		uint8_t rc;
 
 		// Messages are used to pass information from interrupts to normal run
 		while (msgQueue.GetMessagesNumber() > 0) {
-			rc = msgQueue.GetMessage(msg);
+			rc = msgQueue.GetMessage(lastMessage);
 
 			if (rc == EBF_OK) {
-				pHalInstance = (EBF_HalInstance*)msg.param1;
-
-				pHalInstance->Process();
+				isPostInterruptProcessing = 1;
+				lastMessage.pHalInstance->Process();
+				isPostInterruptProcessing = 0;
 			}
 		}
 #endif
@@ -340,7 +356,19 @@ uint8_t EBF_Logic::ProcessInterrupt(EBF_HalInstance *pHalInstance)
 	EBF_MessageQueue::MessageEntry msg;
 
 	memset(&msg, 0, sizeof(EBF_MessageQueue::MessageEntry));
-	msg.param1 = (uint32_t)pHalInstance;
+	msg.pHalInstance = pHalInstance;
+	msg.param1 = 0;
+
+	return msgQueue.AddMessage(msg);
+}
+
+uint8_t EBF_Logic::ProcessInterrupt(EBF_HalInstance *pHalInstance, uint32_t param1)
+{
+	EBF_MessageQueue::MessageEntry msg;
+
+	memset(&msg, 0, sizeof(EBF_MessageQueue::MessageEntry));
+	msg.pHalInstance = pHalInstance;
+	msg.param1 = param1;
 
 	return msgQueue.AddMessage(msg);
 }
