@@ -55,8 +55,8 @@ uint8_t EBF_PlugAndPlayManager::Init()
 	interruptMapping[1] = (uint8_t)(-1);
 	memset(&deviceInfo, 0, sizeof(PnP_DeviceInfo));
 
-	deviceInfo.deviceId = PNP_ID_EMBEDDED_HUB;
 	deviceInfo.version = 1;
+	deviceInfo.deviceIDs[0] = PNP_ID_EMBEDDED_HUB;
 	deviceInfo.numberOfPorts = 1;
 	deviceInfo.numberOfEndpoints = 0;
 	deviceInfo.paramsLength = 2;			// 2 interrupts for one port
@@ -130,7 +130,7 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 		}
 
 		// In case it's a HUB, create its new instance and connect all the pointers
-		if (deviceInfo.deviceId == PnP_DeviceId::PNP_ID_GENERIC_HUB) {
+		if (deviceInfo.deviceIDs[0] == PnP_DeviceId::PNP_ID_GENERIC_HUB) {
 			// Read the parameters in case the configuration says so
 			if (deviceInfo.paramsLength > 0) {
 				rc = GetDeviceParameters(pHub->routingLevel + 1, &parameters[0], min(deviceInfo.paramsLength, sizeof(parameters)));
@@ -229,8 +229,9 @@ uint8_t EBF_PlugAndPlayManager::GetDeviceParameters(uint8_t routingLevel, uint8_
 }
 
 uint8_t EBF_PlugAndPlayManager::AssignDevice(
-	EBF_HalInstance *pHalInstance,
-	PnP_DeviceInfo &deviceInfo,
+	EBF_HalInstance* pHalInstance,
+	PnP_DeviceInfo& deviceInfo,
+	uint8_t& endpointIndex,
 	EBF_PlugAndPlayI2C** pI2CRouter,
 	EBF_PlugAndPlayHub** pAssignedHub,
 	EBF_PlugAndPlayHub* pHub)
@@ -260,7 +261,7 @@ uint8_t EBF_PlugAndPlayManager::AssignDevice(
 		// If the connected device is a HUB, search there
 		if (pConnectedInstance != NULL) {
 			if (pConnectedInstance->GetId() == PnP_DeviceId::PNP_ID_GENERIC_HUB) {
-				rc = AssignDevice(pHalInstance, deviceInfo, pI2CRouter, pAssignedHub, (EBF_PlugAndPlayHub*)(pConnectedInstance));
+				rc = AssignDevice(pHalInstance, deviceInfo, endpointIndex, pI2CRouter, pAssignedHub, (EBF_PlugAndPlayHub*)(pConnectedInstance));
 				if (rc == EBF_OK) {
 					// Device was found by inner HUB instance
 					return EBF_OK;
@@ -279,8 +280,19 @@ uint8_t EBF_PlugAndPlayManager::AssignDevice(
 			continue;
 		}
 
-		// Not the needed device
-		if (deviceInfo.deviceId != pHalInstance->GetId()) {
+		// Check all endpoints
+		for (endpointIndex=0; endpointIndex<maxEndpoints; endpointIndex++) {
+			if (deviceInfo.deviceIDs[endpointIndex] == pHalInstance->GetId()) {
+				// Found the matching endpoint
+				break;
+			} else {
+				// Not the needed device
+				continue;
+			}
+		}
+
+		// No mathcing endpoints found in that device
+		if (endpointIndex == maxEndpoints) {
 			continue;
 		}
 

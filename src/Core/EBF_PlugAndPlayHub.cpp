@@ -15,8 +15,8 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 	this->numberOfPorts = deviceInfo.numberOfPorts;
 
 	// This class handles only the HUB devices
-	if (deviceInfo.deviceId == PnP_DeviceId::PNP_ID_EMBEDDED_HUB &&
-		deviceInfo.deviceId == PnP_DeviceId::PNP_ID_GENERIC_HUB) {
+	if (deviceInfo.deviceIDs[0] == PnP_DeviceId::PNP_ID_EMBEDDED_HUB &&
+		deviceInfo.deviceIDs[0] == PnP_DeviceId::PNP_ID_GENERIC_HUB) {
 		return EBF_INVALID_STATE;
 	}
 
@@ -36,7 +36,7 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 
 	// Fix type and ID after the EBF_Instance init
 	this->type = HAL_Type::PnP;
-	this->id = deviceInfo.deviceId;
+	this->id = deviceInfo.deviceIDs[0];
 	this->pollIntervalMs = EBF_NO_POLLING;	// No polling is needed for HUBs
 
 	// Allocate pointers to HAL instances. Will be used to pass the interrrupts to connected instances

@@ -15,7 +15,8 @@ class EBF_PlugAndPlayI2C;
 
 class EBF_PlugAndPlayManager {
 	public:
-		static const uint8_t maxRoutingLevels = 7;
+		static const uint8_t maxRoutingLevels = 3;
+		static const uint8_t maxEndpoints = 8;
 
 		EBF_PlugAndPlayManager();
 
@@ -25,7 +26,13 @@ class EBF_PlugAndPlayManager {
 
 		EBF_I2C &GetI2CInterface() { return pnpI2C; }
 
-		uint8_t AssignDevice(EBF_HalInstance *pHalInstance, PnP_DeviceInfo &deviceInfo, EBF_PlugAndPlayI2C** pI2CRouter, EBF_PlugAndPlayHub** pAssignedHub, EBF_PlugAndPlayHub* pHub = NULL);
+		uint8_t AssignDevice(
+			EBF_HalInstance* pHalInstance,
+			PnP_DeviceInfo& deviceInfo,
+			uint8_t& endpointIndex,
+			EBF_PlugAndPlayI2C** pI2CRouter,
+			EBF_PlugAndPlayHub** pAssignedHub,
+			EBF_PlugAndPlayHub* pHub = NULL);
 
 		static uint8_t WriteDeviceEEPROM(PnP_DeviceInfo &deviceInfo, uint8_t* pParams = NULL, uint8_t paramsSize = 0);
 
