@@ -32,7 +32,7 @@ uint8_t EBF_PlugAndPlayManager::Init()
 {
 	uint8_t rc = EBF_OK;
 	PnP_DeviceInfo deviceInfo;
-	uint8_t interruptMapping[8*2] = { (uint8_t)(-1) };	// 2 interrupts per port, up to 8 ports
+	uint8_t interruptMapping[EBF_PlugAndPlayHub::maxPorts * 2] = { (uint8_t)(-1) };	// 2 interrupts per port, up to 8 ports
 
 	pnpI2C.Init();
 	pnpI2C.SetClock(400000);
@@ -75,7 +75,7 @@ uint8_t EBF_PlugAndPlayManager::Init()
 
 	// There are parameters, for embedded HUBs those are interrupt mappings
 	if (deviceInfo.paramsLength != 0) {
-		rc = GetDeviceParameters(interruptMapping, min(deviceInfo.paramsLength, sizeof(interruptMapping));
+		rc = GetDeviceParameters(0, interruptMapping, min(deviceInfo.paramsLength, sizeof(interruptMapping)));
 		if (rc != 0) {
 			return EBF_COMMUNICATION_PROBLEM;
 		}
@@ -103,8 +103,8 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 	uint8_t parameters[32];
 
 	// Loop over all the ports of that HUB
-	for (uint8_t i=0; i<pHub->numberOfPorts; i++) {
-		rc = pHub->SwitchToPort(pnpI2C, i);
+	for (uint8_t port=0; port<pHub->numberOfPorts; port++) {
+		rc = pHub->SwitchToPort(pnpI2C, port);
 		if (rc != EBF_OK) {
 			// Something is wrong...
 			return rc;
@@ -123,8 +123,8 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 			// Try to get device for the next routing level
 			rc = GetDeviceInfo(deviceInfo, pHub->routingLevel + 1);
 			if (rc != EBF_OK) {
-				// No HUB either, mark it with (-1) pointer, so it will be skipped in searches
-				pHub->pConnectedInstances[i] = (EBF_HalInstance*)(-1);
+				// No HUB either, mark it with (-1), so it will be skipped in searches
+				pHub->pPortInfo[port].numberOfEndpoints = (uint8_t)(-1);
 				continue;
 			}
 		}
@@ -140,18 +140,23 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 				}
 			}
 
-			EBF_PlugAndPlayHub *pNewHub = new EBF_PlugAndPlayHub();
+			EBF_PlugAndPlayHub* pNewHub = new EBF_PlugAndPlayHub();
 
-			rc = pNewHub->Init(pHub, i, deviceInfo, &parameters[0]);
+			rc = pNewHub->Init(pHub, port, deviceInfo, &parameters[0]);
 			if (rc != EBF_OK) {
 				return rc;
 			}
 
 			// Save the pointer
-			pHub->pConnectedInstances[i] = pNewHub;
+			pHub->pPortInfo[port].numberOfEndpoints = 1;
+			pHub->pPortInfo[port].pConnectedInstanes = (EBF_HalInstance**)malloc(sizeof(EBF_HalInstance*) * pHub->pPortInfo[port].numberOfEndpoints);
+			pHub->pPortInfo[port].pConnectedInstanes[0] = pNewHub;
 
 			// Initialize the new HUB connections
-			InitHubs(pNewHub);
+			rc = InitHubs(pNewHub);
+			if (rc != EBF_OK) {
+				return rc;
+			}
 		}
 	}
 
@@ -160,14 +165,12 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 
 uint8_t EBF_PlugAndPlayManager::IsHeaderValid(PnP_DeviceInfo &deviceInfo)
 {
-	if (deviceInfo.headerId[0] != 'P' ||
-		deviceInfo.headerId[1] != 'n' ||
-		deviceInfo.headerId[2] != 'P' ||
-		deviceInfo.headerId[3] != '*') {
-			return 0;
-		} else {
-			return 1;
-		}
+	// "PnP*" = 0x506E502A
+	if (deviceInfo.headerId == 0x506E502A) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 uint8_t EBF_PlugAndPlayManager::GetDeviceInfo(PnP_DeviceInfo &deviceInfo, uint8_t routingLevel)
@@ -237,39 +240,35 @@ uint8_t EBF_PlugAndPlayManager::AssignDevice(
 	EBF_PlugAndPlayHub* pHub)
 {
 	uint8_t rc;
-	EBF_HalInstance *pConnectedInstance;
+	EBF_PlugAndPlayHub::PortInfo *pPortInfo;
 
 	if (pHub == NULL) {
 		pHub = pMainHub;
 	}
 
 	// Check all the ports
-	for (uint8_t i=0; i<pHub->numberOfPorts; i++) {
-		pConnectedInstance = pHub->pConnectedInstances[i];
+	for (uint8_t port=0; port<pHub->numberOfPorts; port++) {
+		pPortInfo = &pHub->pPortInfo[port];
 
 		// Nothing is connected to that port
-		if (pConnectedInstance == (EBF_HalInstance*)(-1)) {
+		if (pPortInfo->numberOfEndpoints == (uint8_t)(-1)) {
 			continue;
 		}
 
-		rc = pHub->SwitchToPort(pnpI2C, i);
+		rc = pHub->SwitchToPort(pnpI2C, port);
 		if (rc != EBF_OK) {
 			// Something is wrong
 			return rc;
 		}
 
 		// If the connected device is a HUB, search there
-		if (pConnectedInstance != NULL) {
-			if (pConnectedInstance->GetId() == PnP_DeviceId::PNP_ID_GENERIC_HUB) {
-				rc = AssignDevice(pHalInstance, deviceInfo, endpointIndex, pI2CRouter, pAssignedHub, (EBF_PlugAndPlayHub*)(pConnectedInstance));
+		if (pPortInfo->numberOfEndpoints > 0 &&
+			pPortInfo->pConnectedInstanes[0]->GetId() == PnP_DeviceId::PNP_ID_GENERIC_HUB) {
+				rc = AssignDevice(pHalInstance, deviceInfo, endpointIndex, pI2CRouter, pAssignedHub, (EBF_PlugAndPlayHub*)(pPortInfo->pConnectedInstanes[0]));
 				if (rc == EBF_OK) {
 					// Device was found by inner HUB instance
 					return EBF_OK;
 				}
-			}
-
-			// That port was already assigned to a HAL instance
-			continue;
 		}
 
 		// Check if current port is connected to the needed device
@@ -281,7 +280,12 @@ uint8_t EBF_PlugAndPlayManager::AssignDevice(
 		}
 
 		// Check all endpoints
-		for (endpointIndex=0; endpointIndex<maxEndpoints; endpointIndex++) {
+		for (endpointIndex=0; endpointIndex<deviceInfo.numberOfEndpoints; endpointIndex++) {
+			// Skip endpoints that were already assigned to a HAL instance
+			if (pPortInfo->numberOfEndpoints > 0 && pPortInfo->pConnectedInstanes[endpointIndex] != NULL) {
+				continue;
+			}
+
 			if (deviceInfo.deviceIDs[endpointIndex] == pHalInstance->GetId()) {
 				// Found the matching endpoint
 				break;
@@ -292,14 +296,20 @@ uint8_t EBF_PlugAndPlayManager::AssignDevice(
 		}
 
 		// No mathcing endpoints found in that device
-		if (endpointIndex == maxEndpoints) {
+		if (endpointIndex == deviceInfo.numberOfEndpoints) {
 			continue;
 		}
 
 		// We found the needed device
 		// Store it's pointer in the HUB and create PnP I2C linkage that can route to the needed port
-		pHub->pConnectedInstances[i] = pHalInstance;
-		*pI2CRouter = new EBF_PlugAndPlayI2C(pnpI2C, pHub, i);
+		if (pPortInfo->numberOfEndpoints == 0) {
+			// array of connected instances wasn't initiates yet
+			pPortInfo->numberOfEndpoints = deviceInfo.numberOfEndpoints;
+			pPortInfo->pConnectedInstanes = (EBF_HalInstance**)malloc(sizeof(EBF_HalInstance*) * pPortInfo->numberOfEndpoints);
+		}
+
+		pPortInfo->pConnectedInstanes[endpointIndex] = pHalInstance;
+		*pI2CRouter = new EBF_PlugAndPlayI2C(pnpI2C, pHub, port);
 		*pAssignedHub = pHub;
 
 		return EBF_OK;

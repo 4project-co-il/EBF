@@ -56,23 +56,23 @@ typedef enum : uint8_t {
 // 32 bytes
 typedef struct {
 	// 16 bytes for header data
-	char headerId[4];					// 4 bytes
+	uint32_t headerId;					// 4 bytes, "PnP*" = 0x506E502A
 	uint8_t version;					// 1 byte - version of the data structure
-	uint8_t numberOfPorts : 3;			// For HUBs (up to 8)
+	uint8_t numberOfPorts : 4;			// For HUBs (up to 8)
+	uint8_t numberOfEndpoints : 4;		// Number of endpoints on the device (up to 8)
 	uint8_t numberOfInterrupts : 2;		// Number of interrupts needed for the device (up to 2)
-	uint8_t numberOfEndpoints : 3;		// Number of endpoints on the device (up to 8)
-	uint8_t paramsLength;				// 1 byte - number of bytes for the parameters data after the endpoints
 	uint8_t interrupt1Mode : 3;			// Mode of the first interrupt line (PnP_InterruptMode enumeration)
 	uint8_t interrupt2Mode : 3;			// Mode of the second interrupt line (PnP_InterruptMode enumeration)
-	uint8_t reserved1 : 2;
+	uint8_t interrupt1Endpoint : 4;		// Endpoint that will receive first interrupt notification
+	uint8_t interrupt2Endpoint : 4;		// Endpoint that will receive second interrupt notification
+	uint8_t paramsLength;				// 1 byte - number of bytes for the parameters data after the endpoints
+	uint32_t reserved1 : 24;
 	uint32_t reserved2;
-	uint32_t reserved3;
 	// 32 bytes for deviceIDs
 	PnP_DeviceId deviceIDs[8];			// up to 8 endpoints, 4 bytes per endpoint, 32 bytes
 	// 16 bytes for endpointData
 	PnP_EndpointData endpointData[8];	// up to 8 endpoints info, 2 bytes per endpoint, 16 bytes
 	// Device additional parameters will be right after endpointData
 } PnP_DeviceInfo;
-
 
 #endif

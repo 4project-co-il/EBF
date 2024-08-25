@@ -15,8 +15,8 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 	this->numberOfPorts = deviceInfo.numberOfPorts;
 
 	// This class handles only the HUB devices
-	if (deviceInfo.deviceIDs[0] == PnP_DeviceId::PNP_ID_EMBEDDED_HUB &&
-		deviceInfo.deviceIDs[0] == PnP_DeviceId::PNP_ID_GENERIC_HUB) {
+	if (deviceInfo.deviceIDs[0] != PnP_DeviceId::PNP_ID_EMBEDDED_HUB &&
+		deviceInfo.deviceIDs[0] != PnP_DeviceId::PNP_ID_GENERIC_HUB) {
 		return EBF_INVALID_STATE;
 	}
 
@@ -40,12 +40,15 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 	this->pollIntervalMs = EBF_NO_POLLING;	// No polling is needed for HUBs
 
 	// Allocate pointers to HAL instances. Will be used to pass the interrrupts to connected instances
-	pConnectedInstances = (EBF_HalInstance**)malloc(sizeof(EBF_HalInstance*) * numberOfPorts);
-	if(pConnectedInstances == NULL) {
+	// Allocate port info structure. HAL pointer will be used to pass the interrrupts to connected instances
+	pPortInfo = (PortInfo*)malloc(sizeof(PortInfo) * numberOfPorts);
+	if(pPortInfo == NULL) {
 		return EBF_NOT_ENOUGH_MEMORY;
 	}
 
-	memset(pConnectedInstances, 0, sizeof(EBF_HalInstance*) * numberOfPorts);
+	memset(pPortInfo, 0, sizeof(PortInfo) * numberOfPorts);
+
+	// We do not initialize port info data since we don't know what is connected to those ports yet
 
 	// Endpoints specify switch chip and interrupt controller (if exist)
 	// Addresses should be shifted by the routing level to prevent collision between the hubs
@@ -70,10 +73,20 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 	return EBF_OK;
 }
 
-uint8_t EBF_PlugAndPlayHub::AttachInterrupt(uint8_t portNumber, PnP_InterruptMode int1Mode, PnP_InterruptMode int2Mode)
+uint8_t EBF_PlugAndPlayHub::AttachInterrupt(uint8_t portNumber, uint8_t endpointNumber, PnP_DeviceInfo &deviceInfo)
 {
 	uint8_t rc;
 	InterruptHint hint;
+	PnP_InterruptMode int1Mode = PnP_InterruptMode::PNP_NO_INTERRUPT;
+	PnP_InterruptMode int2Mode = PnP_InterruptMode::PNP_NO_INTERRUPT;
+
+	if (deviceInfo.interrupt1Endpoint == endpointNumber) {
+		int1Mode = (PnP_InterruptMode)deviceInfo.interrupt1Mode;
+	}
+
+	if (deviceInfo.interrupt2Endpoint == endpointNumber) {
+		int2Mode = (PnP_InterruptMode)deviceInfo.interrupt2Mode;
+	}
 
 	// For embedded HUBs without interrupt controller, attach specified interrupts to the EBF logic
 	// Additional parameters will specify ports to interrupt lines mapping for embedded HUBs
@@ -110,7 +123,8 @@ uint8_t EBF_PlugAndPlayHub::AttachInterrupt(uint8_t portNumber, PnP_InterruptMod
 	} else {
 		// This HUB have interrupt controller
 		// Connect parent HUBs first, then open the interrupt controller port
-		rc = pParentHub->AttachInterrupt(parentPortNumber, int1Mode, int2Mode);
+		// HUBs are always on the first endpoint
+		rc = pParentHub->AttachInterrupt(parentPortNumber, 0, deviceInfo);
 		if (rc != EBF_OK) {
 			return rc;
 		}
@@ -171,8 +185,9 @@ void EBF_PlugAndPlayHub::ProcessInterrupt()
 		EBF_Logic *pLogic = EBF_Logic::GetInstance();
 		hint.uint32 = pLogic->GetInterruptHint();
 
-		if (pConnectedInstances[port] != NULL) {
-			pConnectedInstances[port]->ProcessInterrupt();
+		if (pPortInfo[hint.fields.portNumber].numberOfEndpoints > 0 &&
+			pPortInfo[hint.fields.portNumber].pConnectedInstanes[hint.fields.endpointNumber] != 0) {
+			pPortInfo[hint.fields.portNumber].pConnectedInstanes[hint.fields.endpointNumber]->ProcessInterrupt();
 		}
 	}
 }
