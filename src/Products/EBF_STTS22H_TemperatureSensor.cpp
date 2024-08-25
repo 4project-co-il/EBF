@@ -362,12 +362,33 @@ void EBF_STTS22H_TemperatureSensor::ProcessInterrupt()
 	// Status register is cleared on read
 	GetStatusRegister(status);
 
-	if (status.fields.overThreshold || status.fields.underThreshold) {
-		// Pass the control back to EBF, so it will call the Process() function from normal run
-		EBF_Logic *pLogic = EBF_Logic::GetInstance();
+	if(highThresholdSet && status.fields.overThreshold) {
+		// Set which interrupt is processed, so post-processing function could use it
+		currentInterruptProcessing.reg = 0;
+		currentInterruptProcessing.fields.overThreshold = 1;
 
-		pLogic->ProcessInterrupt(this, status.reg);
+		onThresholdHigh();
 	}
+
+	if(lowThresholdSet && status.fields.underThreshold) {
+		// Set which interrupt is processed, so post-processing function could use it
+		currentInterruptProcessing.reg = 0;
+		currentInterruptProcessing.fields.underThreshold = 1;
+
+		onThresholdLow();
+	}
+}
+
+// PostponeProcessing should be called to postpone the callback processing later in the normal loop
+uint8_t EBF_STTS22H_TemperatureSensor::PostponeProcessing()
+{
+	uint8_t rc;
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
+	// Pass the control back to EBF, so it will call the Process() function from normal run
+	rc = pLogic->ProcessInterrupt(this, currentInterruptProcessing.reg);
+
+	return rc;
 }
 
 // Sets high threshold value
@@ -417,3 +438,4 @@ uint8_t EBF_STTS22H_TemperatureSensor::DisableThresholdLow()
 
 	return rc;
 }
+
