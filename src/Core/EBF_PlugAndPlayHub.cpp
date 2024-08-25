@@ -73,6 +73,7 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 uint8_t EBF_PlugAndPlayHub::AttachInterrupt(uint8_t portNumber, PnP_InterruptMode int1Mode, PnP_InterruptMode int2Mode)
 {
 	uint8_t rc;
+	InterruptHint hint;
 
 	// For embedded HUBs without interrupt controller, attach specified interrupts to the EBF logic
 	// Additional parameters will specify ports to interrupt lines mapping for embedded HUBs
@@ -83,7 +84,11 @@ uint8_t EBF_PlugAndPlayHub::AttachInterrupt(uint8_t portNumber, PnP_InterruptMod
 		// if it's the first interrupt for the device or the second
 		if (interruptMapping[portNumber*2 + 0] != (uint8_t)(-1) &&
 			int1Mode != PNP_NO_INTERRUPT) {
-			rc = pLogic->AttachInterrupt(interruptMapping[portNumber*2 + 0], this, GetArduinoInterruptMode(int1Mode), (portNumber<<1));
+			hint.uint32 = 0;
+			hint.fields.interruptNumber = 0;
+			hint.fields.portNumber = portNumber;
+			hint.fields.endpointNumber = endpointNumber;
+			rc = pLogic->AttachInterrupt(interruptMapping[portNumber*2 + 0], this, GetArduinoInterruptMode(int1Mode), hint.uint32);
 
 			if (rc != EBF_OK) {
 				return rc;
@@ -92,7 +97,11 @@ uint8_t EBF_PlugAndPlayHub::AttachInterrupt(uint8_t portNumber, PnP_InterruptMod
 
 		if (interruptMapping[portNumber*2 + 1] != (uint8_t)(-1) &&
 			int2Mode != PNP_NO_INTERRUPT) {
-			rc = pLogic->AttachInterrupt(interruptMapping[portNumber*2 + 1], this, GetArduinoInterruptMode(int2Mode), (portNumber<<1) + 1);
+			hint.uint32 = 0;
+			hint.fields.interruptNumber = 1;
+			hint.fields.portNumber = portNumber;
+			hint.fields.endpointNumber = endpointNumber;
+			rc = pLogic->AttachInterrupt(interruptMapping[portNumber*2 + 1], this, GetArduinoInterruptMode(int2Mode), hint.uint32);
 
 			if (rc != EBF_OK) {
 				return rc;
@@ -150,6 +159,8 @@ uint8_t EBF_PlugAndPlayHub::Process()
 
 void EBF_PlugAndPlayHub::ProcessInterrupt()
 {
+	InterruptHint hint;
+
 	// TODO: Pass the interrupt to the relevant PnP device
 	if (interruptControllerI2CAddress != 0) {
 		// Read the interrupt controller
@@ -158,7 +169,7 @@ void EBF_PlugAndPlayHub::ProcessInterrupt()
 	} else {
 		// Embedded HUB instance without interrupt controller
 		EBF_Logic *pLogic = EBF_Logic::GetInstance();
-		uint8_t port = pLogic->GetInterruptHint() >> 1;
+		hint.uint32 = pLogic->GetInterruptHint();
 
 		if (pConnectedInstances[port] != NULL) {
 			pConnectedInstances[port]->ProcessInterrupt();

@@ -25,6 +25,16 @@ class EBF_PlugAndPlayHub : protected EBF_HalInstance {
 		uint8_t SwitchToPort(EBF_I2C &pnpI2C, uint8_t portNumber);
 		uint8_t AttachInterrupt(uint8_t portNumber, PnP_InterruptMode int1Mode, PnP_InterruptMode int2Mode);
 
+		typedef union {
+			struct {
+				uint32_t interruptNumber : 1;
+				uint32_t portNumber : 4;
+				uint32_t endpointNumber : 4;
+				uint32_t reserved : 23;
+			} fields;
+			uint32_t uint32;
+		} InterruptHint;
+
 	protected:
 		uint8_t Process();
 		void ProcessInterrupt();
