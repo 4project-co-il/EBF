@@ -7,14 +7,55 @@
 #endif
 
 #include "../Core/EBF_Global.h"
+#include "../Core/EBF_Logic.h"
 #include "../Core/EBF_HalInstance.h"
-#include "../Core/EBF_I2C.h"
+#include "../Core/EBF_I2CDevice.h"
 #include <Wire.h>
 
-class EBF_STTS22H_TemperatureSensor : protected EBF_HalInstance {
+class EBF_STTS22H_TemperatureSensor : protected EBF_HalInstance, protected EBF_I2CDevice {
+	private:
+		// Device registers data
+		const uint8_t regTempHighLimit 	= 0x02;
+		const uint8_t regTempLowLimit 	= 0x03;
+		const uint8_t regControl 		= 0x04;
+		const uint8_t regStatus			= 0x05;
+		const uint8_t regTempOutput		= 0x06;
+
+		typedef union {
+			struct {
+				uint8_t oneShot		: 1;
+				uint8_t timeOutDis	: 1;
+				uint8_t freeRun		: 1;
+				uint8_t addrInc		: 1;
+				uint8_t avg			: 2;
+				uint8_t bdu			: 1;
+				uint8_t mode_1Hz	: 1;
+			} fields;
+			uint8_t reg;
+		} ControlRegister_t;
+
+		const uint8_t avgMode_25Hz	= 0x00;
+		const uint8_t avgMode_50Hz	= 0x01;
+		const uint8_t avgMode_100Hz	= 0x02;
+		const uint8_t avgMode_200Hz	= 0x03;
+
+		typedef union {
+			struct {
+				uint8_t busy			: 1;
+				uint8_t overThreshold	: 1;
+				uint8_t underThreshold	: 1;
+				uint8_t notUsed			: 5;
+			} fields;
+			uint8_t reg;
+		} StatusRegister_t;
+
+		uint8_t GetControlRegister(ControlRegister_t &ctrl);
+		uint8_t SetControlRegister(ControlRegister_t ctrl);
+		uint8_t GetStatusRegister(StatusRegister_t &status);
+		uint8_t GetValueRaw(int16_t &value);
 	public:
-		EBF_STTS22H_TemperatureSensor(EBF_I2C &i2cInterface) : pI2C(&i2cInterface) { }
-		EBF_STTS22H_TemperatureSensor(EBF_I2C *pI2cInterface) : pI2C(pI2cInterface) { }
+		EBF_STTS22H_TemperatureSensor(EBF_I2C &i2cInterface) : EBF_I2CDevice(&i2cInterface) { }
+		EBF_STTS22H_TemperatureSensor(EBF_I2C *pI2cInterface) : EBF_I2CDevice(pI2cInterface) { }
 
 		typedef enum : uint8_t {
 			POWER_DOWN = 0,
@@ -69,8 +110,6 @@ class EBF_STTS22H_TemperatureSensor : protected EBF_HalInstance {
 			STATE_MEASURING
 		};
 
-		EBF_I2C *pI2C;
-		uint8_t i2cAddress;
 		InstanceState state;
 		OperationMode operationMode;
 		uint8_t highThresholdSet;
@@ -89,46 +128,6 @@ class EBF_STTS22H_TemperatureSensor : protected EBF_HalInstance {
 		void ProcessInterrupt();
 		void UpdatePollInterval();
 
-	private:
-		// Device registers data
-		const uint8_t regTempHighLimit 	= 0x02;
-		const uint8_t regTempLowLimit 	= 0x03;
-		const uint8_t regControl 		= 0x04;
-		const uint8_t regStatus			= 0x05;
-		const uint8_t regTempOutput		= 0x06;
-
-		typedef union {
-			struct {
-				uint8_t oneShot		: 1;
-				uint8_t timeOutDis	: 1;
-				uint8_t freeRun		: 1;
-				uint8_t addrInc		: 1;
-				uint8_t avg			: 2;
-				uint8_t bdu			: 1;
-				uint8_t mode_1Hz	: 1;
-			} fields;
-			uint8_t reg;
-		} ControlRegister_t;
-
-		const uint8_t avgMode_25Hz	= 0x00;
-		const uint8_t avgMode_50Hz	= 0x01;
-		const uint8_t avgMode_100Hz	= 0x02;
-		const uint8_t avgMode_200Hz	= 0x03;
-
-		typedef union {
-			struct {
-				uint8_t busy			: 1;
-				uint8_t overThreshold	: 1;
-				uint8_t underThreshold	: 1;
-				uint8_t notUsed			: 5;
-			} fields;
-			uint8_t reg;
-		} StatusRegister_t;
-
-		uint8_t GetControlRegister(ControlRegister_t &ctrl);
-		uint8_t SetControlRegister(ControlRegister_t ctrl);
-		uint8_t GetStatusRegister(StatusRegister_t &status);
-		uint8_t GetValueRaw(int16_t &value);
 };
 
 #endif
