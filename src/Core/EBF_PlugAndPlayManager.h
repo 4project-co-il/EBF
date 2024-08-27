@@ -15,7 +15,7 @@ class EBF_PlugAndPlayI2C;
 
 class EBF_PlugAndPlayManager {
 	public:
-		static const uint8_t maxRoutingLevels = 3;
+		static const uint8_t maxRoutingLevels = 7;
 		static const uint8_t maxEndpoints = 8;
 
 		EBF_PlugAndPlayManager();

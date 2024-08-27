@@ -24,8 +24,10 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 	this->parentPortNumber = parentPort;
 
 	if (pParentHub == NULL) {
-		routingLevel = 0;
+		// Main HUBs will be level 3
+		routingLevel = 3;
 	} else {
+		// Generic HUBs will be levels 4,5,6,7
 		routingLevel = pParentHub->routingLevel + 1;
 	}
 
@@ -101,6 +103,7 @@ uint8_t EBF_PlugAndPlayHub::AttachInterrupt(uint8_t portNumber, uint8_t endpoint
 			hint.fields.interruptNumber = 0;
 			hint.fields.portNumber = portNumber;
 			hint.fields.endpointNumber = endpointNumber;
+
 			rc = pLogic->AttachInterrupt(interruptMapping[portNumber*2 + 0], this, GetArduinoInterruptMode(int1Mode), hint.uint32);
 
 			if (rc != EBF_OK) {
@@ -114,6 +117,7 @@ uint8_t EBF_PlugAndPlayHub::AttachInterrupt(uint8_t portNumber, uint8_t endpoint
 			hint.fields.interruptNumber = 1;
 			hint.fields.portNumber = portNumber;
 			hint.fields.endpointNumber = endpointNumber;
+
 			rc = pLogic->AttachInterrupt(interruptMapping[portNumber*2 + 1], this, GetArduinoInterruptMode(int2Mode), hint.uint32);
 
 			if (rc != EBF_OK) {
@@ -208,9 +212,10 @@ uint8_t EBF_PlugAndPlayHub::SwitchToPort(EBF_I2C &pnpI2C, uint8_t portNumber)
 			}
 		}
 
-		pnpI2C.beginTransmission(switchI2CAddress + routingLevel);
-		pnpI2C.write(portNumber);
-		rc = pnpI2C.endTransmission();
+		// Casting to EBF_I2C to explicitly have that class implementation and not a derrived class
+		((EBF_I2C)pnpI2C).beginTransmission(switchI2CAddress);
+		((EBF_I2C)pnpI2C).write(1 << portNumber);
+		rc = ((EBF_I2C)pnpI2C).endTransmission();
 		if (rc != 0) {
 			return EBF_COMMUNICATION_PROBLEM;
 		}

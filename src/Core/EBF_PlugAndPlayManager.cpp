@@ -68,14 +68,15 @@ uint8_t EBF_PlugAndPlayManager::Init()
 #else
 
 	// Read the configuration of the main hub
-	rc = GetDeviceInfo(deviceInfo);
+	// Devices are considered as level 0, main hub - level 3, generic hubs - levels 4,5,6,7
+	rc = GetDeviceInfo(deviceInfo, 3);
 	if (rc != 0) {
 		return EBF_COMMUNICATION_PROBLEM;
 	}
 
 	// There are parameters, for embedded HUBs those are interrupt mappings
 	if (deviceInfo.paramsLength != 0) {
-		rc = GetDeviceParameters(0, interruptMapping, min(deviceInfo.paramsLength, sizeof(interruptMapping)));
+		rc = GetDeviceParameters(3, interruptMapping, min(deviceInfo.paramsLength, sizeof(interruptMapping)));
 		if (rc != 0) {
 			return EBF_COMMUNICATION_PROBLEM;
 		}
@@ -85,7 +86,6 @@ uint8_t EBF_PlugAndPlayManager::Init()
 	if (rc != EBF_OK) {
 		return rc;
 	}
-
 #endif
 
 	rc = InitHubs(pMainHub);
@@ -104,6 +104,7 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 
 	// Loop over all the ports of that HUB
 	for (uint8_t port=0; port<pHub->numberOfPorts; port++) {
+
 		rc = pHub->SwitchToPort(pnpI2C, port);
 		if (rc != EBF_OK) {
 			// Something is wrong...
@@ -112,15 +113,15 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 
 		// Read a regular PnP device info
 		rc = GetDeviceInfo(deviceInfo, 0);
-
 		if (rc != EBF_OK) {
 			// There is no PnP device connected to that port, check maybe there's another HUB set up for the next routing level
-			if (pHub->routingLevel + 1 >= maxRoutingLevels) {
+			if (pHub->routingLevel + 1 > maxRoutingLevels) {
 				// We're reached max routing levels
 				continue;
 			}
 
 			// Try to get device for the next routing level
+			// Main HUB will be level 1, generic HUBs will be levels 4,5,6,7
 			rc = GetDeviceInfo(deviceInfo, pHub->routingLevel + 1);
 			if (rc != EBF_OK) {
 				// No HUB either, mark it with (-1), so it will be skipped in searches
@@ -251,6 +252,7 @@ uint8_t EBF_PlugAndPlayManager::AssignDevice(
 		pPortInfo = &pHub->pPortInfo[port];
 
 		// Nothing is connected to that port
+
 		if (pPortInfo->numberOfEndpoints == (uint8_t)(-1)) {
 			continue;
 		}
@@ -273,7 +275,6 @@ uint8_t EBF_PlugAndPlayManager::AssignDevice(
 
 		// Check if current port is connected to the needed device
 		rc = GetDeviceInfo(deviceInfo);
-
 		if (rc != EBF_OK) {
 			// Should not happen since we already communicated with that device before...
 			continue;
