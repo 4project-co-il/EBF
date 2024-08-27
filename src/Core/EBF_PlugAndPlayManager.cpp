@@ -318,7 +318,7 @@ uint8_t EBF_PlugAndPlayManager::AssignDevice(
 	return EBF_NOT_INITIALIZED;
 }
 
-uint8_t EBF_PlugAndPlayManager::WriteDeviceEEPROM(PnP_DeviceInfo &deviceInfo, uint8_t* pParams, uint8_t paramsSize)
+uint8_t EBF_PlugAndPlayManager::WriteDeviceEEPROM(uint8_t i2cAddress, PnP_DeviceInfo &deviceInfo, uint8_t* pParams, uint8_t paramsSize)
 {
 	uint8_t rc;
 
@@ -326,46 +326,59 @@ uint8_t EBF_PlugAndPlayManager::WriteDeviceEEPROM(PnP_DeviceInfo &deviceInfo, ui
 	uint8_t* pData = (uint8_t*)&deviceInfo;
 
 	// Write page-by-page
-	for (uint8_t i=0; i<sizeof(PnP_DeviceInfo)/eepromPageSize; i++) {
-		uint8_t pageOffset = i*eepromPageSize;
-		uint8_t size = sizeof(PnP_DeviceInfo) - pageOffset;
+	uint16_t size = sizeof(PnP_DeviceInfo);
+	uint16_t offsset = 0;
+	while (size > 0) {
+		if (size >= eepromPageSize) {
+			// Full page can be written
+			rc = pInstance->WriteDeviceEepromPage(i2cAddress, offsset, pData+offsset, eepromPageSize);
 
-		if (size > eepromPageSize) {
-			size = eepromPageSize;
+			offsset += eepromPageSize;
+			size -= eepromPageSize;
+		} else {
+			// Less than a page left
+			rc = pInstance->WriteDeviceEepromPage(i2cAddress, offsset, pData+offsset, size);
+
+			offsset += size;
+			size  = 0;
 		}
-
-		rc = pInstance->WriteDeviceEepromPage(pageOffset, pData+pageOffset, size);
 
 		if (rc != EBF_OK) {
 			return rc;
 		}
 	}
 
-	if(paramsSize > 0 && pParams != NULL) {
-		for (uint8_t i=0; i<paramsSize/eepromPageSize; i++) {
-			uint8_t pageOffset = i*eepromPageSize + sizeof(PnP_DeviceInfo);
-			uint8_t size = paramsSize - pageOffset;
+	size = paramsSize;
+	offsset = 0;		// Parameters are started right after the device info
+	while (size > 0) {
+		if (size >= eepromPageSize) {
+			// Full page can be written
+			rc = pInstance->WriteDeviceEepromPage(i2cAddress, offsset + sizeof(PnP_DeviceInfo), pParams+offsset, eepromPageSize);
 
-			if (size > eepromPageSize) {
-				size = eepromPageSize;
-			}
+			offsset += eepromPageSize;
+			size -= eepromPageSize;
+		} else {
+			// Less than a page left
+			rc = pInstance->WriteDeviceEepromPage(i2cAddress, offsset + sizeof(PnP_DeviceInfo), pParams+offsset, size);
 
-			rc = pInstance->WriteDeviceEepromPage(pageOffset, pParams+pageOffset, size);
-			if (rc != EBF_OK) {
-				return rc;
-			}
+			offsset += size;
+			size = 0;
+		}
+
+		if (rc != EBF_OK) {
+			return rc;
 		}
 	}
 
 	return EBF_OK;
 }
 
-uint8_t EBF_PlugAndPlayManager::WriteDeviceEepromPage(uint8_t address, uint8_t* pData, uint8_t size)
+uint8_t EBF_PlugAndPlayManager::WriteDeviceEepromPage(uint8_t i2cAddress, uint8_t eepromAddress, uint8_t* pData, uint8_t size)
 {
 	uint8_t rc;
 
-	pnpI2C.beginTransmission(eepromI2cAddress);
-	pnpI2C.write(address);
+	pnpI2C.beginTransmission(i2cAddress);
+	pnpI2C.write(eepromAddress);
 	pnpI2C.write(pData, size);
 
 	rc = pnpI2C.endTransmission(true);

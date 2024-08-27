@@ -34,7 +34,7 @@ class EBF_PlugAndPlayManager {
 			EBF_PlugAndPlayHub** pAssignedHub,
 			EBF_PlugAndPlayHub* pHub = NULL);
 
-		static uint8_t WriteDeviceEEPROM(PnP_DeviceInfo &deviceInfo, uint8_t* pParams = NULL, uint8_t paramsSize = 0);
+		static uint8_t WriteDeviceEEPROM(uint8_t i2cAddress, PnP_DeviceInfo &deviceInfo, uint8_t* pParams = NULL, uint8_t paramsSize = 0);
 
 	private:
 		EBF_PlugAndPlayHub* pMainHub;
@@ -44,7 +44,7 @@ class EBF_PlugAndPlayManager {
 
 		uint8_t InitHubs(EBF_PlugAndPlayHub *pHub);
 
-		uint8_t WriteDeviceEepromPage(uint8_t address, uint8_t* pData, uint8_t size);
+		uint8_t WriteDeviceEepromPage(uint8_t i2cAddress, uint8_t eepromAddress, uint8_t* pData, uint8_t size);
 
 
 
@@ -52,8 +52,8 @@ class EBF_PlugAndPlayManager {
 		static EBF_PlugAndPlayManager* pStaticInstance;
 		// I2C interface
 		EBF_I2C pnpI2C;
-		static const int8_t eepromI2cAddress = 0x50;
-		static const int8_t eepromPageSize = 16;
+		static const uint8_t eepromI2cAddress = 0x50;
+		static const uint8_t eepromPageSize = 16;
 
 };
 
