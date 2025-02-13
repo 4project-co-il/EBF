@@ -174,8 +174,8 @@ For Arduino 2.3.x on Linux system:
 ```
 
 # Examples
-Multiple examples are ready for you in the [examples](https://github.com/abetis/EBF/tree/master/examples) directory.
+Multiple examples are ready for you in the [examples](https://github.com/4project-co-il/EBF/tree/master/examples) directory.
 
 # Bugs and requests
-Please submit bug reports and requests for new features via [GitHub's Issues](https://github.com/abetis/EBF/issues) system
+Please submit bug reports and requests for new features via [GitHub's Issues](https://github.com/4project-co-il/EBF/issues) system
 
