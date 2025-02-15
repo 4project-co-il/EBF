@@ -5,7 +5,7 @@
     "description": "Event Based Framework for Arduino",
     "repository": {
         "type": "git",
-        "url": "https://github.com/abetis/EBF"
+        "url": "https://github.com/4project-co-il/EBF"
     },
     "frameworks": ["arduino"],
     "platforms": "*",
