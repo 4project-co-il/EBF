@@ -62,8 +62,8 @@
         },
         {
             "name": "Digital - Debounce pushbutton",
-            "base": "examples/Digital-DeboucePushbutton",
-            "files": ["Digital-DeboucePushbutton.ino"]
+            "base": "examples/Digital-DebouncePushbutton",
+            "files": ["Digital-DebouncePushbutton.ino"]
         },
         {
             "name": "Digital - Input with Pull-Up and Serial",
