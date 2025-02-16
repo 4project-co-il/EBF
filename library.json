@@ -1,8 +1,8 @@
 {
-    "name": "EBF - Event Based Framework",
+    "name": "EventBasedFramework",
     "version": "0.1.0",
     "keywords": "",
-    "description": "Event Based Framework for Arduino",
+    "description": "EBF - Event Based Framework for Arduino",
     "repository": {
         "type": "git",
         "url": "https://github.com/4project-co-il/EBF"
@@ -18,6 +18,9 @@
             "-I./src/Core",
             "-I./src/Products"
         ]
+    },
+    "dependencies": {
+        "arduino-libraries/Servo": "^1.2.0"
     },
     "examples": [
         {
