@@ -159,16 +159,51 @@ void onTimer()
 Additional products implementation will be added later.
 
 # Installation
-We use PlatformIO to develop the EBF, but try to keep it compatible with the Arduino's IDE (that's the reason for the strange directory tree).
+We use PlatformIO to develop the EBF, but try to keep it compatible with the Arduino IDE (that's the reason for the strange directory tree).
 
-In both cases, in order to use the EBF library, download it as a ZIP file (Click on the green "<> Code" button on the top of GitHub's page and "Download ZIP" from the menu),
+The EventBasedFramework (EBF) is listed in the library managers of both platforms. You can install it using the platform library manager (the preferred way), or if you need a specific version of the EBF, or can't wait for the library managers to be updated, you can manually install the library from current repository, as explained below.
+
+## Library managers
+### Arduino IDE
+In Arduino IDE, go to **Tools** > **Manage Libraries...** menu. Wait few seconds for the **Library Manager** window to open with the list of all available libraries.
+
+Type `EventBasedFramework` in the **Filter your search...** field. The list will show matching libraries for that search, in our case only the EBF:
+![EventBasedFramework in Arduino Library Manager](images/arduino-ide-library-manager.png)
+
+Press the **Install** button to install the EBF library.
+
+After the installation, you will find multiple examples in the Arduino's IDE **File** > **Examples** > **EventBasedFramework** menu. You might need to scroll down the list in the **Examples** menu to find the **EventBasedFramework** entry.
+
+Library installed using that method is available for all the projects on that computer.
+
+### PlatformIO
+Click the "Alien" icon to get to the PlatformIO menus. Click on the **Libraries** icon and type `EventBasedFramework` in the **Search libraries...** field in the Libraries Registry screen.\
+Click on the magnifier glass icon to perform the search or press Enter.\
+The list show the **EventBasedFramework** entry. Click on it's blue name:
+![EventBasedFramework in PlatformIO Library Registry](images/platformio-libraries-registry.png)
+
+The screen will show the selected library information with examples and some code.\
+You will see the latest version of the library (you can change what version to install). Press the **Add to Project** button.\
+Another window will open showing the selected version in the first field and ask you to select the project where you would like to add the EventBasedFramework library.
+![EventBasedFramework add to PlatformIO project](images/platformio-add-library.png)
+
+Click the **Add** button to complete the installation.
+
+In PlatformIO there is a separation between the projects, so the EBF library will be installed to a specific project only.
+
+You can start using the examples for the EBF after the installation.\
+Pay attention that all the examples are with `.ino` extension file, as required in Arduino IDE.\
+You can simply copy and paste the relevant pieces of code to your `main.cpp` file, or other `.cpp` file in your project's `src` directory.
+
+## Manual installation
+Manual installation of the EBF library to both Arduino IDE and PlatformIO environments is similar. Download this repository content as a ZIP file (Click on the green "<> Code" button on the top of GitHub's page and "Download ZIP" from the menu),
 and extract the ZIP content into your environment's library directory. Change the extracted directory name from "EBF-master" to "EventBasedFramework" or "EBF" to make it more readable.
 
-For PlatformIO on Linux system:
+For **PlatformIO** on Linux system:
 ```
 [Your PlatformIO path]/Projects/[Your project name]/lib/
 ```
-For Arduino 2.3.x on Linux system:
+For **Arduino 1.6.x and up** on Linux system:
 ```
 ~/Arduino/libraries/
 ```
