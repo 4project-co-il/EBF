@@ -129,7 +129,7 @@ When interrupts are enabled and the digital input uses inerrupt enabled pin, the
 # Product abstract layer
 In addition to Arduino hardware services abstraction (digital input, analog output), EBF provides real-life products abstraction, such as Led, Switch, Button and others.
 Product abstraction implements mostly used logic for those products, such as software based debouncing for switches and buttons and extends the callbacks to more expected events such as `onButtonPress`, `onButtonRelease`, `onButtonLongPress`.
-The EBF allows the objects to be time-aware. For example, if you want to blink a LED, just call the `Blink() function. No need to delay or use timers:
+The EBF allows the objects to be time-aware. For example, if you want to blink a LED, just call the `Blink()` function. No need to delay or use timers:
 ```
 // No timers needed to blink the LED, just call he Blink() function!
 // The LED will be ON for 100mSec and OFF for 900mSec
