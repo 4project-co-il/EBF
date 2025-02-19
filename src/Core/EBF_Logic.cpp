@@ -331,7 +331,7 @@ uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHa
 	// We will use Arduino's attachInterrupt for now
 	// PROs: All the initialization is done there (EIC clock, WAKEUP flag, mode)
 	// CONs: There will be one more function call on the way and the loop in the ISR to determine what interrupt is processed now
-	attachInterrupt(pinNumber, EBF_ISR_Handler, mode);
+	attachInterrupt(pinNumber, EBF_ISR_Handler, (PinStatus)mode);
 #else
 	#error Current board type is not supported
 #endif

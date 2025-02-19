@@ -57,8 +57,8 @@ void setup()
 	// Start the LED timer for the first time
 	EBF.StartTimer(SEC_TIMER);
 
-	// Built-in LED on digital output #13 will be used
-	led.Init(13);
+	// Initialize built-in LED (generally on line 13)
+	led.Init(LED_BUILTIN);
 
 	// Initialize button on digital input 2
 	// Internal pullup resistor will be used to minimize bouncing

@@ -1,11 +1,11 @@
 {
-    "name": "EBF - Event Based Framework",
-    "version": "0.1.0",
+    "name": "EventBasedFramework",
+    "version": "0.1.6",
     "keywords": "",
-    "description": "Event Based Framework for Arduino",
+    "description": "EBF - Event Based Framework for Arduino",
     "repository": {
         "type": "git",
-        "url": "https://github.com/abetis/EBF"
+        "url": "https://github.com/4project-co-il/EBF"
     },
     "frameworks": ["arduino"],
     "platforms": "*",
@@ -18,6 +18,9 @@
             "-I./src/Core",
             "-I./src/Products"
         ]
+    },
+    "dependencies": {
+        "arduino-libraries/Servo": "^1.2.0"
     },
     "examples": [
         {
@@ -51,7 +54,7 @@
             "files": ["Basics-ReadAnalogVoltage.ino"]
         },
         {
-            "name": "Basics - Read Analog Voltage using GetRawValue()",
+            "name": "Basics - Read Analog Voltage using GetRawValue",
             "base": "examples/Basics-ReadAnalogVoltageRaw",
             "files": ["Basics-ReadAnalogVoltageRaw.ino"]
         },
@@ -62,8 +65,8 @@
         },
         {
             "name": "Digital - Debounce pushbutton",
-            "base": "examples/Digital-DeboucePushbutton",
-            "files": ["Digital-DeboucePushbutton.ino"]
+            "base": "examples/Digital-DebouncePushbutton",
+            "files": ["Digital-DebouncePushbutton.ino"]
         },
         {
             "name": "Digital - Input with Pull-Up and Serial",
@@ -71,17 +74,17 @@
             "files": ["Digital-InputPullupSerial.ino"]
         },
         {
-            "name": "Digital - Push (Edge) detection with debounce",
+            "name": "Digital - Push/Edge detection with debounce",
             "base": "examples/Digital-EdgeDetectionWithDebounce",
             "files": ["Digital-EdgeDetectionWithDebounce.ino"]
         },
         {
-            "name": "Digital - Push (Edge) detection",
+            "name": "Digital - Push/Edge detection",
             "base": "examples/Digital-EdgeDetection",
             "files": ["Digital-EdgeDetection.ino"]
         },
         {
-            "name": "Digital - Pitch follower using tone() function",
+            "name": "Digital - Pitch follower using tone function",
             "base": "examples/Digital-PitchFollowerUsingTone",
             "files": ["Digital-PitchFollowerUsingTone.ino"]
         },
@@ -96,12 +99,12 @@
             "files": ["Digital-Interrupts.ino"]
         },
         {
-            "name": "Analog - Analog In, PWM Out, Serial",
+            "name": "Analog - Analog In. PWM Out. Serial",
             "base": "examples/Analog-AnalogInPwmOutSerial",
             "files": ["Analog-AnalogInPwmOutSerial.ino"]
         },
         {
-            "name": "Analog - Analog In, PWM Out, Serial, SetPollInterval",
+            "name": "Analog - Analog In. PWM Out. Serial. SetPollInterval",
             "base": "examples/Analog-AnalogInPwmOutSerialSetPollInterval",
             "files": ["Analog-AnalogInPwmOutSerialSetPollInterval.ino"]
         },
@@ -141,7 +144,7 @@
             "files": ["ControlStructures-HowToUseArrays.ino"]
         },
         {
-            "name": "Control Structures - Switch (case) Statement, used with sensor value",
+            "name": "Control Structures - Switch/Case Statement. used with sensor value",
             "base": "examples/ControlStructures-SwitchCaseSensorValue",
             "files": ["ControlStructures-SwitchCaseSensorValue.ino"]
         },
@@ -161,27 +164,27 @@
             "files": ["Display-LedBarGraph.ino"]
         },
         {
-            "name": "Products - LED On(), Off()",
+            "name": "Products - LED On and Off",
             "base": "examples/Products-LedOnOff",
             "files": ["Products-LedOnOff.ino"]
         },
         {
-            "name": "Products - LED Blink()",
+            "name": "Products - LED Blink",
             "base": "examples/Products-LedBlink",
             "files": ["Products-LedBlink.ino"]
         },
         {
-            "name": "Products - LED Brightness()",
+            "name": "Products - LED Brightness",
             "base": "examples/Products-LedBrightness",
             "files": ["Products-LedBrightness.ino"]
         },
         {
-            "name": "Products - LED FadeIn() and FadeOut()",
+            "name": "Products - LED FadeIn and FadeOut",
             "base": "examples/Products-LedFading",
             "files": ["Products-LedFading.ino"]
         },
         {
-            "name": "Products - Relay On(), Off()",
+            "name": "Products - Relay On and Off",
             "base": "examples/Products-RelayOnOff",
             "files": ["Products-RelayOnOff.ino"]
         },

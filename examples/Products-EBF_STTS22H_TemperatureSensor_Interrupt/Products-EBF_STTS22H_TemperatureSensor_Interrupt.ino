@@ -6,10 +6,23 @@
 // That example shows how to use STTS22H with an interrupt line connected to
 // Digital Input, which will notify when the temperature goes out of configured
 // thresholds, so there is no need to poll the sensor every time.
-// In order to enable interrupts for the EBF environment, you have to uncomment
-// the EBF_USE_INTERRUPTS flag in your EBF_Config.h file.
-// Using interrupts allow the EBF to use very low current while sleeping (when
-// sleep functionality enabled), and free the CPU for other tasks.
+
+// That example require to enable interrupts for the EBF environment.
+
+// If you're using the PlatformIO environment, you could add the following line to the project platform.ini file:
+// build_flags = -D EBF_USE_INTERRUPTS
+// Since the Arduino IDE doesn't provide any way to add project wide definitions, there is additional way to add that
+// flag to the compilation...
+// In the library src directory you will find the "EBF_Config_TEMPLATE.h" file, which include all the configuration
+// flags for the EBF library.
+// If you're using PlatformIO, you can save the content of that file as "EBF_Config.h" file in your project "include"
+// directory.
+// If you're using Arduino IDE, copy that file and save it's content as "EBF_Config.h" file in the library "src" directory
+//
+// In the "EBF_Config.h" file you will find the flag definition commented out:
+// #define EBF_USE_INTERRUPTS
+// Uncomment that file to have the interrupts code to be compiled into the EBF library
+
 
 // Timers enumeration
 enum {

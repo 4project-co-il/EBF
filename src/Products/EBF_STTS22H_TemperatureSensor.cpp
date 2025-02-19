@@ -47,6 +47,7 @@ uint8_t EBF_STTS22H_TemperatureSensor::Init(uint8_t i2cAddress, OperationMode mo
 	return EBF_OK;
 }
 
+#ifdef EBF_USE_INTERRUPTS
 uint8_t EBF_STTS22H_TemperatureSensor::AttachInterrupt(uint8_t interruptPin)
 {
 	uint8_t rc;
@@ -63,6 +64,7 @@ uint8_t EBF_STTS22H_TemperatureSensor::AttachInterrupt(uint8_t interruptPin)
 
 	return EBF_OK;
 }
+#endif
 
 void EBF_STTS22H_TemperatureSensor::UpdatePollInterval()
 {
@@ -355,6 +357,7 @@ uint8_t EBF_STTS22H_TemperatureSensor::Process()
 	return EBF_OK;
 }
 
+#ifdef EBF_USE_INTERRUPTS
 void EBF_STTS22H_TemperatureSensor::ProcessInterrupt()
 {
 	StatusRegister_t status;
@@ -378,6 +381,7 @@ void EBF_STTS22H_TemperatureSensor::ProcessInterrupt()
 		onThresholdLow();
 	}
 }
+#endif
 
 // PostponeProcessing should be called to postpone the callback processing later in the normal loop
 uint8_t EBF_STTS22H_TemperatureSensor::PostponeProcessing()

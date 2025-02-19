@@ -36,8 +36,8 @@ void setup()
 	// Start the LED timer for the first time
 	EBF.StartTimer(LED_TIMER);
 
-	// LED on digital output #13 will be used
-	led.Init(13);
+	// Initialize built-in LED (generally on line 13)
+	led.Init(LED_BUILTIN);
 }
 
 void loop()

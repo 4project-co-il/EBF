@@ -71,6 +71,8 @@ class EBF_STTS22H_TemperatureSensor : protected EBF_HalInstance, protected EBF_I
 		uint8_t Init(uint8_t i2cAddress, OperationMode mode = POWER_DOWN);
 		// Setting polling interval in milli-seconds
 		void SetPollInterval(uint32_t ms) { pollIntervalMs = ms; }
+
+#ifdef EBF_USE_INTERRUPTS
 		// Call to attach the device to an interrupt line
 		uint8_t AttachInterrupt(uint8_t interruptPin);
 		uint8_t PostponeProcessing();
@@ -78,6 +80,7 @@ class EBF_STTS22H_TemperatureSensor : protected EBF_HalInstance, protected EBF_I
 			EBF_Logic *pLogic = EBF_Logic::GetInstance();
 			return pLogic->IsRunFromIsr();
 		}
+#endif
 
 		void SetOnChange(EBF_CallbackType onChangeCallback, uint8_t changePercent = 5)
 		{
@@ -131,8 +134,10 @@ class EBF_STTS22H_TemperatureSensor : protected EBF_HalInstance, protected EBF_I
 		EBF_CallbackType onThresholdLow;
 
 		uint8_t Process();
-		void ProcessInterrupt();
 		void UpdatePollInterval();
+#ifdef EBF_USE_INTERRUPTS
+		void ProcessInterrupt();
+#endif
 
 		// Interrupt processing will set currently processing flags, so it could be used as a parameter for post-processing
 		volatile StatusRegister_t currentInterruptProcessing;
