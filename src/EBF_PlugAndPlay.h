@@ -9,6 +9,7 @@
 
 #include "EBF.h"
 
+#include "PlugAndPlay/PnP_StatusLed.h"
 #include "PlugAndPlay/PnP_STTS22H_TemperatureSensor.h"
 
 #endif
