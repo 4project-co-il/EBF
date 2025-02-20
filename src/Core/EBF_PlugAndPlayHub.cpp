@@ -16,7 +16,7 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 
 	// This class handles only the HUB devices
 	if (deviceInfo.deviceIDs[0] != PnP_DeviceId::PNP_ID_EMBEDDED_HUB &&
-		deviceInfo.deviceIDs[0] != PnP_DeviceId::PNP_ID_GENERIC_HUB) {
+		deviceInfo.deviceIDs[0] != PnP_DeviceId::PNP_ID_EXTENDER_HUB) {
 		return EBF_INVALID_STATE;
 	}
 

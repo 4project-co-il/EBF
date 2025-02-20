@@ -31,7 +31,7 @@
 typedef enum : uint32_t {
 	PNP_NO_DEVICE = 0,
 	PNP_ID_EMBEDDED_HUB = 101,				// HUB with interrupt lines connected directly to the microcontroller
-	PNP_ID_GENERIC_HUB,						// HUB with interrupt controller
+	PNP_ID_EXTENDER_HUB,					// Extender HUB with interrupt controller
 	PNP_ID_STTS22H_TEMPERATURE_SENSOR,
 } PnP_DeviceId;
 
@@ -72,6 +72,7 @@ typedef struct {
 	PnP_DeviceId deviceIDs[8];			// up to 8 endpoints, 4 bytes per endpoint, 32 bytes
 	// 16 bytes for endpointData
 	PnP_EndpointData endpointData[8];	// up to 8 endpoints info, 2 bytes per endpoint, 16 bytes
+
 	// Device additional parameters will be right after endpointData
 } PnP_DeviceInfo;
 

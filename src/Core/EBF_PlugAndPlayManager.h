@@ -46,8 +46,6 @@ class EBF_PlugAndPlayManager {
 
 		uint8_t WriteDeviceEepromPage(uint8_t i2cAddress, uint8_t eepromAddress, uint8_t* pData, uint8_t size);
 
-
-
 	private:
 		static EBF_PlugAndPlayManager* pStaticInstance;
 		// I2C interface
@@ -55,6 +53,12 @@ class EBF_PlugAndPlayManager {
 		static const uint8_t eepromI2cAddress = 0x50;
 		static const uint8_t eepromPageSize = 16;
 
+	public:
+		enum EBF_PnPEepromAddress {
+			PNP_EEPROM_DEVICE = 0,			// Devices are always 0
+			PNP_EEPROM_MAIN_HUB = 3,
+			PNP_EEPROM_EXTENDER_HUB = 4,	// Extenders are 4,5,6,7
+		};
 };
 
 #endif

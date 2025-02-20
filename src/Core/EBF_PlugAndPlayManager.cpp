@@ -36,8 +36,8 @@ uint8_t EBF_PlugAndPlayManager::Init()
 	}
 
 	// Read the configuration of the main hub
-	// Devices are considered as level 0, main hub - level 3, generic hubs - levels 4,5,6,7
-	rc = GetDeviceInfo(deviceInfo, 3);
+	// Devices are considered as level 0, main hub - level 3, extender hubs - levels 4,5,6,7
+	rc = GetDeviceInfo(deviceInfo, PNP_EEPROM_MAIN_HUB);
 	if (rc != 0) {
 		return EBF_COMMUNICATION_PROBLEM;
 	}
@@ -98,7 +98,7 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 		}
 
 		// In case it's a HUB, create its new instance and connect all the pointers
-		if (deviceInfo.deviceIDs[0] == PnP_DeviceId::PNP_ID_GENERIC_HUB) {
+		if (deviceInfo.deviceIDs[0] == PnP_DeviceId::PNP_ID_EXTENDER_HUB) {
 			// Read the parameters in case the configuration says so
 			if (deviceInfo.paramsLength > 0) {
 				rc = GetDeviceParameters(pHub->routingLevel + 1, &parameters[0], min(deviceInfo.paramsLength, sizeof(parameters)));
@@ -232,7 +232,7 @@ uint8_t EBF_PlugAndPlayManager::AssignDevice(
 
 		// If the connected device is a HUB, search there
 		if (pPortInfo->numberOfEndpoints > 0 &&
-			pPortInfo->pConnectedInstanes[0]->GetId() == PnP_DeviceId::PNP_ID_GENERIC_HUB) {
+			pPortInfo->pConnectedInstanes[0]->GetId() == PnP_DeviceId::PNP_ID_EXTENDER_HUB) {
 				rc = AssignDevice(pHalInstance, deviceInfo, endpointIndex, pI2CRouter, pAssignedHub, (EBF_PlugAndPlayHub*)(pPortInfo->pConnectedInstanes[0]));
 				if (rc == EBF_OK) {
 					// Device was found by inner HUB instance
