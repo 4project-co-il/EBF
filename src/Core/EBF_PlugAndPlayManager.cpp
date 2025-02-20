@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <Wire.h>
-#include "wiring_private.h" // pinPeripheral() function
 #include "EBF_PlugAndPlayManager.h"
 #include "EBF_PlugAndPlayHub.h"
 #include "EBF_PlugAndPlayI2C.h"
@@ -8,13 +7,7 @@
 // EBF_PlugAndPlay implementation
 EBF_PlugAndPlayManager *EBF_PlugAndPlayManager::pStaticInstance = NULL;
 
-#if defined(PNP_USE_SAMD21_MINI_DIRECT_SERCOM2_INT10) || defined(PNP_USE_SAMD21_MINI_HUB)
-// SERCOM2 is used
-TwoWire pnpWire(&sercom2, 4, 3);
-#endif
-
-
-EBF_PlugAndPlayManager::EBF_PlugAndPlayManager() : pnpI2C(pnpWire)
+EBF_PlugAndPlayManager::EBF_PlugAndPlayManager() : pnpI2C()
 {
 }
 
@@ -37,35 +30,10 @@ uint8_t EBF_PlugAndPlayManager::Init()
 	pnpI2C.Init();
 	pnpI2C.SetClock(400000);
 
-#if defined(PNP_USE_SAMD21_MINI_HUB) || defined(PNP_USE_SAMD21_MINI_DIRECT_SERCOM2_INT10)
-	// SERCOM2 is used
-	// PIN re-assignment is required since SERCOM2 lines were configured for other usage by the Arduino code
-	pinPeripheral(4, PIO_SERCOM_ALT);
-	pinPeripheral(3, PIO_SERCOM_ALT);
-#endif
-
 	pMainHub = new EBF_PlugAndPlayHub();
 	if (pMainHub == NULL) {
 		return EBF_NOT_ENOUGH_MEMORY;
 	}
-
-#if defined(PNP_USE_SAMD21_MINI_DIRECT_SERCOM2_INT10)
-	// Prepare device information for direct connection
-	interruptMapping[0] = 10;
-	interruptMapping[1] = (uint8_t)(-1);
-	memset(&deviceInfo, 0, sizeof(PnP_DeviceInfo));
-
-	deviceInfo.version = 1;
-	deviceInfo.deviceIDs[0] = PNP_ID_EMBEDDED_HUB;
-	deviceInfo.numberOfPorts = 1;
-	deviceInfo.numberOfEndpoints = 0;
-	deviceInfo.paramsLength = 2;			// 2 interrupts for one port
-
-	rc = pMainHub->Init(NULL, 0, deviceInfo, interruptMapping);
-	if (rc != EBF_OK) {
-		return rc;
-	}
-#else
 
 	// Read the configuration of the main hub
 	// Devices are considered as level 0, main hub - level 3, generic hubs - levels 4,5,6,7
@@ -86,7 +54,6 @@ uint8_t EBF_PlugAndPlayManager::Init()
 	if (rc != EBF_OK) {
 		return rc;
 	}
-#endif
 
 	rc = InitHubs(pMainHub);
 	if (rc != EBF_OK) {

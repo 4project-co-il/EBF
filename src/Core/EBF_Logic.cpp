@@ -53,7 +53,9 @@ EBF_Logic *EBF_Logic::pStaticInstance = new EBF_Logic();
 
 		EBF_Logic *pLogic = EBF_Logic::GetInstance();
 
+#ifdef EBF_SLEEP_IMPLEMENTATION
 		pLogic->ExitSleep();
+#endif
 
 		for (uint8_t i=0; i<EXTERNAL_NUM_INTERRUPTS; i++) {
 			if ((EIC->INTFLAG.reg & 1<<i) != 0) {
