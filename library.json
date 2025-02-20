@@ -11,12 +11,13 @@
     "platforms": "*",
     "build": {
         "srcDir": ".",
-        "srcFilter": "+<*> -<examples> -<test>",
+        "srcFilter": "+<*> -<examples> -<test> -<src/PlugAndPlay/EEPROMs>",
         "libArchive": false,
         "flags": [
             "-I$PROJECT_INCLUDE_DIR",
             "-I./src/Core",
-            "-I./src/Products"
+            "-I./src/Products",
+            "-I./src/PlugAndPlay"
         ]
     },
     "dependencies": {
