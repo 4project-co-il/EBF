@@ -4,6 +4,11 @@
 #include "EBF_PlugAndPlayHub.h"
 #include "EBF_PlugAndPlayI2C.h"
 
+#ifdef PNP_DEBUG_ENUMERATION
+#include "PnP_Serial.h"
+extern PnP_Serial serial;
+#endif
+
 // EBF_PlugAndPlay implementation
 EBF_PlugAndPlayManager *EBF_PlugAndPlayManager::pStaticInstance = NULL;
 
@@ -27,6 +32,10 @@ uint8_t EBF_PlugAndPlayManager::Init()
 	PnP_DeviceInfo deviceInfo;
 	uint8_t interruptMapping[EBF_PlugAndPlayHub::maxPorts * 2] = { (uint8_t)(-1) };	// 2 interrupts per port, up to 8 ports
 
+#ifdef PNP_DEBUG_ENUMERATION
+	serial.println(F("PnP Init"));
+#endif
+
 	pnpI2C.Init();
 	pnpI2C.SetClock(400000);
 
@@ -44,11 +53,16 @@ uint8_t EBF_PlugAndPlayManager::Init()
 
 	// There are parameters, for embedded HUBs those are interrupt mappings
 	if (deviceInfo.paramsLength != 0) {
-		rc = GetDeviceParameters(3, interruptMapping, min(deviceInfo.paramsLength, sizeof(interruptMapping)));
+		rc = GetDeviceParameters(PNP_EEPROM_MAIN_HUB, interruptMapping, min(deviceInfo.paramsLength, sizeof(interruptMapping)));
 		if (rc != 0) {
 			return EBF_COMMUNICATION_PROBLEM;
 		}
 	}
+
+#ifdef PNP_DEBUG_ENUMERATION
+	serial.println(F("PnP Main HUB info:"));
+	PrintDeviceInfo(deviceInfo, interruptMapping);
+#endif
 
 	rc = pMainHub->Init(NULL, 0, deviceInfo, interruptMapping);
 	if (rc != EBF_OK) {
@@ -69,9 +83,16 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 	PnP_DeviceInfo deviceInfo;
 	uint8_t parameters[32];
 
+#ifdef PNP_DEBUG_ENUMERATION
+	serial.println(F("PnP InitHubs"));
+#endif
+
 	// Loop over all the ports of that HUB
 	for (uint8_t port=0; port<pHub->numberOfPorts; port++) {
-
+#ifdef PNP_DEBUG_ENUMERATION
+	serial.print(F("Checking port: "));
+	serial.println(port);
+#endif
 		rc = pHub->SwitchToPort(pnpI2C, port);
 		if (rc != EBF_OK) {
 			// Something is wrong...
@@ -79,7 +100,7 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 		}
 
 		// Read a regular PnP device info
-		rc = GetDeviceInfo(deviceInfo, 0);
+		rc = GetDeviceInfo(deviceInfo, PNP_EEPROM_DEVICE);
 		if (rc != EBF_OK) {
 			// There is no PnP device connected to that port, check maybe there's another HUB set up for the next routing level
 			if (pHub->routingLevel + 1 > maxRoutingLevels) {
@@ -87,11 +108,19 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 				continue;
 			}
 
+#ifdef PNP_DEBUG_ENUMERATION
+			serial.print(F("Nothing connected, try next level: "));
+			serial.println(pHub->routingLevel+1);
+#endif
+
 			// Try to get device for the next routing level
 			// Main HUB will be level 1, generic HUBs will be levels 4,5,6,7
 			rc = GetDeviceInfo(deviceInfo, pHub->routingLevel + 1);
 			if (rc != EBF_OK) {
-				// No HUB either, mark it with (-1), so it will be skipped in searches
+#ifdef PNP_DEBUG_ENUMERATION
+				serial.println(F("Nothing on next level as well"));
+#endif
+					// No HUB either, mark it with (-1), so it will be skipped in searches
 				pHub->pPortInfo[port].numberOfEndpoints = (uint8_t)(-1);
 				continue;
 			}
@@ -107,6 +136,11 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 					return rc;
 				}
 			}
+
+#ifdef PNP_DEBUG_ENUMERATION
+			serial.println(F("Extender HUB found"));
+			PrintDeviceInfo(deviceInfo, parameters);
+#endif
 
 			EBF_PlugAndPlayHub* pNewHub = new EBF_PlugAndPlayHub();
 
@@ -359,3 +393,62 @@ uint8_t EBF_PlugAndPlayManager::WriteDeviceEepromPage(uint8_t i2cAddress, uint8_
 
 	return rc;
 }
+
+#ifdef PNP_DEBUG_ENUMERATION
+void EBF_PlugAndPlayManager::PrintDeviceInfo(PnP_DeviceInfo &deviceInfo, uint8_t* pParams)
+{
+	uint8_t i;
+
+	serial.print(F("  headerId: 0x"));
+	serial.println(deviceInfo.headerId, HEX);
+
+	serial.print(F("  version: "));
+	serial.println(deviceInfo.version);
+
+	serial.print(F("  numberOfPorts: "));
+	serial.println(deviceInfo.numberOfPorts);
+
+	serial.print(F("  numberOfEndpoints: "));
+	serial.println(deviceInfo.numberOfEndpoints);
+
+	serial.print(F("  numberOfInterrupts: "));
+	serial.println(deviceInfo.numberOfInterrupts);
+
+	serial.print(F("  interrupt1Mode: "));
+	serial.println(deviceInfo.interrupt1Mode);
+
+	serial.print(F("  interrupt2Mode: "));
+	serial.println(deviceInfo.interrupt2Mode);
+
+	serial.print(F("  interrupt1Endpoint: "));
+	serial.println(deviceInfo.interrupt1Endpoint);
+
+	serial.print(F("  interrupt2Endpoint: "));
+	serial.println(deviceInfo.interrupt2Endpoint);
+
+	serial.print(F("  paramsLength: "));
+	serial.println(deviceInfo.paramsLength);
+
+	for (i=0; i<deviceInfo.numberOfEndpoints; i++) {
+		serial.print(F("  EndPoint["));
+		serial.print(i);
+		serial.println(F("]: "));
+
+		serial.print(F("    ID: "));
+		serial.println(deviceInfo.deviceIDs[i]);
+
+		serial.print(F("    index: "));
+		serial.println(deviceInfo.endpointData[i].endpointId);
+
+		serial.print(F("    I2C address: 0x"));
+		serial.println(deviceInfo.endpointData[i].i2cAddress, HEX);
+	}
+
+	for (i=0; i<deviceInfo.paramsLength; i++) {
+		serial.print(F("  Params["));
+		serial.print(i);
+		serial.print(F("]: "));
+		serial.println(pParams[i]);
+	}
+}
+#endif

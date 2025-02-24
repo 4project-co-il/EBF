@@ -46,6 +46,10 @@ class EBF_PlugAndPlayManager {
 
 		uint8_t WriteDeviceEepromPage(uint8_t i2cAddress, uint8_t eepromAddress, uint8_t* pData, uint8_t size);
 
+#ifdef PNP_DEBUG_ENUMERATION
+		void PrintDeviceInfo(PnP_DeviceInfo &deviceInfo, uint8_t* pParams=NULL);
+#endif
+
 	private:
 		static EBF_PlugAndPlayManager* pStaticInstance;
 		// I2C interface
