@@ -126,6 +126,11 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 			}
 		}
 
+#ifdef PNP_DEBUG_ENUMERATION
+		serial.println(F("Found device:"));
+		PrintDeviceInfo(deviceInfo);
+#endif
+
 		// In case it's a HUB, create its new instance and connect all the pointers
 		if (deviceInfo.deviceIDs[0] == PnP_DeviceId::PNP_ID_EXTENDER_HUB) {
 			// Read the parameters in case the configuration says so
