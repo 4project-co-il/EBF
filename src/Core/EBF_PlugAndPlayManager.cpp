@@ -384,6 +384,14 @@ uint8_t EBF_PlugAndPlayManager::WriteDeviceEepromPage(uint8_t i2cAddress, uint8_
 {
 	uint8_t rc;
 
+	// Main HUB don't need any switches, any other device should be connected to port 0 to write its EEPROM
+	if (i2cAddress != 0x50 + EBF_PlugAndPlayManager::PNP_EEPROM_MAIN_HUB) {
+		rc = pMainHub->SwitchToPort(pnpI2C, 0);
+		if (rc != EBF_OK) {
+			return rc;
+		}
+	}
+
 	pnpI2C.beginTransmission(i2cAddress);
 	pnpI2C.write(eepromAddress);
 	pnpI2C.write(pData, size);
