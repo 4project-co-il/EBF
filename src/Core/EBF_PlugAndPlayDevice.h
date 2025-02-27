@@ -30,9 +30,13 @@
 // 4 bytes
 typedef enum : uint32_t {
 	PNP_NO_DEVICE = 0,
+
+	// HUBs
 	PNP_ID_EMBEDDED_HUB = 101,				// HUB with interrupt lines connected directly to the microcontroller
 	PNP_ID_EXTENDER_HUB,					// Extender HUB with interrupt controller
-	PNP_ID_STTS22H_TEMPERATURE_SENSOR,
+
+	// Devices
+	PNP_ID_STTS22H_TEMPERATURE_SENSOR = 201,
 } PnP_DeviceId;
 
 // 2 bytes
@@ -43,12 +47,14 @@ typedef struct {
 } PnP_EndpointData;
 
 typedef enum : uint8_t {
-	PNP_NO_INTERRUPT = 0,
+	PNP_NOT_CONECTED = 0,
+	PNP_DIGITAL_OUTPUT,
+	PNP_DIGITAL_INPUT,
 	PNP_INTERRUPT_ON_CHANGE,
 	PNP_INTERRUPT_LOW,
 	PNP_INTERRUPT_HIGH,
 	PNP_INTERRUPT_RISING,
-	PNP_INTERRUPT_FALLING
+	PNP_INTERRUPT_FALLING,
 } PnP_InterruptMode;
 
 // 2kBit EEPROM is used for the device (256 bytes)

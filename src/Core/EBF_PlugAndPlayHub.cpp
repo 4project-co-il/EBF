@@ -75,12 +75,50 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 	return EBF_OK;
 }
 
-uint8_t EBF_PlugAndPlayHub::AttachInterrupt(uint8_t portNumber, uint8_t endpointNumber, PnP_DeviceInfo &deviceInfo)
+uint8_t EBF_PlugAndPlayHub::AssignEmbeddedHubLine(uint8_t pinNumber, PnP_InterruptMode intMode, InterruptHint intHint)
+{
+	uint8_t rc;
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
+	switch (intMode) {
+		case PNP_NOT_CONECTED:
+			// The line is not connected, nothing to do
+			break;
+
+		case PNP_DIGITAL_OUTPUT:
+			// Initialize the line as digital output
+			pinMode(pinNumber, OUTPUT);
+			break;
+
+		case PNP_DIGITAL_INPUT:
+			// Initialize the line as digital input, but without an interrupt
+			pinMode(pinNumber, INPUT);
+			break;
+
+		default:
+			// For the rest of the cases attach the line as an interrupt
+
+			// interrupt hint will include port number shifted one bit left and the LSB specifying
+			// if it's the first interrupt for the device or the second
+			if (pinNumber != (uint8_t)(-1)) {
+				rc = pLogic->AttachInterrupt(pinNumber, this, GetArduinoInterruptMode(intMode), intHint.uint32);
+
+				if (rc != EBF_OK) {
+					return rc;
+				}
+			}
+	}
+
+	return EBF_OK;
+
+}
+
+uint8_t EBF_PlugAndPlayHub::AssignInterruptLines(uint8_t portNumber, uint8_t endpointNumber, PnP_DeviceInfo &deviceInfo)
 {
 	uint8_t rc;
 	InterruptHint hint;
-	PnP_InterruptMode int1Mode = PnP_InterruptMode::PNP_NO_INTERRUPT;
-	PnP_InterruptMode int2Mode = PnP_InterruptMode::PNP_NO_INTERRUPT;
+	PnP_InterruptMode int1Mode = PnP_InterruptMode::PNP_NOT_CONECTED;
+	PnP_InterruptMode int2Mode = PnP_InterruptMode::PNP_NOT_CONECTED;
 
 	if (deviceInfo.interrupt1Endpoint == endpointNumber) {
 		int1Mode = (PnP_InterruptMode)deviceInfo.interrupt1Mode;
@@ -93,46 +131,34 @@ uint8_t EBF_PlugAndPlayHub::AttachInterrupt(uint8_t portNumber, uint8_t endpoint
 	// For embedded HUBs without interrupt controller, attach specified interrupts to the EBF logic
 	// Additional parameters will specify ports to interrupt lines mapping for embedded HUBs
 	if (this->GetId() == PnP_DeviceId::PNP_ID_EMBEDDED_HUB && interruptControllerI2CAddress == 0) {
-		EBF_Logic *pLogic = EBF_Logic::GetInstance();
-
 		// interrupt hint will include port number shifted one bit left and the LSB specifying
 		// if it's the first interrupt for the device or the second
-		if (interruptMapping[portNumber*2 + 0] != (uint8_t)(-1) &&
-			int1Mode != PNP_NO_INTERRUPT) {
-			hint.uint32 = 0;
-			hint.fields.interruptNumber = 0;
-			hint.fields.portNumber = portNumber;
-			hint.fields.endpointNumber = endpointNumber;
+		// it helps passing the interrupt call to the correct HAL instance
+		hint.uint32 = 0;
+		hint.fields.interruptNumber = 0;
+		hint.fields.portNumber = portNumber;
+		hint.fields.endpointNumber = endpointNumber;
 
-			rc = pLogic->AttachInterrupt(interruptMapping[portNumber*2 + 0], this, GetArduinoInterruptMode(int1Mode), hint.uint32);
-
-			if (rc != EBF_OK) {
-				return rc;
-			}
+		rc = this->AssignEmbeddedHubLine(interruptMapping[portNumber*2 + 0], int1Mode, hint);
+		if (rc != EBF_OK) {
+			return rc;
 		}
 
-		if (interruptMapping[portNumber*2 + 1] != (uint8_t)(-1) &&
-			int2Mode != PNP_NO_INTERRUPT) {
-			hint.uint32 = 0;
-			hint.fields.interruptNumber = 1;
-			hint.fields.portNumber = portNumber;
-			hint.fields.endpointNumber = endpointNumber;
-
-			rc = pLogic->AttachInterrupt(interruptMapping[portNumber*2 + 1], this, GetArduinoInterruptMode(int2Mode), hint.uint32);
-
-			if (rc != EBF_OK) {
-				return rc;
-			}
+		hint.fields.interruptNumber = 1;
+		rc = this->AssignEmbeddedHubLine(interruptMapping[portNumber*2 + 1], int2Mode, hint);
+		if (rc != EBF_OK) {
+			return rc;
 		}
 	} else {
 		// This HUB have interrupt controller
 		// Connect parent HUBs first, then open the interrupt controller port
 		// HUBs are always on the first endpoint
-		rc = pParentHub->AttachInterrupt(parentPortNumber, 0, deviceInfo);
+		rc = pParentHub->AssignInterruptLines(parentPortNumber, 0, deviceInfo);
 		if (rc != EBF_OK) {
 			return rc;
 		}
-		// TODO: Configure portNumber lines for specified modes
+
+		// TODO: Configure portNumber lines for specified modes (input, output, interrupt)
 	}
 
 	return EBF_OK;
@@ -144,7 +170,7 @@ uint8_t EBF_PlugAndPlayHub::GetArduinoInterruptMode(PnP_InterruptMode intMode)
 {
 	switch (intMode)
 	{
-	case PNP_NO_INTERRUPT:
+	case PNP_NOT_CONECTED:
 		// should not happen
 		return (uint8_t)(-1);
 

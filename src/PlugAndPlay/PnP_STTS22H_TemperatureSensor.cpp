@@ -37,7 +37,7 @@ uint8_t PnP_STTS22H_TemperatureSensor::Init()
 	this->id = PnP_DeviceId::PNP_ID_STTS22H_TEMPERATURE_SENSOR;
 
 	// Attach interrupt lines for that device
-	rc = pAssignedHub->AttachInterrupt(pPnPI2C->GetPortNumber(), endpointIndex, deviceInfo);
+	rc = pAssignedHub->AssignInterruptLines(pPnPI2C->GetPortNumber(), endpointIndex, deviceInfo);
 	if (rc != EBF_OK) {
 		return rc;
 	}

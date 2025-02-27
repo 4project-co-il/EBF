@@ -23,12 +23,6 @@ class EBF_PlugAndPlayHub : protected EBF_HalInstance {
 
 		uint8_t Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentPort, PnP_DeviceInfo &deviceInfo, uint8_t *pParams);
 		uint8_t SwitchToPort(EBF_I2C &pnpI2C, uint8_t portNumber);
-		uint8_t AttachInterrupt(uint8_t portNumber, uint8_t endpointNumber, PnP_DeviceInfo &deviceInfo);
-
-		typedef struct {
-			EBF_HalInstance** pConnectedInstanes;	// Array of HalInstance pointers assigned to the device connected to that port
-			uint8_t numberOfEndpoints;				// Number of endpoints on the device connected to that port
-		} PortInfo;
 
 		typedef union {
 			struct {
@@ -39,6 +33,14 @@ class EBF_PlugAndPlayHub : protected EBF_HalInstance {
 			} fields;
 			uint32_t uint32;
 		} InterruptHint;
+
+		uint8_t AssignInterruptLines(uint8_t portNumber, uint8_t endpointNumber, PnP_DeviceInfo &deviceInfo);
+		uint8_t AssignEmbeddedHubLine(uint8_t pinNumber, PnP_InterruptMode intMode, InterruptHint intHint);
+
+		typedef struct {
+			EBF_HalInstance** pConnectedInstanes;	// Array of HalInstance pointers assigned to the device connected to that port
+			uint8_t numberOfEndpoints;				// Number of endpoints on the device connected to that port
+		} PortInfo;
 
 	protected:
 		uint8_t Process();
