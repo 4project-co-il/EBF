@@ -13,6 +13,6 @@
 #include "PlugAndPlay/PnP_Serial.h"
 #include "PlugAndPlay/PnP_UART.h"
 
-#include "PlugAndPlay/PnP_STTS22H_TemperatureSensor.h"
+#include "PlugAndPlay/PnP_Module_STTS22H_TemperatureSensor.h"
 
 #endif
