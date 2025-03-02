@@ -19,6 +19,7 @@ class EBF_PlugAndPlayI2C : public EBF_I2C {
 		void beginTransmission(uint8_t address);
 
 		uint8_t GetPortNumber() { return portNumber; }
+		EBF_PlugAndPlayHub* GetHub() { return pHub; }
 
 	private:
 		EBF_PlugAndPlayHub* pHub;

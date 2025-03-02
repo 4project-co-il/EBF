@@ -249,3 +249,68 @@ uint8_t EBF_PlugAndPlayHub::SwitchToPort(EBF_I2C &pnpI2C, uint8_t portNumber)
 
 	return EBF_OK;
 }
+
+// Setting an interrupt line is possible only for device that declared that line as a Digital Output
+uint8_t EBF_PlugAndPlayHub::SetIntLine(EBF_I2C &pnpI2C, uint8_t portNumber, uint8_t intLineNumber, uint8_t value)
+{
+	//uint8_t rc;
+
+	// This is the main HUB without interrupt controller, the interrupt lines are directly connected to the MCU
+	if (interruptControllerI2CAddress == 0) {
+		// Set the corresponding line
+		if (interruptMapping[portNumber*2 + intLineNumber] != (uint8_t)(-1)) {
+			digitalWrite(interruptMapping[portNumber*2 + intLineNumber], value & 0x01);
+		} else {
+			return EBF_NOT_INITIALIZED;
+		}
+	} else {
+/*
+		if (pParentHub != NULL) {
+			// Switch parent HUBs first (from the main HUB up to this)
+			rc = pParentHub->SwitchToPort(pnpI2C, parentPortNumber);
+			if (rc != EBF_OK) {
+				return rc;
+			}
+		}
+*/
+
+		// TODO: Configure the interrupt controller to set the relevant line to the needed value
+	}
+
+	return EBF_OK;
+}
+
+// Setting both interrupt lines is possible only for device that declared those line as a Digital Outputs
+uint8_t EBF_PlugAndPlayHub::SetIntLinesValue(EBF_I2C &pnpI2C, uint8_t portNumber, uint8_t value)
+{
+	//uint8_t rc;
+
+	// This is the main HUB without interrupt controller, the interrupt lines are directly connected to the MCU
+	if (interruptControllerI2CAddress == 0) {
+		// Set the corresponding lines
+		if (interruptMapping[portNumber*2 + 0] != (uint8_t)(-1)) {
+			digitalWrite(interruptMapping[portNumber*2 + 0], value & 0x01);
+		}
+
+		if (interruptMapping[portNumber*2 + 1] != (uint8_t)(-1)) {
+			digitalWrite(interruptMapping[portNumber*2 + 1], value & 0x02);
+		}
+	} else {
+		// TODO: Configure the interrupt controller to set the relevant line to the needed value
+/*
+		if (pParentHub != NULL) {
+			// Switch parent HUBs first (from the main HUB up to this)
+			rc = pParentHub->SwitchToPort(pnpI2C, parentPortNumber);
+			if (rc != EBF_OK) {
+				return rc;
+			}
+		}
+
+		// interruptControllerI2CAddress
+
+		// set to value & 0x03
+*/
+	}
+
+	return EBF_OK;
+}
