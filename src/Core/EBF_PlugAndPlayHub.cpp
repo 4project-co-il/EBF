@@ -101,6 +101,8 @@ uint8_t EBF_PlugAndPlayHub::AssignEmbeddedHubLine(uint8_t pinNumber, PnP_Interru
 			// interrupt hint will include port number shifted one bit left and the LSB specifying
 			// if it's the first interrupt for the device or the second
 			if (pinNumber != (uint8_t)(-1)) {
+				pinMode(pinNumber, INPUT);
+
 				rc = pLogic->AttachInterrupt(pinNumber, this, GetArduinoInterruptMode(intMode), intHint.uint32);
 
 				if (rc != EBF_OK) {
@@ -309,6 +311,76 @@ uint8_t EBF_PlugAndPlayHub::SetIntLinesValue(EBF_I2C &pnpI2C, uint8_t portNumber
 		// interruptControllerI2CAddress
 
 		// set to value & 0x03
+*/
+	}
+
+	return EBF_OK;
+}
+
+// Getting both interrupt lines values
+uint8_t EBF_PlugAndPlayHub::GetIntLinesValue(EBF_I2C &pnpI2C, uint8_t portNumber, uint8_t &value)
+{
+//	uint8_t rc;
+	value = 0;
+
+	// This is the main HUB without interrupt controller, the interrupt lines are directly connected to the MCU
+	if (interruptControllerI2CAddress == 0) {
+		// Get the corresponding lines values
+		if (interruptMapping[portNumber*2 + 0] != (uint8_t)(-1)) {
+			value |= digitalRead(interruptMapping[portNumber*2 + 0]) & 0x01;
+		}
+
+		if (interruptMapping[portNumber*2 + 1] != (uint8_t)(-1)) {
+			value |= ((digitalRead(interruptMapping[portNumber*2 + 1]) & 0x01) << 1);
+		}
+	} else {
+		// TODO: Configure the interrupt controller to set the relevant line to the needed value
+/*
+		if (pParentHub != NULL) {
+			// Switch parent HUBs first (from the main HUB up to this)
+			rc = pParentHub->SwitchToPort(pnpI2C, parentPortNumber);
+			if (rc != EBF_OK) {
+				return rc;
+			}
+		}
+
+		// interruptControllerI2CAddress
+*/
+	}
+
+	return EBF_OK;
+}
+
+uint8_t EBF_PlugAndPlayHub::GetIntLine(EBF_I2C &pnpI2C, uint8_t portNumber, uint8_t intLineNumber, uint8_t &value)
+{
+//	uint8_t rc;
+	value = 0;
+
+	// Line can be only 0 or 1 (the interrupt line number)
+	if (intLineNumber > 1) {
+		return EBF_INDEX_OUT_OF_BOUNDS;
+	}
+
+	// This is the main HUB without interrupt controller, the interrupt lines are directly connected to the MCU
+	if (interruptControllerI2CAddress == 0) {
+		// Get the corresponding line
+		if (interruptMapping[portNumber*2 + intLineNumber] != (uint8_t)(-1)) {
+			value |= digitalRead(interruptMapping[portNumber*2 + intLineNumber]);
+		} else {
+			return EBF_NOT_INITIALIZED;
+		}
+	} else {
+		// TODO: Configure the interrupt controller to set the relevant line to the needed value
+/*
+		if (pParentHub != NULL) {
+			// Switch parent HUBs first (from the main HUB up to this)
+			rc = pParentHub->SwitchToPort(pnpI2C, parentPortNumber);
+			if (rc != EBF_OK) {
+				return rc;
+			}
+		}
+
+		// interruptControllerI2CAddress
 */
 	}
 

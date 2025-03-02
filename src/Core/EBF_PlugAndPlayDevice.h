@@ -39,6 +39,8 @@ typedef enum : uint32_t {
 	PNP_ID_STTS22H_TEMPERATURE_SENSOR = 201,
 	PNP_ID_1LED,							// Module with 1 LED  connected directly to interrupt #0 line
 	PNP_ID_2LED,							// Module with 2 LEDs connected directly to both interrupt lines
+	PNP_ID_1INPUT,							// Module with 1 input connected directly to interrupt #0 line, no interrupts involved
+	PNP_ID_2INPUT,							// Module with 2 inputs connected directly to interrupt lines, no interrupts involved
 } PnP_DeviceId;
 
 // 2 bytes

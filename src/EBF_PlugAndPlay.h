@@ -16,5 +16,7 @@
 #include "PlugAndPlay/PnP_Module_STTS22H_TemperatureSensor.h"
 #include "PlugAndPlay/PnP_Module_1Led.h"
 #include "PlugAndPlay/PnP_Module_2Led.h"
+#include "PlugAndPlay/PnP_Module_1Input.h"
+#include "PlugAndPlay/PnP_Module_2Input.h"
 
 #endif
