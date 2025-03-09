@@ -225,7 +225,7 @@ int EBF_Serial::read(void)
 		break;
 
 	case SERIAL_UART:
-		return pUsbSerial->read();
+		return pUartSerial->read();
 		break;
 #endif
 
