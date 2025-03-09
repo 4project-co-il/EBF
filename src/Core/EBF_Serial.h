@@ -30,6 +30,7 @@ class EBF_Serial : protected EBF_HalInstance, public Stream {
 		uint8_t Process();
 
 		void SetPollInterval(uint32_t ms);
+		void SetCallback(EBF_CallbackType callbackFunc) { this->callbackFunc = callbackFunc; }
 
 		// Stream and Print interfaces
 		inline size_t write(unsigned long n) { return this->write((uint8_t)n); }
