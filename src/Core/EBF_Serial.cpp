@@ -262,7 +262,7 @@ int EBF_Serial::read(void)
 
 	case SERIAL_UART:
 		noInterrupts();
-		rc = pUsbSerial->read();
+		rc = pUartSerial->read();
 		interrupts();
 		break;
 #endif
