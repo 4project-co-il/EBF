@@ -15,7 +15,7 @@ class PnP_Serial : public EBF_Serial {
 	public:
 		PnP_Serial();
 
-		uint8_t Init();
+		uint8_t Init(uint32_t boudRate = 115200, uint16_t config = SERIAL_8N1);
 };
 
 #endif
