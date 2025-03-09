@@ -263,7 +263,7 @@ uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHa
 uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode, uint32_t hint)
 {
 #if defined(ARDUINO_ARCH_SAMD)
-	uint8_t pinNumber = interruptNumber;
+	uint8_t pinNumber = digitalPinToInterrupt(interruptNumber);
 
 // For SAMD there is a converstion table
 #if ARDUINO_SAMD_VARIANT_COMPLIANCE >= 10606
