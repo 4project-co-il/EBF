@@ -1,7 +1,7 @@
 #include "EBF_Logic.h"
 #include "EBF_HalInstance.h"
 
-/// EBF_Logic implementation
+// EBF_Logic implementation
 EBF_Logic *EBF_Logic::pStaticInstance = new EBF_Logic();
 
 #ifdef EBF_USE_INTERRUPTS
@@ -159,7 +159,6 @@ uint8_t EBF_Logic::Process()
 
 		if (ms - pHal->GetLastPollMillis() > pHal->GetPollingInterval()) {
 			pHal->SetLastPollMillis(ms);
-
 			pHal->Process();
 
 			if (pHal->GetPollingInterval() < delayWanted) {
@@ -236,7 +235,7 @@ EBF_HalInstance *EBF_Logic::GetHalInstance(EBF_HalInstance::HAL_Type type, uint8
 uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode)
 {
 #if defined(ARDUINO_ARCH_SAMD)
-	uint8_t pinNumber = interruptNumber;
+	uint8_t pinNumber = digitalPinToInterrupt(interruptNumber);
 
 // For SAMD there is a converstion table
 #if ARDUINO_SAMD_VARIANT_COMPLIANCE >= 10606
