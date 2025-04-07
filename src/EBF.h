@@ -19,5 +19,6 @@
 #include "Core/EBF_AnalogInput.h"
 #include "Core/EBF_Serial.h"
 #include "Core/EBF_I2C.h"
+#include "Core/EBF_SPI.h"
 
 #endif
