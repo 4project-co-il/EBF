@@ -43,12 +43,11 @@ uint8_t EBF_Serial::Init(
 {
 	uint8_t rc;
 
-	rc = EBF_HalInstance::Init(HAL_Type::UART, serialNumber);
+	rc = EBF_HalInstance::Init(HAL_Type::UART_INTERFACE, serialNumber);
 	if (rc != EBF_OK) {
 		return rc;
 	}
 
-	this->hwNumber = hwNumber;
 	this->callbackFunc = callbackFunc;
 
 	if (callbackFunc == NULL) {

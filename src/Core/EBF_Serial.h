@@ -52,7 +52,6 @@ class EBF_Serial : protected EBF_HalInstance, public Stream {
 			SERIAL_UART
 		};
 
-		uint8_t hwNumber;
 		EBF_CallbackType callbackFunc;
 
 		// Need to keep different pointer types for initialization

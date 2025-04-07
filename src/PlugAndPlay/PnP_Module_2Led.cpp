@@ -4,7 +4,7 @@
 
 PnP_Module_2Led::PnP_Module_2Led()
 {
-	this->type = HAL_Type::PnP;
+	this->type = HAL_Type::PnP_DEVICE;
 	this->id = PnP_DeviceId::PNP_ID_2LED;
 }
 
@@ -29,7 +29,7 @@ uint8_t PnP_Module_2Led::Init()
 	this->pPnPI2C = pPnPI2C;
 
 	// Fix type and ID after the EBF_Instance init
-	this->type = HAL_Type::PnP;
+	this->type = HAL_Type::PnP_DEVICE;
 	this->id = PnP_DeviceId::PNP_ID_2LED;
 
 	// Attach interrupt lines for that device

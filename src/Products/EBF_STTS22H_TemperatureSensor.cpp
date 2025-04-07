@@ -28,7 +28,7 @@ uint8_t EBF_STTS22H_TemperatureSensor::Init(uint8_t i2cAddress, OperationMode mo
 	onThresholdHigh = EBF_EmptyCallback;
 	onThresholdLow = EBF_EmptyCallback;
 
-	rc = EBF_HalInstance::Init(HAL_Type::I2C, i2cAddress);
+	rc = EBF_HalInstance::Init(HAL_Type::I2C_INTERFACE, i2cAddress);
 	if (rc != EBF_OK) {
 		return rc;
 	}

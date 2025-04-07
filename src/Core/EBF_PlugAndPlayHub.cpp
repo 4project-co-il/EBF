@@ -3,7 +3,7 @@
 
 EBF_PlugAndPlayHub::EBF_PlugAndPlayHub()
 {
-	this->type = HAL_Type::PnP;
+	this->type = HAL_Type::PnP_DEVICE;
 }
 
 uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentPort, PnP_DeviceInfo &deviceInfo, uint8_t *pParams)
@@ -31,13 +31,13 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 		routingLevel = pParentHub->routingLevel + 1;
 	}
 
-	rc = EBF_HalInstance::Init(HAL_Type::I2C, parentPort);
+	rc = EBF_HalInstance::Init(HAL_Type::I2C_INTERFACE, parentPort);
 	if (rc != EBF_OK) {
 		return rc;
 	}
 
 	// Fix type and ID after the EBF_Instance init
-	this->type = HAL_Type::PnP;
+	this->type = HAL_Type::PnP_DEVICE;
 	this->id = deviceInfo.deviceIDs[0];
 	this->pollIntervalMs = EBF_NO_POLLING;	// No polling is needed for HUBs
 

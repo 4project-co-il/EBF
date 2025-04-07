@@ -5,7 +5,7 @@
 
 PnP_Module_2Input::PnP_Module_2Input()
 {
-	this->type = HAL_Type::PnP;
+	this->type = HAL_Type::PnP_DEVICE;
 	this->id = PnP_DeviceId::PNP_ID_2INPUT;
 }
 
@@ -35,7 +35,7 @@ uint8_t PnP_Module_2Input::Init()
 	this->pPnPI2C = pPnPI2C;
 
 	// Fix type and ID after the EBF_Instance init
-	this->type = HAL_Type::PnP;
+	this->type = HAL_Type::PnP_DEVICE;
 	this->id = PnP_DeviceId::PNP_ID_2INPUT;
 
 	// Attach interrupt lines for that device

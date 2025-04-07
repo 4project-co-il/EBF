@@ -31,10 +31,10 @@ class EBF_HalInstance {
 			DIGITAL_OUTPUT,
 			ANALOG_INPUT,
 			PWM_OUTPUT,
-			UART,
-			I2C,
-			SPI,
-			PnP
+			UART_INTERFACE,
+			I2C_INTERFACE,
+			SPI_INTERFACE,
+			PnP_DEVICE
 		};
 
 		HAL_Type GetType() { return type; };

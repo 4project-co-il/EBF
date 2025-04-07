@@ -4,7 +4,7 @@ uint8_t EBF_I2C::Init(EBF_CallbackType callbackFunc, uint8_t address)
 {
 	uint8_t rc;
 
-	rc = EBF_HalInstance::Init(HAL_Type::I2C, address);
+	rc = EBF_HalInstance::Init(HAL_Type::I2C_INTERFACE, address);
 	if (rc != EBF_OK) {
 		return rc;
 	}

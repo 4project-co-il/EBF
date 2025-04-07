@@ -4,7 +4,7 @@
 
 PnP_Module_STTS22H_TemperatureSensor::PnP_Module_STTS22H_TemperatureSensor() : EBF_STTS22H_TemperatureSensor(NULL)
 {
-	this->type = HAL_Type::PnP;
+	this->type = HAL_Type::PnP_DEVICE;
 	this->id = PnP_DeviceId::PNP_ID_STTS22H_TEMPERATURE_SENSOR;
 }
 
@@ -33,7 +33,7 @@ uint8_t PnP_Module_STTS22H_TemperatureSensor::Init()
 	}
 
 	// Fix type and ID after the EBF_Instance init
-	this->type = HAL_Type::PnP;
+	this->type = HAL_Type::PnP_DEVICE;
 	this->id = PnP_DeviceId::PNP_ID_STTS22H_TEMPERATURE_SENSOR;
 
 	// Attach interrupt lines for that device
