@@ -1,5 +1,7 @@
 #include "EBF_SPI.h"
 
+#ifndef EBF_NO_SPI
+
 #if defined(ARDUINO_ARCH_SAMD)
 EBF_SPI::EBF_SPI()
 {
@@ -58,3 +60,5 @@ uint8_t EBF_SPI::Process()
 	// Nothing to do for SPI
 	return EBF_OK;
 }
+
+#endif // EBF_NO_SPI

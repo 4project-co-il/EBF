@@ -1,3 +1,5 @@
+#ifndef EBF_NO_SPI
+
 #include "PnP_SPI.h"
 #include "EBF_Logic.h"
 
@@ -12,3 +14,5 @@ uint8_t PnP_SPI::Init()
 	// Using default constructor
 	return EBF_SPI::Init();
 }
+
+#endif	// EBF_NO_SPI

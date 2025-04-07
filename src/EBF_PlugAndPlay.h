@@ -12,7 +12,9 @@
 #include "PlugAndPlay/PnP_StatusLed.h"
 #include "PlugAndPlay/PnP_Serial.h"
 #include "PlugAndPlay/PnP_UART.h"
+#ifndef EBF_NO_SPI
 #include "PlugAndPlay/PnP_SPI.h"
+#endif
 
 #include "PlugAndPlay/PnP_Module_STTS22H_TemperatureSensor.h"
 #include "PlugAndPlay/PnP_Module_1Led.h"

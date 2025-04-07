@@ -1,3 +1,5 @@
+#ifndef EBF_NO_SPI
+
 #ifndef __PnP_SPI_H__
 #define __PnP_SPI_H__
 
@@ -18,3 +20,5 @@ class PnP_SPI : public EBF_SPI {
 };
 
 #endif
+
+#endif	// EBF_NO_SPI
