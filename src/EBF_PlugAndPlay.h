@@ -12,6 +12,7 @@
 #include "PlugAndPlay/PnP_StatusLed.h"
 #include "PlugAndPlay/PnP_Serial.h"
 #include "PlugAndPlay/PnP_UART.h"
+#include "PlugAndPlay/PnP_SPI.h"
 
 #include "PlugAndPlay/PnP_Module_STTS22H_TemperatureSensor.h"
 #include "PlugAndPlay/PnP_Module_1Led.h"
