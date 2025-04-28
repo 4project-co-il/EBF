@@ -26,9 +26,14 @@ uint8_t PnP_Module_1Led::Init()
 	// The PlugAndPlayI2C class have pointer to the HUB and port number, which are needed for interrupt lines manipulation
 	this->pPnPI2C = pPnPI2C;
 
-	// Fix type and ID after the EBF_Instance init
-	this->type = HAL_Type::PnP_DEVICE;
-	this->id = PnP_DeviceId::PNP_ID_1LED;
+	// Initialize the instance
+	rc = EBF_HalInstance::Init(HAL_Type::PnP_DEVICE, PnP_DeviceId::PNP_ID_1LED);
+	if (rc != EBF_OK) {
+		return rc;
+	}
+
+	// PnP is interrupt driven, no polling is needed
+	this->pollIntervalMs = EBF_NO_POLLING;
 
 	// Attach interrupt lines for that device
 	// Current device don't produce interrupts, but all the initializations are done in AssignInterruptLines
