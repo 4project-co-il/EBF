@@ -366,13 +366,7 @@ void EBF_Logic::HandleIsr(uint8_t interruptNumber)
 
 uint8_t EBF_Logic::ProcessInterrupt(EBF_HalInstance *pHalInstance)
 {
-	EBF_MessageQueue::MessageEntry msg;
-
-	memset(&msg, 0, sizeof(EBF_MessageQueue::MessageEntry));
-	msg.pHalInstance = pHalInstance;
-	msg.param1 = 0;
-
-	return msgQueue.AddMessage(msg);
+	return ProcessInterrupt(pHalInstance, 0);
 }
 
 uint8_t EBF_Logic::ProcessInterrupt(EBF_HalInstance *pHalInstance, uint32_t param1)
