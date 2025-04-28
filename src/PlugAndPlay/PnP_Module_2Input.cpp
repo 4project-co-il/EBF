@@ -1,7 +1,4 @@
 #include "PnP_Module_2Input.h"
-#include "../Core/EBF_Logic.h"
-#include "../Core/EBF_PlugAndPlayManager.h"
-#include "../Core/EBF_PlugAndPlayI2C.h"
 
 PnP_Module_2Input::PnP_Module_2Input()
 {

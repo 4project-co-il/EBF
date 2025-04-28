@@ -1,6 +1,4 @@
 #include "PnP_Module_STTS22H_TemperatureSensor.h"
-#include "../Core/EBF_PlugAndPlayManager.h"
-#include "../Core/EBF_PlugAndPlayI2C.h"
 
 PnP_Module_STTS22H_TemperatureSensor::PnP_Module_STTS22H_TemperatureSensor() : EBF_STTS22H_TemperatureSensor(NULL)
 {

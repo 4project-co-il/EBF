@@ -8,6 +8,8 @@
 
 #include "../Core/EBF_Global.h"
 #include "../Core/EBF_PlugAndPlayDevice.h"
+#include "../Core/EBF_PlugAndPlayManager.h"
+#include "../Core/EBF_PlugAndPlayI2C.h"
 #include "../Products/EBF_STTS22H_TemperatureSensor.h"
 #include <Wire.h>
 

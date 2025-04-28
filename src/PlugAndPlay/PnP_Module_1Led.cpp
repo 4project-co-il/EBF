@@ -1,6 +1,4 @@
 #include "PnP_Module_1Led.h"
-#include "../Core/EBF_PlugAndPlayManager.h"
-#include "../Core/EBF_PlugAndPlayI2C.h"
 
 PnP_Module_1Led::PnP_Module_1Led()
 {
