@@ -154,9 +154,19 @@ uint8_t EBF_Logic::Process()
 	// Process timers
 	delayWanted = timers.Process(start);
 
+//	SerialUSB.print("Timers wanted: ");
+//	SerialUSB.println(delayWanted);
+
 	// Process HALs
 	for (i=0; i<halIndex; i++) {
 		pHal = pHalInstances[i];
+
+//		SerialUSB.print("HAL ");
+//		SerialUSB.print(pHal->GetType());
+//		SerialUSB.print(":");
+//		SerialUSB.print(pHal->GetId());
+//		SerialUSB.print(" want ");
+//		SerialUSB.println(pHal->GetPollingInterval());
 
 		if (pHal->GetPollingInterval() == EBF_NO_POLLING) {
 			continue;
@@ -185,8 +195,8 @@ uint8_t EBF_Logic::Process()
 		delayWanted = 1;
 	}
 
-	//SerialUSB.print("Wanted delay: ");
-	//SerialUSB.println(delayWanted);
+//	SerialUSB.print("Wanted delay: ");
+//	SerialUSB.println(delayWanted);
 
 #ifdef EBF_SLEEP_IMPLEMENTATION
 	// Try to power down the CPU for some time...
