@@ -40,6 +40,9 @@ class EBF_HalInstance {
 		HAL_Type GetType() { return type; };
 		uint32_t GetId() { return id; };
 
+		uint32_t GetPollingInterval();
+		void SetPollingInterval(uint32_t ms);
+
 	protected:
 		uint8_t Init(HAL_Type type, uint32_t id);
 		// Virtual function that will be called to process the data
@@ -48,7 +51,6 @@ class EBF_HalInstance {
 		virtual void ProcessInterrupt() { }
 
 		static uint8_t GetNumberOfInstances();
-		uint32_t GetPollingInterval();
 		unsigned long GetLastPollMillis();
 		void SetLastPollMillis(unsigned long ms);
 

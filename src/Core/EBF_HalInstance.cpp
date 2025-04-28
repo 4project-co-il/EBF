@@ -35,6 +35,11 @@ uint32_t EBF_HalInstance::GetPollingInterval()
 	return pollIntervalMs;
 }
 
+void EBF_HalInstance::SetPollingInterval(uint32_t ms)
+{
+	pollIntervalMs = ms;
+}
+
 unsigned long EBF_HalInstance::GetLastPollMillis()
 {
 	return lastPollMillis;
