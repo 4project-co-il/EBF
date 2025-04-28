@@ -20,7 +20,12 @@
 // This will free some FLASH and RAM memory if SPI is not used
 //#define EBF_REMOVE_SPI_IMPLEMENTATION
 
+//////////////////////////////////////
 // Plug-n-Play system configuration
-// Uncomment the relevant line to the used PnP HUB board (only 1 line should be uncommented from the list)
-//#define PNP_USE_SAMD21_MINI_DIRECT_SERCOM2_INT10
-//#define PNP_USE_SAMD21_MINI_HUB
+//////////////////////////////////////
+// Uncomment the PNP_DEBUG_ENUMERATION to print PnP enumeration process to the SerialUSB interface
+//#define PNP_DEBUG_ENUMERATION
+
+// Uncomment the PNP_REMOVE_PORT_EXTENDER_IMPLEMENTATION if PnP port extender board is not used
+// and you want to free some FLASH and RAM memory
+//#define PNP_REMOVE_PORT_EXTENDER_IMPLEMENTATION
