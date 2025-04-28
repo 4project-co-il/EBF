@@ -1,7 +1,7 @@
 #ifndef __EBF_SPI_H__
 #define __EBF_SPI_H__
 
-#ifndef EBF_NO_SPI
+#ifndef EBF_REMOVE_SPI_IMPLEMENTATION
 
 #include <Arduino.h>
 
@@ -47,4 +47,4 @@ class EBF_SPI : protected EBF_HalInstance {
 
 #endif
 
-#endif	// EBF_NO_SPI
+#endif	// EBF_REMOVE_SPI_IMPLEMENTATION

@@ -1,4 +1,4 @@
-#ifndef EBF_NO_SPI
+#ifndef EBF_REMOVE_SPI_IMPLEMENTATION
 
 #ifndef __PnP_SPI_H__
 #define __PnP_SPI_H__
@@ -21,4 +21,4 @@ class PnP_SPI : public EBF_SPI {
 
 #endif
 
-#endif	// EBF_NO_SPI
+#endif	// EBF_REMOVE_SPI_IMPLEMENTATION

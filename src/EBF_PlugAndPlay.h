@@ -12,7 +12,7 @@
 #include "PlugAndPlay/PnP_StatusLed.h"
 #include "PlugAndPlay/PnP_Serial.h"
 #include "PlugAndPlay/PnP_UART.h"
-#ifndef EBF_NO_SPI
+#ifndef EBF_REMOVE_SPI_IMPLEMENTATION
 #include "PlugAndPlay/PnP_SPI.h"
 #endif
 
@@ -21,5 +21,6 @@
 #include "PlugAndPlay/PnP_Module_2Led.h"
 #include "PlugAndPlay/PnP_Module_1Input.h"
 #include "PlugAndPlay/PnP_Module_2Input.h"
+#include "PlugAndPlay/PnP_Module_2ButtonsInput.h"
 
 #endif
