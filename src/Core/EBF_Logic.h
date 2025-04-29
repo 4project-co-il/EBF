@@ -72,6 +72,15 @@ class EBF_Logic {
 		// Message queue debug functions
 		uint8_t GetNumberOfMessages() { return msgQueue.GetMessagesNumber(); }
 		uint8_t GetMaxNumberOfMessages() { return msgQueue.GetMaxMessagesNumber(); }
+#else
+		uint8_t IsRunFromIsr() { return 0; }
+		uint32_t GetInterruptHint() { return 0; }
+		uint8_t IsPostInterruptProcessing() { return 0; }
+		uint32_t GetLastMessageParam1() { return 0; }
+		uint8_t AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode) { return EBF_INVALID_STATE; }
+		uint8_t AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode, uint32_t hint) { return EBF_INVALID_STATE; }
+		uint8_t ProcessInterrupt(EBF_HalInstance *pHalInstance) { return EBF_INVALID_STATE; }
+		uint8_t ProcessInterrupt(EBF_HalInstance *pHalInstance, uint32_t param1) { return EBF_INVALID_STATE; }
 #endif
 
 #ifdef EBF_SLEEP_IMPLEMENTATION

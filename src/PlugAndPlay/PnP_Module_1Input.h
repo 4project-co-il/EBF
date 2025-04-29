@@ -22,16 +22,15 @@ class PnP_Module_1Input : protected EBF_HalInstance {
 
 		void SetOnChange(EBF_CallbackType onChangeCallback) { this->onChangeCallback = onChangeCallback; }
 
-#ifdef EBF_USE_INTERRUPTS
 		uint8_t PostponeProcessing();
 		uint8_t InInterrupt() {
 			EBF_Logic *pLogic = EBF_Logic::GetInstance();
 			return pLogic->IsRunFromIsr();
 		}
-#endif
 
 	private:
 		uint8_t Process();
+		void ProcessInterrupt();
 
 	 	uint8_t GetIntLine(uint8_t line, uint8_t &value);
 
@@ -40,11 +39,6 @@ class PnP_Module_1Input : protected EBF_HalInstance {
 
 		// Callbacks
 		EBF_CallbackType onChangeCallback;
-
-#ifdef EBF_USE_INTERRUPTS
-		void ProcessInterrupt();
-#endif
-
 };
 
 #endif

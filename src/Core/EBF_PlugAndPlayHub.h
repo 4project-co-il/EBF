@@ -54,7 +54,6 @@ class EBF_PlugAndPlayHub : protected EBF_HalInstance {
 
 		uint8_t GetArduinoInterruptMode(PnP_InterruptMode intMode);
 
-
 		EBF_PlugAndPlayHub* pParentHub;
 		uint8_t parentPortNumber;
 		uint8_t numberOfPorts;

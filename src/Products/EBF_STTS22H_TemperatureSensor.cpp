@@ -381,7 +381,6 @@ void EBF_STTS22H_TemperatureSensor::ProcessInterrupt()
 		onThresholdLow();
 	}
 }
-#endif
 
 // PostponeProcessing should be called to postpone the callback processing later in the normal loop
 uint8_t EBF_STTS22H_TemperatureSensor::PostponeProcessing()
@@ -394,6 +393,7 @@ uint8_t EBF_STTS22H_TemperatureSensor::PostponeProcessing()
 
 	return rc;
 }
+#endif
 
 // Sets high threshold value
 uint8_t EBF_STTS22H_TemperatureSensor::SetThresholdHigh(float temp)

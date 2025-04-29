@@ -28,7 +28,6 @@ class PnP_Module_2ButtonsInput : protected EBF_HalInstance {
 		uint8_t SetOnLongPress(uint8_t index, EBF_CallbackType onLongPressCallback);
 		uint8_t SetOnRelease(uint8_t index, EBF_CallbackType onReleaseCallback);
 
-#ifdef EBF_USE_INTERRUPTS
 		typedef union {
 			struct {
 				uint32_t index : 3;		// up to 8 buttons
@@ -43,10 +42,10 @@ class PnP_Module_2ButtonsInput : protected EBF_HalInstance {
 			EBF_Logic *pLogic = EBF_Logic::GetInstance();
 			return pLogic->IsRunFromIsr();
 		}
-#endif
 
 	private:
 		uint8_t Process();
+		void ProcessInterrupt();
 
 	 	uint8_t GetIntLine(uint8_t line, uint8_t &value);
 
@@ -56,12 +55,6 @@ class PnP_Module_2ButtonsInput : protected EBF_HalInstance {
 		static const uint8_t numberOfButtons = 2;
 
 		EBF_ButtonLogic button[numberOfButtons];
-
-
-#ifdef EBF_USE_INTERRUPTS
-		void ProcessInterrupt();
-#endif
-
 };
 
 #endif

@@ -77,9 +77,6 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 
 uint8_t EBF_PlugAndPlayHub::AssignEmbeddedHubLine(uint8_t pinNumber, PnP_InterruptMode intMode, InterruptHint intHint)
 {
-	uint8_t rc;
-	EBF_Logic *pLogic = EBF_Logic::GetInstance();
-
 	switch (intMode) {
 		case PNP_NOT_CONECTED:
 			// The line is not connected, nothing to do
@@ -102,6 +99,9 @@ uint8_t EBF_PlugAndPlayHub::AssignEmbeddedHubLine(uint8_t pinNumber, PnP_Interru
 			// if it's the first interrupt for the device or the second
 			if (pinNumber != (uint8_t)(-1)) {
 				pinMode(pinNumber, INPUT);
+
+				uint8_t rc;
+				EBF_Logic *pLogic = EBF_Logic::GetInstance();
 
 				rc = pLogic->AttachInterrupt(pinNumber, this, GetArduinoInterruptMode(intMode), intHint.uint32);
 

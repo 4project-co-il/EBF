@@ -113,7 +113,6 @@ uint8_t PnP_Module_2Input::GetIntLine(uint8_t line, uint8_t &value)
 	return EBF_OK;
 }
 
-#ifdef EBF_USE_INTERRUPTS
 void PnP_Module_2Input::ProcessInterrupt()
 {
 	EBF_Logic *pLogic = EBF_Logic::GetInstance();
@@ -129,7 +128,6 @@ void PnP_Module_2Input::ProcessInterrupt()
 		onChangeCallback2();
 	}
 }
-#endif
 
 // PostponeProcessing should be called to postpone the callback processing later in the normal loop
 uint8_t PnP_Module_2Input::PostponeProcessing()

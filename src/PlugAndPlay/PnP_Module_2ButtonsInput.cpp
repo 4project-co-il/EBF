@@ -54,6 +54,7 @@ uint8_t PnP_Module_2ButtonsInput::Init()
 uint8_t PnP_Module_2ButtonsInput::Process()
 {
 	uint8_t rc;
+
 	EBF_Logic *pLogic = EBF_Logic::GetInstance();
 	PostponedInterruptData data = {0};
 
@@ -119,7 +120,6 @@ uint8_t PnP_Module_2ButtonsInput::GetIntLine(uint8_t line, uint8_t &value)
 	return EBF_OK;
 }
 
-#ifdef EBF_USE_INTERRUPTS
 // Called directly from the ISR
 void PnP_Module_2ButtonsInput::ProcessInterrupt()
 {
@@ -134,7 +134,6 @@ void PnP_Module_2ButtonsInput::ProcessInterrupt()
 	// Process the relevant button
 	button[hint.fields.interruptNumber].Process(value, this);
 }
-#endif
 
 // PostponeProcessing should be called to execute the callback processing later in the normal loop
 uint8_t PnP_Module_2ButtonsInput::PostponeProcessing()
