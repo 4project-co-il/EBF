@@ -1,3 +1,8 @@
+Version 0.2.0
+	Adding PnP (Plug-and-Play) logic code
+	Adding several PnP devices support
+	Bugfixes in EBF code
+
 Version 0.1.6
 	Arduino IDE Library Manager updates
 	PlatformIO Libraries Registry updates
