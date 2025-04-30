@@ -4,37 +4,14 @@
 #include <Arduino.h>
 #include "EBF_Global.h"
 
-#ifndef EBF_MESSAGE_PARAMS
-#define EBF_MESSAGE_PARAMS 1
-#endif
+class EBF_HalInstance;
 
 class EBF_MessageQueue {
 	public:
-#if EBF_MESSAGE_PARAMS == 1
 		typedef struct {
+			EBF_HalInstance *pHalInstance;
 			uint32_t param1;
 		} MessageEntry;
-#elif EBF_MESSAGE_PARAMS == 2
-		typedef struct {
-			uint32_t param1;
-			uint32_t param2;
-		} MessageEntry;
-#elif EBF_MESSAGE_PARAMS == 3
-		typedef struct {
-			uint32_t param1;
-			uint32_t param2;
-			uint32_t param3;
-		} MessageEntry;
-#elif EBF_MESSAGE_PARAMS == 4
-		typedef struct {
-			uint32_t param1;
-			uint32_t param2;
-			uint32_t param3;
-			uint32_t param4;
-		} MessageEntry;
-#else
-	#error Unhandled number of parameters for EBF_MESSAGE_PARAMS
-#endif
 
 	public:
 		uint8_t Init(uint8_t queueSize);

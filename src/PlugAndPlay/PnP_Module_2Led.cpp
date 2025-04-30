@@ -1,0 +1,99 @@
+#include "PnP_Module_2Led.h"
+
+PnP_Module_2Led::PnP_Module_2Led()
+{
+	this->type = HAL_Type::PnP_DEVICE;
+	this->id = PnP_DeviceId::PNP_ID_2LED;
+}
+
+uint8_t PnP_Module_2Led::Init()
+{
+	uint8_t rc = EBF_OK;
+	PnP_DeviceInfo deviceInfo;
+	uint8_t endpointIndex;
+	EBF_PlugAndPlayI2C *pPnPI2C;
+	EBF_PlugAndPlayHub *pAssignedHub;
+
+	EBF_PlugAndPlayManager *pPnpManager = EBF_PlugAndPlayManager::GetInstance();
+
+	// Assign the current instance to physical PnP device and get all needed information
+	rc = pPnpManager->AssignDevice(this, deviceInfo, endpointIndex, &pPnPI2C, &pAssignedHub);
+	if(rc != EBF_OK) {
+		return rc;
+	}
+
+	// Save the I2C instance, although this device doesn't communicate via I2C, but via the HUBs
+	// The PlugAndPlayI2C class have pointer to the HUB and port number, which are needed for interrupt lines manipulation
+	this->pPnPI2C = pPnPI2C;
+
+	// Initialize the instance
+	rc = EBF_HalInstance::Init(HAL_Type::PnP_DEVICE, PnP_DeviceId::PNP_ID_2LED);
+	if (rc != EBF_OK) {
+		return rc;
+	}
+
+	// PnP is interrupt driven, no polling is needed
+	this->pollIntervalMs = EBF_NO_POLLING;
+
+	// Attach interrupt lines for that device
+	// Current device don't produce interrupts, but all the initializations are done in AssignInterruptLines
+	rc = pAssignedHub->AssignInterruptLines(pPnPI2C->GetPortNumber(), endpointIndex, deviceInfo);
+	if (rc != EBF_OK) {
+		return rc;
+	}
+
+	return rc;
+}
+
+uint8_t PnP_Module_2Led::Process()
+{
+	// Nothing to do
+	// No polling needed
+	pollIntervalMs = EBF_NO_POLLING;
+
+	return EBF_OK;
+}
+
+// Set both interrupt lines values
+uint8_t PnP_Module_2Led::SetValue(uint8_t value)
+{
+	uint8_t rc = EBF_OK;
+	EBF_PlugAndPlayHub *pHub = pPnPI2C->GetHub();
+
+	rc = pHub->SetIntLinesValue(*pPnPI2C, pPnPI2C->GetPortNumber(), value);
+	if (rc != EBF_OK) {
+		return rc;
+	}
+
+	return EBF_OK;
+}
+
+// Turns the LED ON.
+uint8_t PnP_Module_2Led::On(uint8_t index)
+{
+	return SetIntLine(index, 1);
+}
+
+// Turns the LED OFF.
+uint8_t PnP_Module_2Led::Off(uint8_t index)
+{
+	return SetIntLine(index, 0);
+}
+
+uint8_t PnP_Module_2Led::SetIntLine(uint8_t line, uint8_t value)
+{
+	uint8_t rc = EBF_OK;
+	EBF_PlugAndPlayHub *pHub = pPnPI2C->GetHub();
+
+	// Line can be only 0 or 1 (the interrupt line number)
+	if (line > 1) {
+		return EBF_INDEX_OUT_OF_BOUNDS;
+	}
+
+	rc = pHub->SetIntLine(*pPnPI2C, pPnPI2C->GetPortNumber(), line, value & 0x03);
+	if (rc != EBF_OK) {
+		return rc;
+	}
+
+	return rc;
+}

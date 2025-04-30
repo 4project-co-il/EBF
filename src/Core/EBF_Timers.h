@@ -13,6 +13,7 @@ class EBF_Timers {
 		uint8_t StartTimer(uint8_t timerId);
 		uint8_t StartTimer(uint8_t timerId, uint16_t milliSec);
 		uint8_t StopTimer(uint8_t timerId);
+		uint8_t RestartTimer(uint8_t timerId);
 
 		// Returns number of milliSeconds till the next timer, or 0xFFFFFFFF if there are no timers
 		uint32_t Process(unsigned long current);

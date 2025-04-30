@@ -36,6 +36,9 @@ void EBF_Button::ProcessSwitchCallback()
 	EBF_Switch::ProcessSwitchCallback();
 
 	if (this->state == EBF_Button::BUTTON_OFF) {
+		// Restore polling interval
+		RestorePollInterval();
+
 		onReleaseCallback();
 	} else {
 		onPressCallback();
@@ -64,9 +67,13 @@ uint8_t EBF_Button::Process()
 
 	// When in waiting for long press state, wait till the long press time
 	if (this->state == BUTTON_WAITING_FOR_LONG_PRESS &&
-		(millis() - longPressStart) > longPressTime) {
+		(millis() - longPressStart) >= longPressTime) {
 		// change to the regular ON state
 		this->state = BUTTON_ON;
+
+		// Restore polling interval
+		RestorePollInterval();
+
 		// and fire the callback
 		onLongPressCallback();
 	}

@@ -51,9 +51,15 @@ EBF_Logic *EBF_Logic::pStaticInstance = new EBF_Logic();
 			return;
 		}
 
+		EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
+#ifdef EBF_SLEEP_IMPLEMENTATION
+		pLogic->ExitSleep();
+#endif
+
 		for (uint8_t i=0; i<EXTERNAL_NUM_INTERRUPTS; i++) {
 			if ((EIC->INTFLAG.reg & 1<<i) != 0) {
-				EBF_Logic::GetInstance()->HandleIsr(i);
+				pLogic->HandleIsr(i);
 
 				// Clear the interrupt flag, so we will not handle the same interrupt in the next call of the
 				// handler from the Arduino's processing functions
@@ -73,6 +79,7 @@ EBF_Logic::EBF_Logic()
 	halIndex = 0;
 #ifdef EBF_USE_INTERRUPTS
 	isRunFromISR = 0;
+	isPostInterruptProcessing = 0;
 #endif
 
 #ifdef EBF_SLEEP_IMPLEMENTATION
@@ -147,9 +154,19 @@ uint8_t EBF_Logic::Process()
 	// Process timers
 	delayWanted = timers.Process(start);
 
+//	SerialUSB.print("Timers wanted: ");
+//	SerialUSB.println(delayWanted);
+
 	// Process HALs
 	for (i=0; i<halIndex; i++) {
 		pHal = pHalInstances[i];
+
+//		SerialUSB.print("HAL ");
+//		SerialUSB.print(pHal->GetType());
+//		SerialUSB.print(":");
+//		SerialUSB.print(pHal->GetId());
+//		SerialUSB.print(" want ");
+//		SerialUSB.println(pHal->GetPollingInterval());
 
 		if (pHal->GetPollingInterval() == EBF_NO_POLLING) {
 			continue;
@@ -178,14 +195,31 @@ uint8_t EBF_Logic::Process()
 		delayWanted = 1;
 	}
 
-	//Serial.print("Wanted delay: ");
-	//Serial.println(delayWanted);
+//	SerialUSB.print("Wanted delay: ");
+//	SerialUSB.println(delayWanted);
 
 #ifdef EBF_SLEEP_IMPLEMENTATION
 	// Try to power down the CPU for some time...
-	if (delayWanted > 1 && sleepMode != EBF_SleepMode::EBF_NO_SLEEP) {
+	if (delayWanted > 1 && sleepMode != EBF_SleepMode::EBF_NO_SLEEP && msgQueue.GetMessagesNumber() == 0) {
 		// Enter sleep mode for delayWanted timer
 		EnterSleep(delayWanted);
+
+#ifdef EBF_USE_INTERRUPTS
+		uint8_t rc;
+
+		// Messages are used to pass information from interrupts to normal run
+		while (msgQueue.GetMessagesNumber() > 0) {
+			rc = msgQueue.GetMessage(lastMessage);
+
+			if (rc == EBF_OK) {
+				isPostInterruptProcessing = 1;
+				lastMessage.pHalInstance->Process();
+				isPostInterruptProcessing = 0;
+			}
+		}
+
+		return EBF_OK;
+#endif
 	}
 #endif
 
@@ -194,18 +228,16 @@ uint8_t EBF_Logic::Process()
 		yield();
 
 #ifdef EBF_USE_INTERRUPTS
-		EBF_MessageQueue::MessageEntry msg;
-		uint16_t rc;
-		EBF_HalInstance *pHalInstance;
+		uint8_t rc;
 
 		// Messages are used to pass information from interrupts to normal run
 		while (msgQueue.GetMessagesNumber() > 0) {
-			rc = msgQueue.GetMessage(msg);
+			rc = msgQueue.GetMessage(lastMessage);
 
 			if (rc == EBF_OK) {
-				pHalInstance = (EBF_HalInstance*)msg.param1;
-
-				pHalInstance->Process();
+				isPostInterruptProcessing = 1;
+				lastMessage.pHalInstance->Process();
+				isPostInterruptProcessing = 0;
 			}
 		}
 #endif
@@ -234,6 +266,12 @@ EBF_HalInstance *EBF_Logic::GetHalInstance(EBF_HalInstance::HAL_Type type, uint8
 #ifdef EBF_USE_INTERRUPTS
 uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode)
 {
+	// Use interrupt number as the hint
+	return AttachInterrupt(interruptNumber, pHalInstance, mode, interruptNumber);
+}
+
+uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode, uint32_t hint)
+{
 #if defined(ARDUINO_ARCH_SAMD)
 	uint8_t pinNumber = digitalPinToInterrupt(interruptNumber);
 
@@ -248,6 +286,7 @@ uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHa
 	}
 
 	pHalIsr[interruptNumber] = pHalInstance;
+	isrHint[interruptNumber] = hint;
 
 #if defined(ARDUINO_ARCH_AVR)
 	switch (interruptNumber)
@@ -317,17 +356,26 @@ void EBF_Logic::HandleIsr(uint8_t interruptNumber)
 	if (pHalIsr[interruptNumber] != NULL) {
 		// Next process call is done from ISR
 		isRunFromISR = 1;
+		interruptHint = isrHint[interruptNumber];
+
 		pHalIsr[interruptNumber]->ProcessInterrupt();
+
 		isRunFromISR = 0;
 	}
 }
 
 uint8_t EBF_Logic::ProcessInterrupt(EBF_HalInstance *pHalInstance)
 {
+	return ProcessInterrupt(pHalInstance, 0);
+}
+
+uint8_t EBF_Logic::ProcessInterrupt(EBF_HalInstance *pHalInstance, uint32_t param1)
+{
 	EBF_MessageQueue::MessageEntry msg;
 
 	memset(&msg, 0, sizeof(EBF_MessageQueue::MessageEntry));
-	msg.param1 = (uint32_t)pHalInstance;
+	msg.pHalInstance = pHalInstance;
+	msg.param1 = param1;
 
 	return msgQueue.AddMessage(msg);
 }
@@ -440,9 +488,6 @@ uint8_t EBF_Logic::InitSleep()
 uint8_t EBF_Logic::EnterSleep(uint32_t msSleep)
 {
 	uint32_t timerCnt;
-	bool restoreUSBDevice = false;
-	uint32_t apbBMask;
-	uint32_t apbCMask;
 
 	// No sleep needed
 	if (sleepMode == EBF_SleepMode::EBF_NO_SLEEP) {
@@ -489,24 +534,23 @@ uint8_t EBF_Logic::EnterSleep(uint32_t msSleep)
 
 		if (SERIAL_PORT_USBVIRTUAL) {
 			USBDevice.standby();
+			restoreUSBDevice = 0;
 		} else {
 			USBDevice.detach();
-			restoreUSBDevice = true;
+			restoreUSBDevice = 1;
 		}
+
 		// Disable systick interrupt:  See https://www.avrfreaks.net/forum/samd21-samd21e16b-sporadically-locks-and-does-not-wake-standby-sleep-mode
 		SysTick->CTRL &= ~SysTick_CTRL_TICKINT_Msk;
 		SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
+
 		__DSB();
 		__WFI();
-		// Enable systick interrupt
-		SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
-		if (restoreUSBDevice) {
-			USBDevice.attach();
-		}
 
-		// Restore currently running modules
-		PM->APBCMASK.reg = apbCMask;
-		PM->APBBMASK.reg = apbBMask;
+		noInterrupts();
+		ExitSleep();
+		interrupts();
+
 		break;
 
 	default:
@@ -539,8 +583,23 @@ uint8_t EBF_Logic::EnterSleep(uint32_t msSleep)
 	}
 
 	// Back to normal CPU oreration
-
 	return EBF_OK;
+}
+
+void EBF_Logic::ExitSleep()
+{
+	// We're in deep sleep, restore the registers
+	if (PM->APBCMASK.reg == 0) {
+		// Enable systick interrupt
+		SysTick->CTRL |= SysTick_CTRL_TICKINT_Msk;
+		if (restoreUSBDevice) {
+			USBDevice.attach();
+		}
+
+		// Restore currently running modules
+		PM->APBCMASK.reg = apbCMask;
+		PM->APBBMASK.reg = apbBMask;
+	}
 }
 #else
 	#error Current board type is not supported

@@ -34,6 +34,10 @@ void EBF_Switch::SetPollInterval(uint32_t ms) {
 	savedPollingInterval = pollIntervalMs;
 }
 
+void EBF_Switch::RestorePollInterval() {
+	pollIntervalMs = savedPollingInterval;
+}
+
 // Called when digital input change is detected
 void EBF_Switch::ProcessCallback()
 {
@@ -73,7 +77,7 @@ uint8_t EBF_Switch::Process()
 		if (state != lastState) {
 			state = lastState;
 			// restore polling interval to its original value
-			pollIntervalMs = savedPollingInterval;
+			RestorePollInterval();
 
 			ProcessSwitchCallback();
 		}

@@ -16,7 +16,7 @@ EBF_HalInstance::EBF_HalInstance() {
 	this->numberOfInstances++;
 }
 
-uint8_t EBF_HalInstance::Init(HAL_Type type, uint8_t id)
+uint8_t EBF_HalInstance::Init(HAL_Type type, uint32_t id)
 {
 	this->pollIntervalMs = 0;
 	this->type = type;
@@ -33,6 +33,11 @@ uint8_t EBF_HalInstance::GetNumberOfInstances()
 uint32_t EBF_HalInstance::GetPollingInterval()
 {
 	return pollIntervalMs;
+}
+
+void EBF_HalInstance::SetPollingInterval(uint32_t ms)
+{
+	pollIntervalMs = ms;
 }
 
 unsigned long EBF_HalInstance::GetLastPollMillis()

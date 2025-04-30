@@ -15,3 +15,17 @@
 
 // Uncomment the EBF_SLEEP_IMPLEMENTATION to allow power down modes for supported CPUs
 //#define EBF_SLEEP_IMPLEMENTATION
+
+// Uncomment the EBF_REMOVE_SPI_IMPLEMENTATION to to remove the code for SPI communication
+// This will free some FLASH and RAM memory if SPI is not used
+//#define EBF_REMOVE_SPI_IMPLEMENTATION
+
+//////////////////////////////////////
+// Plug-n-Play system configuration
+//////////////////////////////////////
+// Uncomment the PNP_DEBUG_ENUMERATION to print PnP enumeration process to the SerialUSB interface
+//#define PNP_DEBUG_ENUMERATION
+
+// Uncomment the PNP_REMOVE_PORT_EXTENDER_IMPLEMENTATION if PnP port extender board is not used
+// and you want to free some FLASH and RAM memory
+//#define PNP_REMOVE_PORT_EXTENDER_IMPLEMENTATION

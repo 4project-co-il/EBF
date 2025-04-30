@@ -30,12 +30,13 @@ class EBF_Serial : protected EBF_HalInstance, public Stream {
 		uint8_t Process();
 
 		void SetPollInterval(uint32_t ms);
+		void SetCallback(EBF_CallbackType callbackFunc) { this->callbackFunc = callbackFunc; }
 
 		// Stream and Print interfaces
-		inline size_t write(unsigned long n) { return write((uint8_t)n); }
-		inline size_t write(long n) { return write((uint8_t)n); }
-		inline size_t write(unsigned int n) { return write((uint8_t)n); }
-		inline size_t write(int n) { return write((uint8_t)n); }
+		inline size_t write(unsigned long n) { return this->write((uint8_t)n); }
+		inline size_t write(long n) { return this->write((uint8_t)n); }
+		inline size_t write(unsigned int n) { return this->write((uint8_t)n); }
+		inline size_t write(int n) { return this->write((uint8_t)n); }
 		size_t write(uint8_t n);
 
 		int available(void);
@@ -51,7 +52,6 @@ class EBF_Serial : protected EBF_HalInstance, public Stream {
 			SERIAL_UART
 		};
 
-		uint8_t hwNumber;
 		EBF_CallbackType callbackFunc;
 
 		// Need to keep different pointer types for initialization

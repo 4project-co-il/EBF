@@ -43,12 +43,11 @@ uint8_t EBF_Serial::Init(
 {
 	uint8_t rc;
 
-	rc = EBF_HalInstance::Init(HAL_Type::UART, serialNumber);
+	rc = EBF_HalInstance::Init(HAL_Type::UART_INTERFACE, serialNumber);
 	if (rc != EBF_OK) {
 		return rc;
 	}
 
-	this->hwNumber = hwNumber;
 	this->callbackFunc = callbackFunc;
 
 	if (callbackFunc == NULL) {
@@ -133,104 +132,144 @@ EBF_Serial::operator bool()
 
 size_t EBF_Serial::write(uint8_t n)
 {
+	size_t rc = 0;
+
 	switch (type)
 	{
 #if defined(ARDUINO_ARCH_AVR)
 	case SERIAL_HW:
-		return pHwSerial->write((uint8_t)n);
+		noInterrupts();
+		rc = pHwSerial->write((uint8_t)n);
+		interrupts();
 		break;
 #endif
 
 #if defined(ARDUINO_ARCH_SAMD)
 	case SERIAL_USB:
-		return pUsbSerial->write((uint8_t)n);
+		noInterrupts();
+		rc = pUsbSerial->write((uint8_t)n);
+		interrupts();
 		break;
 
 	case SERIAL_UART:
-		return pUartSerial->write((uint8_t)n);
+		noInterrupts();
+		rc = pUartSerial->write((uint8_t)n);
+		interrupts();
 		break;
 #endif
 
 	default:
-		return 0;
+		rc = 0;
 		break;
 	}
+
+	return rc;
 }
 
 int EBF_Serial::available(void)
 {
+	int rc = 0;
+
 	switch (type)
 	{
 #if defined(ARDUINO_ARCH_AVR)
 	case SERIAL_HW:
-		return pHwSerial->available();
+		noInterrupts();
+		rc = pHwSerial->available();
+		interrupts();
 		break;
 #endif
 
 #if defined(ARDUINO_ARCH_SAMD)
 	case SERIAL_USB:
-		return pUsbSerial->available();
+		noInterrupts();
+		rc = pUsbSerial->available();
+		interrupts();
 		break;
 
 	case SERIAL_UART:
-		return pUartSerial->available();
+		noInterrupts();
+		rc = pUartSerial->available();
+		interrupts();
 		break;
 #endif
 
 	default:
-		return 0;
+		rc = 0;
 		break;
 	}
+
+	return rc;
 }
 
 int EBF_Serial::peek(void)
 {
+	int rc = 0;
+
 	switch (type)
 	{
 #if defined(ARDUINO_ARCH_AVR)
 	case SERIAL_HW:
-		return pHwSerial->peek();
+		noInterrupts();
+		rc = pHwSerial->peek();
+		interrupts();
 		break;
 #endif
 
 #if defined(ARDUINO_ARCH_SAMD)
 	case SERIAL_USB:
-		return pUsbSerial->peek();
+		noInterrupts();
+		rc = pUsbSerial->peek();
+		interrupts();
 		break;
 
 	case SERIAL_UART:
-		return pUartSerial->peek();
+		noInterrupts();
+		rc = pUartSerial->peek();
+		interrupts();
 		break;
 #endif
 
 	default:
-		return 0;
+		rc = 0;
 		break;
 	}
+
+	return rc;
 }
 
 int EBF_Serial::read(void)
 {
+	int rc = 0;
+
 	switch (type)
 	{
 #if defined(ARDUINO_ARCH_AVR)
 	case SERIAL_HW:
-		return pHwSerial->read();
+		noInterrupts();
+		rc = pHwSerial->read();
+		interrupts();
 		break;
 #endif
 
 #if defined(ARDUINO_ARCH_SAMD)
 	case SERIAL_USB:
-		return pUsbSerial->read();
+		noInterrupts();
+		rc = pUsbSerial->read();
+		interrupts();
 		break;
 
 	case SERIAL_UART:
-		return pUartSerial->read();
+		noInterrupts();
+		rc = pUartSerial->read();
+		interrupts();
 		break;
 #endif
 
 	default:
-		return 0;
+		rc = 0;
 		break;
 	}
+
+	return rc;
 }

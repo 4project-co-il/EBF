@@ -134,3 +134,20 @@ uint8_t EBF_Timers::SetTimeout(uint8_t timerId, uint16_t milliSec)
 
 	return EBF_OK;
 }
+
+uint8_t EBF_Timers::RestartTimer(uint8_t timerId)
+{
+	uint8_t rc;
+
+	rc = StopTimer(timerId);
+	if (rc != EBF_OK) {
+		return rc;
+	}
+
+	rc = StartTimer(timerId);
+	if (rc != EBF_OK) {
+		return rc;
+	}
+
+	return EBF_OK;
+}
