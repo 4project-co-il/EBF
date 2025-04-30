@@ -44,6 +44,7 @@ class PnP_Module_2ButtonsInput : protected EBF_HalInstance {
 		}
 
 	private:
+		void SetPollingInterval(uint32_t ms);
 		uint8_t Process();
 		void ProcessInterrupt();
 

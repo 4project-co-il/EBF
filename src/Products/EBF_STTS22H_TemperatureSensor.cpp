@@ -2,15 +2,14 @@
 #include "../Core/EBF_Logic.h"
 #include "../Core/EBF_DigitalInput.h"
 
+extern void EBF_EmptyCallback();
+
 // Part of the code is based on the SparkFun_STTS22H_Arduino_Library
 // https://github.com/sparkfun/SparkFun_STTS22H_Arduino_Library/tree/main
 
 // Initializing EBF_STTS22H_TemperatureSensor class instance.
 // The i2cAddress should specify the device I2C address
 // The mode should specify the operation mode of the device
-
-extern void EBF_EmptyCallback();
-
 uint8_t EBF_STTS22H_TemperatureSensor::Init(uint8_t i2cAddress, OperationMode mode)
 {
 	uint8_t rc;

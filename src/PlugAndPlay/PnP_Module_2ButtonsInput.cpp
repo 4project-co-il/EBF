@@ -197,3 +197,22 @@ uint8_t PnP_Module_2ButtonsInput::SetOnRelease(uint8_t index, EBF_CallbackType o
 
 	return EBF_OK;
 }
+
+// This is an override of the default function
+void PnP_Module_2ButtonsInput::SetPollingInterval(uint32_t ms)
+{
+	// Since we have multiple buttons that might need the polling at the same time
+	// we can't just change the value. Need to check if there is a button that might
+	// still need the low value
+
+	if (ms == EBF_NO_POLLING) {
+		for (uint8_t i=0; i<numberOfButtons; i++) {
+			if (button[i].GetState() == EBF_ButtonLogic::BUTTON_WAITING_FOR_LONG_PRESS) {
+				// There is a button that still need the short polling
+				return;
+			}
+		}
+	}
+
+	EBF_HalInstance::SetPollingInterval(ms);
+}

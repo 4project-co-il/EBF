@@ -41,7 +41,7 @@ class EBF_HalInstance {
 		uint32_t GetId() { return id; };
 
 		uint32_t GetPollingInterval();
-		void SetPollingInterval(uint32_t ms);
+		virtual void SetPollingInterval(uint32_t ms);
 
 	protected:
 		uint8_t Init(HAL_Type type, uint32_t id);

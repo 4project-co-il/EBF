@@ -40,15 +40,17 @@ uint8_t EBF_ButtonLogic::Process(EBF_HalInstance* pHal)
 {
 	// When in waiting for long press state, wait till the long press time
 	if (this->state == BUTTON_WAITING_FOR_LONG_PRESS &&
-		(pHal->millis() - longPressStart) > longPressTime) {
-		// disable the polling since PnP is based on interrupts
-		pHal->SetPollingInterval(EBF_NO_POLLING);
+		((pHal->millis() - longPressStart) >= longPressTime)) {
+			// and fire the callback
+			onLongPressCallback();
 
-		// and fire the callback
-		onLongPressCallback();
+			// change to the regular "0" state after the callback
+			this->state = BUTTON_LOGICAL_1;
 
-		// change to the regular "0" state after the callback
-		this->state = BUTTON_LOGICAL_1;
+			// disable the polling since PnP is based on interrupts
+			// Should be done after the state change, since PnP_Module_* that uses
+			// the EBF_ButtonLogic class overrides the SetPollingInterval and checks the state of each button
+			pHal->SetPollingInterval(EBF_NO_POLLING);
 	}
 
 	return EBF_OK;
@@ -76,9 +78,9 @@ uint8_t EBF_ButtonLogic::Process(uint8_t value, EBF_HalInstance* pHal)
 		longPressStart = pHal->millis();
 
 		// Process() function is called every polling interval or change
-		// We will set the polling interval to the long press value if it's shorter
+		// We will poll every 100mSec till the long press will be detected
 		if (longPressTime < pHal->GetPollingInterval()) {
-			pHal->SetPollingInterval(longPressTime);
+			pHal->SetPollingInterval(100);
 		}
 	}
 
