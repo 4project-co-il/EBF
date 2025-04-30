@@ -83,6 +83,12 @@ uint8_t EBF_Core::StopTimer(uint8_t timerId)
 	return pLogic->StopTimer(timerId);
 }
 
+uint8_t EBF_Core::RestartTimer(uint8_t timerId)
+{
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
+	return pLogic->RestartTimer(timerId);
+}
 unsigned long EBF_Core::micros()
 {
 	EBF_Logic *pLogic = EBF_Logic::GetInstance();

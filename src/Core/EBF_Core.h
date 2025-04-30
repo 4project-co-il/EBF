@@ -32,9 +32,10 @@ class EBF_Core {
 		uint8_t StartTimer(uint8_t timerId);
 		uint8_t StartTimer(uint8_t timerId, uint16_t milliSec);
 		uint8_t StopTimer(uint8_t timerId);
+		uint8_t RestartTimer(uint8_t timerId);
 
-		inline unsigned long micros();
-		inline unsigned long millis();
+		unsigned long micros();
+		unsigned long millis();
 
 #ifdef EBF_USE_INTERRUPTS
 		// Message queue functions

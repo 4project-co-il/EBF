@@ -49,6 +49,11 @@ class EBF_Logic {
 			return timers.StopTimer(timerId);
 		}
 
+		inline uint8_t RestartTimer(uint8_t timerId)
+		{
+			return timers.RestartTimer(timerId);
+		}
+
 #ifdef EBF_SLEEP_IMPLEMENTATION
 		inline unsigned long micros() { return ::micros() + microsAddition; }
 		inline unsigned long millis() { return ::millis() + microsAddition/1000; }
