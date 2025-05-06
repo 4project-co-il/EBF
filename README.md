@@ -22,7 +22,7 @@ void loop() {
 While it might be eaiser to understand such code, when you try to implement something a bit more complex than a blinking led, handle several components, such as buttons, switches, motors, sensors and so on, you can't just delay the execution as it's done in the blink example.
 
 Did you ever try to add a button that will turn on another led to the blink example?
-You will discover that the button it non-responsive due to the delays in the code.
+You will discover that the button is non-responsive due to the delays in the code.
 Reducing the delay will make the button more responsive, but the timing for the first led will change.
 The solution that Arduino proposes, is to use the "Blink Without Delay" method, where the loop of the `delay()` function is just moved to your main `loop()` and you have to keep track of the passed time in your code.
 It will work, but the code quickly grows into a spaghetti just for those simple components such as blinking a led in a specific frequency and having another led, which is turned on when a button is pressed.
