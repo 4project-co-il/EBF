@@ -97,7 +97,7 @@
         {
             "name": "Digital - Interrupts ISR",
             "base": "examples/Digital-Interrupts-ISR",
-            "files": ["Digital-InterruptsISR.ino"]
+            "files": ["Digital-Interrupts-ISR.ino"]
         },
         {
             "name": "Digital - Interrupts",
