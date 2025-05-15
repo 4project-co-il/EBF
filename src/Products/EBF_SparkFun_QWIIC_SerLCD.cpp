@@ -138,13 +138,33 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::SendSpecialCommand(uint8_t command, uint8_t c
 // Clears the display and moves to the first row/col position
 uint8_t EBF_SparkFun_QWIIC_SerLCD::Clear()
 {
-	return SendSettingCommand(LCD_SET_CLEAR);
+	uint8_t rc;
+
+	rc = SendSettingCommand(LCD_SET_CLEAR);
+	if (rc != EBF_OK) {
+		return rc;
+	}
+
+	// TODO: delay() is bad, but looks like there is no other way to do it
+	delayMicroseconds(1500);	// According to datasheet, the HD44780 needs 1.52mSec after clear command
+
+	return EBF_OK;
 }
 
 // Moves to the first row/col position without clearing the display
 uint8_t EBF_SparkFun_QWIIC_SerLCD::Home()
 {
-	return SendSpecialCommand(LCD_CMD_RETURNHOME);
+	uint8_t rc;
+
+	rc = SendSettingCommand(LCD_CMD_RETURNHOME);
+	if (rc != EBF_OK) {
+		return rc;
+	}
+
+	// TODO: delay() is bad, but looks like there is no other way to do it
+	delayMicroseconds(1500);	// According to datasheet, the HD44780 needs 1.52mSec after home command
+
+	return EBF_OK;
 }
 
 // Moves the cursor to specified row and column
