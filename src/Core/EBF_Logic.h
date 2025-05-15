@@ -69,8 +69,8 @@ class EBF_Logic {
 		uint8_t IsPostInterruptProcessing() { return isPostInterruptProcessing; }
 		uint8_t AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode);
 		uint8_t AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode, uint32_t hint);
-		uint8_t ProcessInterrupt(EBF_HalInstance *pHalInstance);
-		uint8_t ProcessInterrupt(EBF_HalInstance *pHalInstance, uint32_t param1);
+		uint8_t PostponeInterrupt(EBF_HalInstance *pHalInstance);
+		uint8_t PostponeInterrupt(EBF_HalInstance *pHalInstance, uint32_t param1);
 		uint32_t GetLastMessageParam1() { return lastMessage.param1; }
 		void HandleIsr(uint8_t interruptNumber);
 
@@ -84,8 +84,8 @@ class EBF_Logic {
 		uint32_t GetLastMessageParam1() { return 0; }
 		uint8_t AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode) { return EBF_INVALID_STATE; }
 		uint8_t AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode, uint32_t hint) { return EBF_INVALID_STATE; }
-		uint8_t ProcessInterrupt(EBF_HalInstance *pHalInstance) { return EBF_INVALID_STATE; }
-		uint8_t ProcessInterrupt(EBF_HalInstance *pHalInstance, uint32_t param1) { return EBF_INVALID_STATE; }
+		uint8_t PostponeInterrupt(EBF_HalInstance *pHalInstance) { return EBF_INVALID_STATE; }
+		uint8_t PostponeInterrupt(EBF_HalInstance *pHalInstance, uint32_t param1) { return EBF_INVALID_STATE; }
 #endif
 
 #ifdef EBF_SLEEP_IMPLEMENTATION

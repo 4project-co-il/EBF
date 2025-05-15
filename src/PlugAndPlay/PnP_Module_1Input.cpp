@@ -106,7 +106,7 @@ uint8_t PnP_Module_1Input::PostponeProcessing()
 	// Pass the control back to EBF, so it will call the Process() function from normal run
 
 	// 0x01 = first bit set, indicating interrupt #1 fired
-	rc = pLogic->ProcessInterrupt(this, 0x01);
+	rc = pLogic->PostponeInterrupt(this, 0x01);
 
 	return rc;
 }

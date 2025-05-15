@@ -1,14 +1,17 @@
 #include <Arduino.h>
 #include "EBF.h"
 
-// This example demonstrates the use of hardwre interrupts with the Event Based Framework - EBF
+// This example demonstrates the advanced use of hardwre interrupts with the Event Based Framework - EBF
 // By default, the EBF core doesn't use interrupts and that part of the code is not compiled to save memory.
 // Since interrupts are more advanced topic, there are few things to be done in order to use that code.
 // To have the interrupts processing code compiled, the library needs the EBF_USE_INTERRUPTS flag to be defined
 // project wide.
+// For this advanced example, you will also need the EBF_DIRECT_CALL_FROM_ISR flag, which will enable the EBF
+// to call your functions directly from the ISR (Interrupt Service Routine).
 // If you're using the PlatformIO environment, you could add the following line to the project platform.ini file:
 // build_flags =
 //     -D EBF_USE_INTERRUPTS
+//     -D EBF_DIRECT_CALL_FROM_ISR
 //
 // Since the Arduino IDE doesn't provide any way to add project wide definitions, there is additional way to add that
 // flag to the compilation...
@@ -20,7 +23,8 @@
 //
 // In the "EBF_Config.h" file you will find the flag definition commented out:
 // #define EBF_USE_INTERRUPTS
-// Uncomment that line to have the interrupts code to be compiled into the EBF library
+// #define EBF_DIRECT_CALL_FROM_ISR
+// Uncomment those lines to have the interrupts code to be compiled into the EBF library
 
 
 // Timers enumeration
@@ -51,12 +55,30 @@ void onTimer()
 }
 
 // The callback function for the digital input change
-// Since interrupts are enabled for that example, the internal messaging mechanist will
-// process the interrupt and call that function from the normal run mode as a response to
-// the arrived interrupt and from based on the polling
+// Since interrupts are enabled for that example, and direct ISR calls as well,
+// the function will be called as an ISR - Interrupt Service Routine.
+// You can do whatever you need in the ISR, as in regular function, but the operation
+// should be fast. It is advised not to use Serial or other communication channels
+// directly from the ISR since other interrupts are not processed while the function
+// is executed, hence some buffers might overflow. Printing small messages is OK.
+// If you have a longer task, you can return the control to EBF, which will use internal
+// message queue to pass the execution from ISR level to normal run, and will call the
+// same function again to process the logic of the digital input change from the normal run mode.
 void onButtonChange()
 {
 	uint8_t buttonState;
+
+	// If the function is called directly from an interrupt (ISR mode) since the EBF_DIRECT_CALL_FROM_ISR flag is defined
+	if (EBF.InInterrupt()) {
+		serial.println("ISR!");
+
+		// Pass the processing back to EBF
+		EBF.PostponeInterrupt(button);
+		// And return from that function
+		return;
+	}
+
+	// The function will be called again, as a normal run and not from the interrupt
 
 	// We use GetLastValue instead of the GetValue, to use the value that triggered
 	// the callback. The digital input might change again since then

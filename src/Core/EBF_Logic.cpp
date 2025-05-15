@@ -71,7 +71,7 @@ EBF_Logic *EBF_Logic::pStaticInstance = new EBF_Logic();
 	#error Current board type is not supported
 #endif
 
-#endif
+#endif	// EBF_USE_INTERRUPTS
 
 EBF_Logic::EBF_Logic()
 {
@@ -358,18 +358,22 @@ void EBF_Logic::HandleIsr(uint8_t interruptNumber)
 		isRunFromISR = 1;
 		interruptHint = isrHint[interruptNumber];
 
+#ifdef EBF_DIRECT_CALL_FROM_ISR
 		pHalIsr[interruptNumber]->ProcessInterrupt();
+#else
+		PostponeInterrupt(pHalIsr[interruptNumber]);
+#endif
 
 		isRunFromISR = 0;
 	}
 }
 
-uint8_t EBF_Logic::ProcessInterrupt(EBF_HalInstance *pHalInstance)
+uint8_t EBF_Logic::PostponeInterrupt(EBF_HalInstance *pHalInstance)
 {
-	return ProcessInterrupt(pHalInstance, 0);
+	return PostponeInterrupt(pHalInstance, 0);
 }
 
-uint8_t EBF_Logic::ProcessInterrupt(EBF_HalInstance *pHalInstance, uint32_t param1)
+uint8_t EBF_Logic::PostponeInterrupt(EBF_HalInstance *pHalInstance, uint32_t param1)
 {
 	EBF_MessageQueue::MessageEntry msg;
 

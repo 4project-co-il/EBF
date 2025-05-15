@@ -39,7 +39,7 @@ class EBF_Core {
 
 #ifdef EBF_USE_INTERRUPTS
 		// Message queue functions
-		uint8_t ProcessInterrupt(EBF_DigitalInput &digitalInput);
+		uint8_t PostponeInterrupt(EBF_DigitalInput &digitalInput);
 		static uint8_t UseInterrupts() { return 1; }
 		uint8_t InInterrupt();
 		uint32_t GetInterruptHint();
@@ -48,7 +48,7 @@ class EBF_Core {
 		uint8_t GetNumberOfMessages();
 		uint8_t GetMaxNumberOfMessages();
 #else
-		uint8_t ProcessInterrupt(EBF_DigitalInput &digitalInput) { return EBF_INVALID_STATE; }
+		uint8_t PostponeInterrupt(EBF_DigitalInput &digitalInput) { return EBF_INVALID_STATE; }
 		static uint8_t UseInterrupts() { return 0; }
 		uint8_t InInterrupt() { return 0; }
 		uint32_t GetInterruptHint() { return 0; }

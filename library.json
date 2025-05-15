@@ -95,6 +95,11 @@
             "files": ["Digital-PollingInterval.ino"]
         },
         {
+            "name": "Digital - Interrupts ISR",
+            "base": "examples/Digital-Interrupts-ISR",
+            "files": ["Digital-InterruptsISR.ino"]
+        },
+        {
             "name": "Digital - Interrupts",
             "base": "examples/Digital-Interrupts",
             "files": ["Digital-Interrupts.ino"]

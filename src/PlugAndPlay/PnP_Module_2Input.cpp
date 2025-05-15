@@ -142,7 +142,7 @@ uint8_t PnP_Module_2Input::PostponeProcessing()
 
 	// 0x01 = first bit set, indicating interrupt #1 fired
 	// 0x02 = second bit set, indicating interrupt #2 fired
-	rc = pLogic->ProcessInterrupt(this, 0x01 << hint.fields.interruptNumber);
+	rc = pLogic->PostponeInterrupt(this, 0x01 << hint.fields.interruptNumber);
 
 	return rc;
 }

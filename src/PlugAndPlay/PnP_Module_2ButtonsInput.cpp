@@ -149,7 +149,7 @@ uint8_t PnP_Module_2ButtonsInput::PostponeProcessing()
 	data.fields.state = button[data.fields.index].GetState();
 
 	// Pass the control back to EBF, so it will call the Process() function from normal run
-	rc = pLogic->ProcessInterrupt(this, data.uint32);
+	rc = pLogic->PostponeInterrupt(this, data.uint32);
 
 	return rc;
 }

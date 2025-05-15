@@ -388,7 +388,7 @@ uint8_t EBF_STTS22H_TemperatureSensor::PostponeProcessing()
 	EBF_Logic *pLogic = EBF_Logic::GetInstance();
 
 	// Pass the control back to EBF, so it will call the Process() function from normal run
-	rc = pLogic->ProcessInterrupt(this, currentInterruptProcessing.reg);
+	rc = pLogic->PostponeInterrupt(this, currentInterruptProcessing.reg);
 
 	return rc;
 }
