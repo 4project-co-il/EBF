@@ -31,22 +31,22 @@ void setup()
 	deviceInfo.endpointData[0].i2cAddress = 0x70;		// TCA9548A I2C mux address
 	deviceInfo.paramsLength = 16;
 
-	interruptMapping[0*2 + 0] = 12;
-	interruptMapping[0*2 + 1] = 11;
-	interruptMapping[1*2 + 0] = 7;
-	interruptMapping[1*2 + 1] = 6;
-	interruptMapping[2*2 + 0] = A5;
-	interruptMapping[2*2 + 1] = 26;
-	interruptMapping[3*2 + 0] = A2;
-	interruptMapping[3*2 + 1] = A1;
-	interruptMapping[4*2 + 0] = 9;
-	interruptMapping[4*2 + 1] = 8;
-	interruptMapping[5*2 + 0] = 23;
-	interruptMapping[5*2 + 1] = 24;
-	interruptMapping[6*2 + 0] = 22;
-	interruptMapping[6*2 + 1] = 13;
-	interruptMapping[7*2 + 0] = 2;
-	interruptMapping[7*2 + 1] = 38;
+	interruptMapping[0*2 + 0] = 11;
+	interruptMapping[0*2 + 1] = 12;
+	interruptMapping[1*2 + 0] = 6;
+	interruptMapping[1*2 + 1] = 7;
+	interruptMapping[2*2 + 0] = 26;
+	interruptMapping[2*2 + 1] = A5;
+	interruptMapping[3*2 + 0] = A1;
+	interruptMapping[3*2 + 1] = A2;
+	interruptMapping[4*2 + 0] = 8;
+	interruptMapping[4*2 + 1] = 9;
+	interruptMapping[5*2 + 0] = 24;
+	interruptMapping[5*2 + 1] = 23;
+	interruptMapping[6*2 + 0] = 13;
+	interruptMapping[6*2 + 1] = 22;
+	interruptMapping[7*2 + 0] = 38;
+	interruptMapping[7*2 + 1] = 2;
 
 	rc = EBF_PlugAndPlayManager::WriteDeviceEEPROM(0x50 + EBF_PlugAndPlayManager::PNP_EEPROM_MAIN_HUB, deviceInfo, interruptMapping, sizeof(interruptMapping));
 	if (rc == EBF_OK) {
