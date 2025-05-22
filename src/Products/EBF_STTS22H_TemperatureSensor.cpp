@@ -298,17 +298,12 @@ uint8_t EBF_STTS22H_TemperatureSensor::Process()
 	StatusRegister_t status;
 
 	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
 	// Process interrupt detected logic
 	if (pLogic->IsPostInterruptProcessing()) {
 		status.reg = pLogic->GetLastMessageParam1();
 
-		if(status.fields.overThreshold) {
-			onThresholdHigh();
-		}
-
-		if(status.fields.underThreshold) {
-			onThresholdLow();
-		}
+		ExecuteCallback(status);
 	}
 
 	switch (state)
@@ -368,16 +363,20 @@ void EBF_STTS22H_TemperatureSensor::ProcessInterrupt()
 		// Set which interrupt is processed, so post-processing function could use it
 		currentInterruptProcessing.reg = 0;
 		currentInterruptProcessing.fields.overThreshold = 1;
-
-		onThresholdHigh();
 	}
 
 	if(lowThresholdSet && status.fields.underThreshold) {
 		// Set which interrupt is processed, so post-processing function could use it
 		currentInterruptProcessing.reg = 0;
 		currentInterruptProcessing.fields.underThreshold = 1;
+	}
 
-		onThresholdLow();
+	if (currentInterruptProcessing.reg != 0) {
+#ifdef EBF_DIRECT_CALL_FROM_ISR
+		ExecuteCallback(currentInterruptProcessing);
+#else
+		PostponeProcessing();
+#endif
 	}
 }
 
@@ -442,3 +441,13 @@ uint8_t EBF_STTS22H_TemperatureSensor::DisableThresholdLow()
 	return rc;
 }
 
+void EBF_STTS22H_TemperatureSensor::ExecuteCallback(volatile StatusRegister_t& status)
+{
+	if(status.fields.overThreshold) {
+		onThresholdHigh();
+	}
+
+	if(status.fields.underThreshold) {
+		onThresholdLow();
+	}
+}

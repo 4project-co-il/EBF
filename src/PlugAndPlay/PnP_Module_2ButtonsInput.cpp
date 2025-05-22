@@ -4,6 +4,9 @@ PnP_Module_2ButtonsInput::PnP_Module_2ButtonsInput()
 {
 	this->type = HAL_Type::PnP_DEVICE;
 	this->id = PnP_DeviceId::PNP_ID_2BUTTONS_INPUT;
+
+	lastEvent = EBF_ButtonLogic::BUTTON_EVENT_NONE;
+	currentEventIndex = 0;
 }
 
 extern void EBF_EmptyCallback();
@@ -53,7 +56,8 @@ uint8_t PnP_Module_2ButtonsInput::Init()
 // Called by the EBF from normal run to take care of the events
 uint8_t PnP_Module_2ButtonsInput::Process()
 {
-	uint8_t rc;
+	uint8_t value;
+	EBF_ButtonLogic::ButtonEvent event;
 
 	EBF_Logic *pLogic = EBF_Logic::GetInstance();
 	PostponedInterruptData data = {0};
@@ -63,14 +67,17 @@ uint8_t PnP_Module_2ButtonsInput::Process()
 		data.uint32 = pLogic->GetLastMessageParam1();
 
 		// Re-execute postponed event, this time from the normal run
-		button[data.fields.index].ExecuteCallback((EBF_ButtonLogic::ButtonState)data.fields.state);
+		currentEventIndex = data.fields.index;
+		button[data.fields.index].ExecuteCallback((EBF_ButtonLogic::ButtonEvent)data.fields.event);
 	}
 
-	for (uint8_t i=0; i<numberOfButtons; i++) {
-		rc = button[i].Process(this);
+	for (currentEventIndex=0; currentEventIndex<numberOfButtons; currentEventIndex++) {
+		value = GetValue(currentEventIndex);
 
-		if (rc != EBF_OK) {
-			return rc;
+		event = button[currentEventIndex].Process(value, this);
+
+		if (event != EBF_ButtonLogic::BUTTON_EVENT_NONE) {
+			button[currentEventIndex].ExecuteCallback(event);
 		}
 	}
 
@@ -131,8 +138,21 @@ void PnP_Module_2ButtonsInput::ProcessInterrupt()
 	hint.uint32 = pLogic->GetInterruptHint();
 
 	value = GetValue(hint.fields.interruptNumber);
-	// Process the relevant button
-	button[hint.fields.interruptNumber].Process(value, this);
+
+	// Process the relevant button, save last event
+	lastEvent = button[hint.fields.interruptNumber].Process(value, this);
+
+#ifdef EBF_DIRECT_CALL_FROM_ISR
+	button[hint.fields.interruptNumber].ExecuteCallback(lastEvent);
+#else
+	// Postpone the processing based on the last event
+	if (lastEvent != EBF_ButtonLogic::BUTTON_EVENT_NONE) {
+		PostponeProcessing();
+	}
+#endif
+
+	// Clear the event, just in case
+	lastEvent = EBF_ButtonLogic::BUTTON_EVENT_NONE;
 }
 
 // PostponeProcessing should be called to execute the callback processing later in the normal loop
@@ -146,7 +166,7 @@ uint8_t PnP_Module_2ButtonsInput::PostponeProcessing()
 	hint.uint32 = pLogic->GetInterruptHint();
 
 	data.fields.index = hint.fields.interruptNumber;
-	data.fields.state = button[data.fields.index].GetState();
+	data.fields.event = lastEvent;
 
 	// Pass the control back to EBF, so it will call the Process() function from normal run
 	rc = pLogic->PostponeInterrupt(this, data.uint32);
@@ -207,7 +227,7 @@ void PnP_Module_2ButtonsInput::SetPollingInterval(uint32_t ms)
 
 	if (ms == EBF_NO_POLLING) {
 		for (uint8_t i=0; i<numberOfButtons; i++) {
-			if (button[i].GetState() == EBF_ButtonLogic::BUTTON_WAITING_FOR_LONG_PRESS) {
+			if (button[i].GetState() == EBF_ButtonLogic::BUTTON_STATE_WAITING_FOR_LONG_PRESS) {
 				// There is a button that still need the short polling
 				return;
 			}
@@ -215,4 +235,22 @@ void PnP_Module_2ButtonsInput::SetPollingInterval(uint32_t ms)
 	}
 
 	EBF_HalInstance::SetPollingInterval(ms);
+}
+
+// Returns button index that caused the callback function call
+// You can have the same callback function for all the button's press events
+// where you can call the GetEventIndex to know which button was actually pressed
+uint8_t PnP_Module_2ButtonsInput::GetEventIndex()
+{
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+	EBF_PlugAndPlayHub::InterruptHint hint;
+
+	if (InInterrupt()) {
+		// Hint will tell us what interrupt arrived
+		hint.uint32 = pLogic->GetInterruptHint();
+
+		return hint.fields.interruptNumber;
+	} else {
+		return currentEventIndex;
+	}
 }

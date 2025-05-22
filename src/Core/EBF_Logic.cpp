@@ -358,11 +358,7 @@ void EBF_Logic::HandleIsr(uint8_t interruptNumber)
 		isRunFromISR = 1;
 		interruptHint = isrHint[interruptNumber];
 
-#ifdef EBF_DIRECT_CALL_FROM_ISR
 		pHalIsr[interruptNumber]->ProcessInterrupt();
-#else
-		PostponeInterrupt(pHalIsr[interruptNumber]);
-#endif
 
 		isRunFromISR = 0;
 	}

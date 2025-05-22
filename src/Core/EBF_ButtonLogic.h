@@ -15,9 +15,16 @@ class EBF_ButtonLogic {
 
 	protected:
 		enum ButtonState : uint8_t {
-			BUTTON_LOGICAL_0 = 0,
-			BUTTON_LOGICAL_1,
-			BUTTON_WAITING_FOR_LONG_PRESS
+			BUTTON_STATE_PRESSED = 0,
+			BUTTON_STATE_RELEASED,
+			BUTTON_STATE_WAITING_FOR_LONG_PRESS
+		};
+
+		enum ButtonEvent : uint8_t {
+			BUTTON_EVENT_NONE = 0,
+			BUTTON_EVENT_PRESS,
+			BUTTON_EVENT_RELEASE,
+			BUTTON_EVENT_LONG_PRESS
 		};
 
 		EBF_ButtonLogic();
@@ -26,9 +33,9 @@ class EBF_ButtonLogic {
 
 		uint8_t GetState() { return state; }
 
-		// Can be called to execute callblack based on a known state
-		// This funftion is used to re-execute callback again after postponing the interrupt from ISR to normal run
-		void ExecuteCallback(ButtonState state);
+		// Called to execute callblack based on the specified event
+		// This function is used to re-execute callback again after postponing the interrupt from ISR to normal run
+		void ExecuteCallback(ButtonEvent event);
 
 		// Time in milli-Sec that will trigger onLongPress callback if the button is kept pressed
 		void SetLongPressTime(uint16_t msTime) { this->longPressTime = msTime; }
@@ -43,8 +50,7 @@ class EBF_ButtonLogic {
 		uint16_t longPressTime;			// in milli-Sec
 		unsigned long longPressStart;	// in milli-Sec
 
-		uint8_t Process(EBF_HalInstance* pHal);
-		uint8_t Process(uint8_t value, EBF_HalInstance* pHal);
+		EBF_ButtonLogic::ButtonEvent Process(uint8_t value, EBF_HalInstance* pHal);
 
 		// Callbacks
 		EBF_CallbackType onPressCallback;

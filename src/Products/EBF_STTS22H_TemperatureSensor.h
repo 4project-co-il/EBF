@@ -80,6 +80,9 @@ class EBF_STTS22H_TemperatureSensor : protected EBF_HalInstance, protected EBF_I
 			EBF_Logic *pLogic = EBF_Logic::GetInstance();
 			return pLogic->IsRunFromIsr();
 		}
+#else
+		uint8_t PostponeProcessing() { return EBF_INVALID_STATE; }
+		uint8_t InInterrupt() { return 0; }
 #endif
 
 		void SetOnChange(EBF_CallbackType onChangeCallback, uint8_t changePercent = 5)
@@ -134,6 +137,7 @@ class EBF_STTS22H_TemperatureSensor : protected EBF_HalInstance, protected EBF_I
 		EBF_CallbackType onThresholdLow;
 
 		uint8_t Process();
+		void ExecuteCallback(volatile StatusRegister_t& status);
 		void UpdatePollInterval();
 #ifdef EBF_USE_INTERRUPTS
 		void ProcessInterrupt();

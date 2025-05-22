@@ -200,6 +200,23 @@ uint8_t EBF_PlugAndPlayHub::GetArduinoInterruptMode(PnP_InterruptMode intMode)
 
 uint8_t EBF_PlugAndPlayHub::Process()
 {
+	uint8_t rc;
+
+	// Pass the Process call to all the devices. Connected HUBs will pass it even further.
+	for (uint8_t i=0; i<numberOfPorts; i++) {
+		if (pPortInfo[i].numberOfEndpoints > 0) {
+			for (uint8_t j=0; j<pPortInfo[i].numberOfEndpoints; j++) {
+				if (pPortInfo[i].pConnectedInstanes[j] != 0) {
+					rc = pPortInfo[i].pConnectedInstanes[j]->Process();
+
+					if (rc != EBF_OK) {
+						return rc;
+					}
+				}
+			}
+		}
+	}
+
 	return EBF_OK;
 }
 

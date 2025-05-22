@@ -17,21 +17,30 @@ class PnP_Module_2ButtonsInput : protected EBF_HalInstance {
 	public:
 		PnP_Module_2ButtonsInput();
 
+		static const uint8_t numberOfButtons = 2;
+
 		uint8_t Init();
 
 		uint8_t GetValue(uint8_t index);
 		uint8_t GetValue();
 
+		// Set long-press timeout in mSec for a specific button
 		uint8_t SetLongPressTime(uint8_t index, uint16_t msTime);
 
+		// Set callback functions for specific button
 		uint8_t SetOnPress(uint8_t index, EBF_CallbackType onPressCallback);
 		uint8_t SetOnLongPress(uint8_t index, EBF_CallbackType onLongPressCallback);
 		uint8_t SetOnRelease(uint8_t index, EBF_CallbackType onReleaseCallback);
 
+		// Returns button index that caused the callback function call
+		// You can have the same callback function for all the button's press events
+		// where you can call the GetEventIndex to know which button was actually pressed
+		uint8_t GetEventIndex();
+
 		typedef union {
 			struct {
 				uint32_t index : 3;		// up to 8 buttons
-				uint32_t state : 8;	// button state when the interrupt happened
+				uint32_t event : 8;		// button event that should be executed
 				uint32_t reserved : 21;
 			} fields;
 			uint32_t uint32;
@@ -53,7 +62,8 @@ class PnP_Module_2ButtonsInput : protected EBF_HalInstance {
 	private:
 		EBF_PlugAndPlayI2C *pPnPI2C;
 
-		static const uint8_t numberOfButtons = 2;
+		volatile EBF_ButtonLogic::ButtonEvent lastEvent;
+		uint8_t currentEventIndex;
 
 		EBF_ButtonLogic button[numberOfButtons];
 };

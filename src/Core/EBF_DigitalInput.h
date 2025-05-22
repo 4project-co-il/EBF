@@ -40,13 +40,14 @@ class EBF_DigitalInput : protected EBF_HalInstance {
 	protected:
 		uint8_t Process();
 		void ProcessInterrupt();
-		virtual void ProcessCallback() { callbackFunc(); }
+		virtual void ProcessCallback();
 		EBF_CallbackType callbackFunc;
 		uint8_t pinNumber;
 
 	private:
 		uint8_t lastValue;
 		InterruptMode isrMode;
+		uint8_t interruptAttached;
 };
 
 #endif

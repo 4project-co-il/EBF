@@ -19,6 +19,7 @@ uint8_t EBF_DigitalInput::Init(
 	this->pinNumber = pinNumber;
 	this->callbackFunc = callbackFunc;
 	this->isrMode = isrMode;
+	this->interruptAttached = 0;
 
 	if (internelPullup) {
 		pinMode(pinNumber, INPUT_PULLUP);
@@ -48,6 +49,7 @@ uint8_t EBF_DigitalInput::AttachInterrupt()
 
 				// We can use interrupt for that pin
 				pLogic->AttachInterrupt(interruptNumber, this, isrMode);
+				interruptAttached = 1;
 
 				// No need to poll
 				pollIntervalMs = EBF_NO_POLLING;
@@ -73,10 +75,16 @@ void EBF_DigitalInput::SetPollInterval(uint32_t ms)
 uint8_t EBF_DigitalInput::Process()
 {
 	uint8_t currentValue;
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
 
 	// Callback might not be set, nothing to do in that case
 	if (callbackFunc == NULL) {
 		return EBF_OK;
+	}
+
+	// Process postponed call
+	if (pLogic->IsPostInterruptProcessing()) {
+		callbackFunc();
 	}
 
 	currentValue = digitalRead(pinNumber);
@@ -138,10 +146,10 @@ uint8_t EBF_DigitalInput::Process()
 void EBF_DigitalInput::ProcessInterrupt()
 {
 	// This function is called from ISR.
-	// For DigitalInput, call the callback function to pass the pcontrol to user
-	// The user can call EBF.ProcessInterrupt() function to pass the control
+	// For DigitalInput, call the callback function to pass the control to user
+	// The user can call EBF.PostponeInterrupt() function to pass the control
 	// back to the EBF, which will call user callback again from normal run
-	ProcessCallback();
+	Process();
 
 	// The interrupt register is cleared by the arduino code
 }
@@ -156,3 +164,16 @@ uint8_t EBF_DigitalInput::GetLastValue()
 	return lastValue;
 }
 
+void EBF_DigitalInput::ProcessCallback()
+{
+#ifdef EBF_DIRECT_CALL_FROM_ISR
+	callbackFunc();
+#else
+	if (interruptAttached) {
+		EBF_Logic *pLogic = EBF_Logic::GetInstance();
+		pLogic->PostponeInterrupt(this);
+	} else {
+		callbackFunc();
+	}
+#endif
+}
