@@ -43,6 +43,7 @@ typedef enum : uint32_t {
 	PNP_ID_2INPUT,							// Module with 2 inputs connected directly to interrupt lines
 	PNP_ID_2BUTTONS_INPUT,					// Module with 2 buttons connected directly to interrupt lines
 	PNP_ID_SPARKFUN_QWIIC_SERLCD,			// SparkFun QWIIC SerLCD. Both 2 and 4 rows versions
+	PNP_ID_SEEED_MONOCHROME_GROVE_16x2_LCD,	// SeeedStudio monochrome GROVE 16x2 LCD. Black on Yellow, Black on Red, White on Blue
 } PnP_DeviceId;
 
 // 2 bytes
