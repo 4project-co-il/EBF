@@ -23,5 +23,6 @@
 #include "PlugAndPlay/PnP_Module_2Input.h"
 #include "PlugAndPlay/PnP_Module_2ButtonsInput.h"
 #include "PlugAndPlay/PnP_Module_SparkFun_QWIIC_SerLCD.h"
+#include "PlugAndPlay/PnP_Module_Seeed_Monochrome_GROVE_16x2_LCD.h"
 
 #endif
