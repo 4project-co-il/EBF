@@ -9,7 +9,7 @@ EBF_PlugAndPlayI2C::EBF_PlugAndPlayI2C(EBF_I2C &i2c, EBF_PlugAndPlayHub* pHub, u
 void EBF_PlugAndPlayI2C::beginTransmission(uint8_t address)
 {
 	// Switch all the hubs first
-	pHub->SwitchToPort(*this, portNumber);
+	pHub->SwitchToPort(this, portNumber);
 
 	i2c.beginTransmission(address);
 }

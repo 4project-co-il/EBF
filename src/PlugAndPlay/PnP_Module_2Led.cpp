@@ -60,7 +60,7 @@ uint8_t PnP_Module_2Led::SetValue(uint8_t value)
 	uint8_t rc = EBF_OK;
 	EBF_PlugAndPlayHub *pHub = pPnPI2C->GetHub();
 
-	rc = pHub->SetIntLinesValue(*pPnPI2C, pPnPI2C->GetPortNumber(), value);
+	rc = pHub->SetIntLinesValue(pPnPI2C, pPnPI2C->GetPortNumber(), value);
 	if (rc != EBF_OK) {
 		return rc;
 	}
@@ -90,7 +90,7 @@ uint8_t PnP_Module_2Led::SetIntLine(uint8_t line, uint8_t value)
 		return EBF_INDEX_OUT_OF_BOUNDS;
 	}
 
-	rc = pHub->SetIntLine(*pPnPI2C, pPnPI2C->GetPortNumber(), line, value & 0x03);
+	rc = pHub->SetIntLine(pPnPI2C, pPnPI2C->GetPortNumber(), line, value & 0x03);
 	if (rc != EBF_OK) {
 		return rc;
 	}

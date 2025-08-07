@@ -241,7 +241,7 @@ void EBF_PlugAndPlayHub::ProcessInterrupt()
 	}
 }
 
-uint8_t EBF_PlugAndPlayHub::SwitchToPort(EBF_I2C &pnpI2C, uint8_t portNumber)
+uint8_t EBF_PlugAndPlayHub::SwitchToPort(EBF_I2C* pPnpI2C, uint8_t portNumber)
 {
 	uint8_t rc;
 
@@ -251,16 +251,16 @@ uint8_t EBF_PlugAndPlayHub::SwitchToPort(EBF_I2C &pnpI2C, uint8_t portNumber)
 	} else {
 		if (pParentHub != NULL) {
 			// Switch parent HUBs first (from the main HUB up to this)
-			rc = pParentHub->SwitchToPort(pnpI2C, parentPortNumber);
+			rc = pParentHub->SwitchToPort(pPnpI2C, parentPortNumber);
 			if (rc != EBF_OK) {
 				return rc;
 			}
 		}
 
 		// Casting to EBF_I2C to explicitly have that class implementation and not a derrived class
-		((EBF_I2C)pnpI2C).beginTransmission(switchI2CAddress);
-		((EBF_I2C)pnpI2C).write(1 << portNumber);
-		rc = ((EBF_I2C)pnpI2C).endTransmission();
+		((EBF_I2C*)pPnpI2C)->EBF_I2C::beginTransmission(switchI2CAddress);
+		((EBF_I2C*)pPnpI2C)->EBF_I2C::write(1 << portNumber);
+		rc = ((EBF_I2C*)pPnpI2C)->EBF_I2C::endTransmission();
 		if (rc != 0) {
 			return EBF_COMMUNICATION_PROBLEM;
 		}
@@ -270,7 +270,7 @@ uint8_t EBF_PlugAndPlayHub::SwitchToPort(EBF_I2C &pnpI2C, uint8_t portNumber)
 }
 
 // Setting an interrupt line is possible only for device that declared that line as a Digital Output
-uint8_t EBF_PlugAndPlayHub::SetIntLine(EBF_I2C &pnpI2C, uint8_t portNumber, uint8_t intLineNumber, uint8_t value)
+uint8_t EBF_PlugAndPlayHub::SetIntLine(EBF_I2C* pPnpI2C, uint8_t portNumber, uint8_t intLineNumber, uint8_t value)
 {
 	//uint8_t rc;
 
@@ -286,7 +286,7 @@ uint8_t EBF_PlugAndPlayHub::SetIntLine(EBF_I2C &pnpI2C, uint8_t portNumber, uint
 /*
 		if (pParentHub != NULL) {
 			// Switch parent HUBs first (from the main HUB up to this)
-			rc = pParentHub->SwitchToPort(pnpI2C, parentPortNumber);
+			rc = pParentHub->SwitchToPort(pPnpI2C, parentPortNumber);
 			if (rc != EBF_OK) {
 				return rc;
 			}
@@ -300,7 +300,7 @@ uint8_t EBF_PlugAndPlayHub::SetIntLine(EBF_I2C &pnpI2C, uint8_t portNumber, uint
 }
 
 // Setting both interrupt lines is possible only for device that declared those line as a Digital Outputs
-uint8_t EBF_PlugAndPlayHub::SetIntLinesValue(EBF_I2C &pnpI2C, uint8_t portNumber, uint8_t value)
+uint8_t EBF_PlugAndPlayHub::SetIntLinesValue(EBF_I2C* pPnpI2C, uint8_t portNumber, uint8_t value)
 {
 	//uint8_t rc;
 
@@ -319,7 +319,7 @@ uint8_t EBF_PlugAndPlayHub::SetIntLinesValue(EBF_I2C &pnpI2C, uint8_t portNumber
 /*
 		if (pParentHub != NULL) {
 			// Switch parent HUBs first (from the main HUB up to this)
-			rc = pParentHub->SwitchToPort(pnpI2C, parentPortNumber);
+			rc = pParentHub->SwitchToPort(pPnpI2C, parentPortNumber);
 			if (rc != EBF_OK) {
 				return rc;
 			}
@@ -335,7 +335,7 @@ uint8_t EBF_PlugAndPlayHub::SetIntLinesValue(EBF_I2C &pnpI2C, uint8_t portNumber
 }
 
 // Getting both interrupt lines values
-uint8_t EBF_PlugAndPlayHub::GetIntLinesValue(EBF_I2C &pnpI2C, uint8_t portNumber, uint8_t &value)
+uint8_t EBF_PlugAndPlayHub::GetIntLinesValue(EBF_I2C* pPnpI2C, uint8_t portNumber, uint8_t &value)
 {
 //	uint8_t rc;
 	value = 0;
@@ -355,7 +355,7 @@ uint8_t EBF_PlugAndPlayHub::GetIntLinesValue(EBF_I2C &pnpI2C, uint8_t portNumber
 /*
 		if (pParentHub != NULL) {
 			// Switch parent HUBs first (from the main HUB up to this)
-			rc = pParentHub->SwitchToPort(pnpI2C, parentPortNumber);
+			rc = pParentHub->SwitchToPort(pPnpI2C, parentPortNumber);
 			if (rc != EBF_OK) {
 				return rc;
 			}
@@ -368,7 +368,7 @@ uint8_t EBF_PlugAndPlayHub::GetIntLinesValue(EBF_I2C &pnpI2C, uint8_t portNumber
 	return EBF_OK;
 }
 
-uint8_t EBF_PlugAndPlayHub::GetIntLine(EBF_I2C &pnpI2C, uint8_t portNumber, uint8_t intLineNumber, uint8_t &value)
+uint8_t EBF_PlugAndPlayHub::GetIntLine(EBF_I2C* pPnpI2C, uint8_t portNumber, uint8_t intLineNumber, uint8_t &value)
 {
 //	uint8_t rc;
 	value = 0;
@@ -391,7 +391,7 @@ uint8_t EBF_PlugAndPlayHub::GetIntLine(EBF_I2C &pnpI2C, uint8_t portNumber, uint
 /*
 		if (pParentHub != NULL) {
 			// Switch parent HUBs first (from the main HUB up to this)
-			rc = pParentHub->SwitchToPort(pnpI2C, parentPortNumber);
+			rc = pParentHub->SwitchToPort(pPnpI2C, parentPortNumber);
 			if (rc != EBF_OK) {
 				return rc;
 			}

@@ -84,7 +84,7 @@ uint8_t PnP_Module_1Input::GetIntLine(uint8_t line, uint8_t &value)
 	uint8_t rc = EBF_OK;
 	EBF_PlugAndPlayHub *pHub = pPnPI2C->GetHub();
 
-	rc = pHub->GetIntLine(*pPnPI2C, pPnPI2C->GetPortNumber(), line, value);
+	rc = pHub->GetIntLine(pPnPI2C, pPnPI2C->GetPortNumber(), line, value);
 	if (rc != EBF_OK) {
 		return rc;
 	}

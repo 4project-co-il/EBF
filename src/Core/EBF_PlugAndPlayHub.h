@@ -22,13 +22,13 @@ class EBF_PlugAndPlayHub : protected EBF_HalInstance {
 		EBF_PlugAndPlayHub();
 
 		uint8_t Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentPort, PnP_DeviceInfo &deviceInfo, uint8_t *pParams);
-		uint8_t SwitchToPort(EBF_I2C &pnpI2C, uint8_t portNumber);
+		uint8_t SwitchToPort(EBF_I2C* pPnpI2C, uint8_t portNumber);
 
 		// Setting an interrupt line is possible only for device that declared that line as a Digital Output
-		uint8_t SetIntLine(EBF_I2C &pnpI2C, uint8_t portNumber, uint8_t intLineNumber, uint8_t value);
-		uint8_t SetIntLinesValue(EBF_I2C &pnpI2C, uint8_t portNumber, uint8_t value);
-		uint8_t GetIntLine(EBF_I2C &pnpI2C, uint8_t portNumber, uint8_t intLineNumber, uint8_t &value);
-		uint8_t GetIntLinesValue(EBF_I2C &pnpI2C, uint8_t portNumber, uint8_t &value);
+		uint8_t SetIntLine(EBF_I2C* pPnpI2C, uint8_t portNumber, uint8_t intLineNumber, uint8_t value);
+		uint8_t SetIntLinesValue(EBF_I2C* pPnpI2C, uint8_t portNumber, uint8_t value);
+		uint8_t GetIntLine(EBF_I2C* pPnpI2C, uint8_t portNumber, uint8_t intLineNumber, uint8_t &value);
+		uint8_t GetIntLinesValue(EBF_I2C* pPnpI2C, uint8_t portNumber, uint8_t &value);
 
 		typedef union {
 			struct {

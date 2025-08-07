@@ -24,8 +24,6 @@ class EBF_PlugAndPlayManager {
 
 		static EBF_PlugAndPlayManager *GetInstance();
 
-		EBF_I2C &GetI2CInterface() { return pnpI2C; }
-
 		uint8_t AssignDevice(
 			EBF_HalInstance* pHalInstance,
 			PnP_DeviceInfo& deviceInfo,
@@ -39,8 +37,8 @@ class EBF_PlugAndPlayManager {
 	private:
 		EBF_PlugAndPlayHub* pMainHub;
 		uint8_t IsHeaderValid(PnP_DeviceInfo &deviceInfo);
-		uint8_t GetDeviceInfo(PnP_DeviceInfo &deviceInfo, uint8_t routingLevel = 0);
-		uint8_t GetDeviceParameters(uint8_t routingLevel, uint8_t *pParams, uint8_t maxSize);
+		uint8_t GetDeviceInfo(EBF_I2C* pPnpI2C, PnP_DeviceInfo &deviceInfo, uint8_t routingLevel = 0);
+		uint8_t GetDeviceParameters(EBF_I2C* pPnpI2C, uint8_t routingLevel, uint8_t *pParams, uint8_t maxSize);
 
 		uint8_t InitHubs(EBF_PlugAndPlayHub *pHub);
 
@@ -52,10 +50,12 @@ class EBF_PlugAndPlayManager {
 
 	private:
 		static EBF_PlugAndPlayManager* pStaticInstance;
-		// I2C interface
-		EBF_I2C pnpI2C;
+
 		static const uint8_t eepromI2cAddress = 0x50;
 		static const uint8_t eepromPageSize = 16;
+
+		// I2C interfaces array. The number comes from variants.h of Arduino board definition
+		EBF_I2C* pnpI2CArr[PNP_NUMBER_OF_I2C_INTERFACES];
 
 	public:
 		enum EBF_PnPEepromAddress {

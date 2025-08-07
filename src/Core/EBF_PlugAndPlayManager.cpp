@@ -12,8 +12,9 @@ extern PnP_Serial serial;
 // EBF_PlugAndPlay implementation
 EBF_PlugAndPlayManager *EBF_PlugAndPlayManager::pStaticInstance = NULL;
 
-EBF_PlugAndPlayManager::EBF_PlugAndPlayManager() : pnpI2C()
+EBF_PlugAndPlayManager::EBF_PlugAndPlayManager()
 {
+	memset(pnpI2CArr, 0, sizeof(EBF_I2C*) * PNP_NUMBER_OF_I2C_INTERFACES);
 }
 
 EBF_PlugAndPlayManager *EBF_PlugAndPlayManager::GetInstance()
@@ -36,8 +37,39 @@ uint8_t EBF_PlugAndPlayManager::Init()
 	serial.println(F("PnP Init"));
 #endif
 
-	pnpI2C.Init();
-	pnpI2C.SetClock(400000);
+	// I2C interfaces initialization.
+	// Controller might have different PnP ports connected to different physical I2C interfaces
+	// Number of the interfaces and ports mapping arrive from the variants.h file of Arduino board definition
+	for (uint8_t i=0; i<PNP_NUMBER_OF_I2C_INTERFACES; i++) {
+		switch (i)
+		{
+		case 0:
+			pnpI2CArr[i] = new EBF_I2C(Wire);
+			break;
+#if PNP_NUMBER_OF_I2C_INTERFACES > 1
+		case 1:
+			pnpI2CArr[i] = new EBF_I2C(Wire1);
+			break;
+#endif
+#if PNP_NUMBER_OF_I2C_INTERFACES > 2
+		case 2:
+			pnpI2CArr[i] = new EBF_I2C(Wire2);
+			break;
+#endif
+#if PNP_NUMBER_OF_I2C_INTERFACES > 3
+		case 3:
+			pnpI2CArr[i] = new EBF_I2C(Wire3);
+			break;
+#endif
+		}
+
+		if (pnpI2CArr[i] == NULL) {
+			return EBF_NOT_ENOUGH_MEMORY;
+		}
+
+		pnpI2CArr[i]->Init();
+		pnpI2CArr[i]->SetClock(400000);
+	}
 
 	pMainHub = new EBF_PlugAndPlayHub();
 	if (pMainHub == NULL) {
@@ -46,14 +78,15 @@ uint8_t EBF_PlugAndPlayManager::Init()
 
 	// Read the configuration of the main hub
 	// Devices are considered as level 0, main hub - level 3, extender hubs - levels 4,5,6,7
-	rc = GetDeviceInfo(deviceInfo, PNP_EEPROM_MAIN_HUB);
+	// Controller I2C interface is specified in variants.h
+	rc = GetDeviceInfo(pnpI2CArr[PNP_CONTROLLER_INTERNAL_I2C_INTERFACE_INDEX], deviceInfo, PNP_EEPROM_MAIN_HUB);
 	if (rc != 0) {
 		return EBF_COMMUNICATION_PROBLEM;
 	}
 
 	// There are parameters, for embedded HUBs those are interrupt mappings
 	if (deviceInfo.paramsLength != 0) {
-		rc = GetDeviceParameters(PNP_EEPROM_MAIN_HUB, interruptMapping, min(deviceInfo.paramsLength, sizeof(interruptMapping)));
+		rc = GetDeviceParameters(pnpI2CArr[PNP_CONTROLLER_INTERNAL_I2C_INTERFACE_INDEX], PNP_EEPROM_MAIN_HUB, interruptMapping, min(deviceInfo.paramsLength, sizeof(interruptMapping)));
 		if (rc != 0) {
 			return EBF_COMMUNICATION_PROBLEM;
 		}
@@ -80,6 +113,7 @@ uint8_t EBF_PlugAndPlayManager::Init()
 uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 {
 	uint8_t rc;
+	EBF_I2C *pI2C;
 	PnP_DeviceInfo deviceInfo;
 	uint8_t parameters[32];
 
@@ -93,14 +127,17 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 	serial.print(F("Checking port: "));
 	serial.println(port);
 #endif
-		rc = pHub->SwitchToPort(pnpI2C, port);
+		// I2C interface for current port
+		pI2C = pnpI2CArr[PnP_GetInterfaceIndexForPort(port)];
+
+		rc = pHub->SwitchToPort(pI2C, port);
 		if (rc != EBF_OK) {
 			// Something is wrong...
 			return rc;
 		}
 
 		// Read a regular PnP device info
-		rc = GetDeviceInfo(deviceInfo, PNP_EEPROM_DEVICE);
+		rc = GetDeviceInfo(pI2C, deviceInfo, PNP_EEPROM_DEVICE);
 		if (rc != EBF_OK) {
 			// There is no PnP device connected to that port, check maybe there's another HUB set up for the next routing level
 			if (pHub->routingLevel + 1 > maxRoutingLevels) {
@@ -115,7 +152,7 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 
 			// Try to get device for the next routing level
 			// Main HUB will be level 1, generic HUBs will be levels 4,5,6,7
-			rc = GetDeviceInfo(deviceInfo, pHub->routingLevel + 1);
+			rc = GetDeviceInfo(pI2C, deviceInfo, pHub->routingLevel + 1);
 			if (rc != EBF_OK) {
 #ifdef PNP_DEBUG_ENUMERATION
 				serial.println(F("Nothing on next level as well"));
@@ -135,7 +172,8 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 		if (deviceInfo.deviceIDs[0] == PnP_DeviceId::PNP_ID_EXTENDER_HUB) {
 			// Read the parameters in case the configuration says so
 			if (deviceInfo.paramsLength > 0) {
-				rc = GetDeviceParameters(pHub->routingLevel + 1, &parameters[0], min(deviceInfo.paramsLength, sizeof(parameters)));
+				rc = GetDeviceParameters(pI2C, pHub->routingLevel + 1, &parameters[0], min(deviceInfo.paramsLength, sizeof(parameters)));
+
 				if (rc != EBF_OK) {
 					// Something is wrong... should not happen
 					return rc;
@@ -180,22 +218,22 @@ uint8_t EBF_PlugAndPlayManager::IsHeaderValid(PnP_DeviceInfo &deviceInfo)
 	}
 }
 
-uint8_t EBF_PlugAndPlayManager::GetDeviceInfo(PnP_DeviceInfo &deviceInfo, uint8_t routingLevel)
+uint8_t EBF_PlugAndPlayManager::GetDeviceInfo(EBF_I2C* pPnpI2C, PnP_DeviceInfo &deviceInfo, uint8_t routingLevel)
 {
 	uint8_t rc;
 
 	// Read the device info
-	pnpI2C.beginTransmission(eepromI2cAddress + routingLevel);
+	pPnpI2C->beginTransmission(eepromI2cAddress + routingLevel);
 	// Device info resides at the beginning of the EEPROM
-	pnpI2C.write(0);
-	rc = pnpI2C.endTransmission(false);
+	pPnpI2C->write(0);
+	rc = pPnpI2C->endTransmission(false);
 	if (rc != 0) {
 		return EBF_COMMUNICATION_PROBLEM;
 	}
 
-	pnpI2C.requestFrom(eepromI2cAddress + routingLevel, sizeof(PnP_DeviceInfo));
+	pPnpI2C->requestFrom(eepromI2cAddress + routingLevel, sizeof(PnP_DeviceInfo));
 
-	rc = pnpI2C.readBytes((uint8_t*)&deviceInfo, sizeof(PnP_DeviceInfo));
+	rc = pPnpI2C->readBytes((uint8_t*)&deviceInfo, sizeof(PnP_DeviceInfo));
 	// Strange, shuuld not happen with PnP device, skip it
 	if (rc != sizeof(PnP_DeviceInfo)) {
 		return EBF_COMMUNICATION_PROBLEM;
@@ -209,7 +247,7 @@ uint8_t EBF_PlugAndPlayManager::GetDeviceInfo(PnP_DeviceInfo &deviceInfo, uint8_
 	return EBF_OK;
 }
 
-uint8_t EBF_PlugAndPlayManager::GetDeviceParameters(uint8_t routingLevel, uint8_t *pParams, uint8_t maxSize)
+uint8_t EBF_PlugAndPlayManager::GetDeviceParameters(EBF_I2C* pPnpI2C, uint8_t routingLevel, uint8_t *pParams, uint8_t maxSize)
 {
 	uint8_t rc;
 
@@ -219,17 +257,17 @@ uint8_t EBF_PlugAndPlayManager::GetDeviceParameters(uint8_t routingLevel, uint8_
 	}
 
 	// Read the device parameters
-	pnpI2C.beginTransmission(eepromI2cAddress + routingLevel);
+	pPnpI2C->beginTransmission(eepromI2cAddress + routingLevel);
 	// Parameters are right after the device info structure
-	pnpI2C.write(sizeof(PnP_DeviceInfo));
-	rc = pnpI2C.endTransmission(false);
+	pPnpI2C->write(sizeof(PnP_DeviceInfo));
+	rc = pPnpI2C->endTransmission(false);
 	if (rc != 0) {
 		return EBF_COMMUNICATION_PROBLEM;
 	}
 
-	pnpI2C.requestFrom(eepromI2cAddress + routingLevel, sizeof(PnP_DeviceInfo));
+	pPnpI2C->requestFrom(eepromI2cAddress + routingLevel, maxSize);
 
-	rc = pnpI2C.readBytes(pParams, maxSize);
+	rc = pPnpI2C->readBytes(pParams, maxSize);
 	// Strange, should not happen with PnP device, skip it
 	if (rc != maxSize) {
 		return EBF_COMMUNICATION_PROBLEM;
@@ -247,6 +285,7 @@ uint8_t EBF_PlugAndPlayManager::AssignDevice(
 	EBF_PlugAndPlayHub* pHub)
 {
 	uint8_t rc;
+	EBF_I2C *pI2C;
 	EBF_PlugAndPlayHub::PortInfo *pPortInfo;
 
 	if (pHub == NULL) {
@@ -263,7 +302,10 @@ uint8_t EBF_PlugAndPlayManager::AssignDevice(
 			continue;
 		}
 
-		rc = pHub->SwitchToPort(pnpI2C, port);
+		// I2C interface for current port
+		pI2C = pnpI2CArr[PnP_GetInterfaceIndexForPort(port)];
+
+		rc = pHub->SwitchToPort(pI2C, port);
 		if (rc != EBF_OK) {
 			// Something is wrong
 			return rc;
@@ -280,7 +322,7 @@ uint8_t EBF_PlugAndPlayManager::AssignDevice(
 		}
 
 		// Check if current port is connected to the needed device
-		rc = GetDeviceInfo(deviceInfo);
+		rc = GetDeviceInfo(pI2C, deviceInfo);
 		if (rc != EBF_OK) {
 			// Should not happen since we already communicated with that device before...
 			continue;
@@ -316,8 +358,12 @@ uint8_t EBF_PlugAndPlayManager::AssignDevice(
 		}
 
 		pPortInfo->pConnectedInstanes[endpointIndex] = pHalInstance;
-		*pI2CRouter = new EBF_PlugAndPlayI2C(pnpI2C, pHub, port);
+		*pI2CRouter = new EBF_PlugAndPlayI2C(*(pI2C), pHub, port);
 		*pAssignedHub = pHub;
+
+		if (*pI2CRouter == NULL) {
+			return EBF_NOT_ENOUGH_MEMORY;
+		}
 
 		return EBF_OK;
 	}
@@ -384,19 +430,21 @@ uint8_t EBF_PlugAndPlayManager::WriteDeviceEepromPage(uint8_t i2cAddress, uint8_
 {
 	uint8_t rc;
 
+	EBF_I2C *pPnpI2C = pnpI2CArr[PNP_EEPROM_PROGRAMMING_INTERFACE_INDEX];
+
 	// Main HUB don't need any switches, any other device should be connected to port 0 to write its EEPROM
 	if (i2cAddress != 0x50 + EBF_PlugAndPlayManager::PNP_EEPROM_MAIN_HUB) {
-		rc = pMainHub->SwitchToPort(pnpI2C, 0);
+		rc = pMainHub->SwitchToPort(pPnpI2C, 0);
 		if (rc != EBF_OK) {
 			return rc;
 		}
 	}
 
-	pnpI2C.beginTransmission(i2cAddress);
-	pnpI2C.write(eepromAddress);
-	pnpI2C.write(pData, size);
+	pPnpI2C->beginTransmission(i2cAddress);
+	pPnpI2C->write(eepromAddress);
+	pPnpI2C->write(pData, size);
 
-	rc = pnpI2C.endTransmission(true);
+	rc = pPnpI2C->endTransmission(true);
 	if (rc != 0) {
 		return EBF_COMMUNICATION_PROBLEM;
 	}
