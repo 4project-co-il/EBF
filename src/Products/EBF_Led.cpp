@@ -30,6 +30,25 @@ uint8_t EBF_Led::SetValue(uint8_t value)
 	return EBF_PwmOutput::SetValue(value);
 }
 
+// GetValue returns current status of the led (ON or OFF)
+uint8_t EBF_Led::GetValue()
+{
+	switch (state)
+	{
+		case LED_OFF:
+		case LED_BLINKING_OFF:
+			return 0;
+
+		case LED_ON:
+		case LED_BLINKING_ON:
+		case LED_FADING_IN:
+		case LED_FADING_OUT:
+			return 1;
+	}
+
+	return 0;
+}
+
 uint8_t EBF_Led::On()
 {
 	state = LED_ON;

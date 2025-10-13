@@ -13,6 +13,7 @@ class EBF_Led : protected EBF_PwmOutput {
 	public:
 		uint8_t Init(uint8_t pinNumber);
 		uint8_t SetValue(uint8_t value);
+		uint8_t GetValue();
 
 		uint8_t On();
 		uint8_t Off();
