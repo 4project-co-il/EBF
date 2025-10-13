@@ -11,9 +11,10 @@
 #include "../Core/EBF_PlugAndPlayDevice.h"
 #include "../Core/EBF_HalInstance.h"
 #include "../Core/EBF_PlugAndPlayI2C.h"
-#include "../Core/EBF_ButtonLogic.h"
+#include "../Core/PnP_InputInterface.h"
+#include "../Core/PnP_InputInterfaceProvider.h"
 
-class PnP_Module_2ButtonsInput : protected EBF_HalInstance {
+class PnP_Module_2ButtonsInput : protected EBF_HalInstance, public PnP_InputInterfaceProvider {
 	public:
 		PnP_Module_2ButtonsInput();
 
@@ -23,14 +24,17 @@ class PnP_Module_2ButtonsInput : protected EBF_HalInstance {
 
 		uint8_t GetValue(uint8_t index);
 		uint8_t GetValue();
-
-		// Set long-press timeout in mSec for a specific button
-		uint8_t SetLongPressTime(uint8_t index, uint16_t msTime);
+		uint8_t GetLastValue(uint8_t index);
+		PnP_InputInterface* GetCurrentInterface();
 
 		// Set callback functions for specific button
-		uint8_t SetOnPress(uint8_t index, EBF_CallbackType onPressCallback);
-		uint8_t SetOnLongPress(uint8_t index, EBF_CallbackType onLongPressCallback);
-		uint8_t SetOnRelease(uint8_t index, EBF_CallbackType onReleaseCallback);
+		uint8_t SetOnChange(uint8_t index, EBF_CallbackType onPressCallback);
+
+		// Assign interface instance to specified input index
+		uint8_t AssignInterface(uint8_t index, PnP_InputInterface* pIfInstance);
+		uint8_t AssignInterface(uint8_t index, PnP_InputInterface& IfInstance) {
+			return AssignInterface(index, &IfInstance);
+		}
 
 		// Returns button index that caused the callback function call
 		// You can have the same callback function for all the button's press events
@@ -59,13 +63,24 @@ class PnP_Module_2ButtonsInput : protected EBF_HalInstance {
 
 	 	uint8_t GetIntLine(uint8_t line, uint8_t &value);
 
+		unsigned long millis_IIP() { return this->millis(); }
+		void SetPollingInterval_IIP(uint32_t ms) { this->SetPollingInterval(ms); }
+		uint32_t GetPollingInterval_IIP() { return this->GetPollingInterval(); }
+
+		// The onChangeCallback should be treated as a pointer to an interface instance after assignment
+		PnP_InputInterface* GetAsInputInterface(uint8_t index) { return (PnP_InputInterface*)(onChangeCallback[index]); }
+
 	private:
 		EBF_PlugAndPlayI2C *pPnPI2C;
 
-		volatile EBF_ButtonLogic::ButtonEvent lastEvent;
+		uint8_t lastValue;
 		uint8_t currentEventIndex;
 
-		EBF_ButtonLogic button[numberOfButtons];
+		// Callbacks
+		EBF_CallbackType onChangeCallback[numberOfButtons];
+
+		// Interface assigned flag
+		uint8_t isInterfaceAssigned;
 };
 
 #endif

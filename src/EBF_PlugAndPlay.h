@@ -16,6 +16,9 @@
 #include "PlugAndPlay/PnP_SPI.h"
 #endif
 
+#include "Core/PnP_InputInterface.h"
+#include "Core/PnP_SwitchInterface.h"
+#include "Core/PnP_ButtonInterface.h"
 #include "PlugAndPlay/PnP_Module_STTS22H_TemperatureSensor.h"
 #include "PlugAndPlay/PnP_Module_1Led.h"
 #include "PlugAndPlay/PnP_Module_2Led.h"
