@@ -6,6 +6,9 @@
 #include "EBF_MessageQueue.h"
 
 class EBF_Timers {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_Timers");
+
 	public:
 		uint8_t Init(uint8_t maxTimers, EBF_MessageQueue *pMsgQueue);
 		uint8_t InitTimer(uint8_t timerId, EBF_CallbackType callbackPtr, uint16_t milliSec);

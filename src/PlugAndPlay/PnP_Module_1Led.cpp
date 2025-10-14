@@ -1,4 +1,5 @@
 #include "PnP_Module_1Led.h"
+#include "../Core/EBF_Core.h"
 
 PnP_Module_1Led::PnP_Module_1Led()
 {
@@ -8,7 +9,7 @@ PnP_Module_1Led::PnP_Module_1Led()
 
 uint8_t PnP_Module_1Led::Init()
 {
-	uint8_t rc = EBF_OK;
+	uint8_t rc;
 	PnP_DeviceInfo deviceInfo;
 	uint8_t endpointIndex;
 	EBF_PlugAndPlayI2C *pPnPI2C;
@@ -19,6 +20,7 @@ uint8_t PnP_Module_1Led::Init()
 	// Assign the current instance to physical PnP device and get all needed information
 	rc = pPnpManager->AssignDevice(this, deviceInfo, endpointIndex, &pPnPI2C, &pAssignedHub);
 	if(rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -29,6 +31,7 @@ uint8_t PnP_Module_1Led::Init()
 	// Initialize the instance
 	rc = EBF_HalInstance::Init(HAL_Type::PnP_DEVICE, PnP_DeviceId::PNP_ID_1LED);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -39,10 +42,11 @@ uint8_t PnP_Module_1Led::Init()
 	// Current device don't produce interrupts, but all the initializations are done in AssignInterruptLines
 	rc = pAssignedHub->AssignInterruptLines(pPnPI2C->GetPortNumber(), endpointIndex, deviceInfo);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
-	return rc;
+	return EBF_OK;
 }
 
 uint8_t PnP_Module_1Led::Process()
@@ -73,11 +77,13 @@ uint8_t PnP_Module_1Led::SetIntLine(uint8_t line, uint8_t value)
 
 	// Line can be only 0 or 1 (the interrupt line number)
 	if (line > 1) {
+		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
 		return EBF_INDEX_OUT_OF_BOUNDS;
 	}
 
 	rc = pHub->SetIntLine(pPnPI2C, pPnPI2C->GetPortNumber(), line, value & 0x03);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 

@@ -77,6 +77,9 @@ EBF_Logic::EBF_Logic()
 {
 	pHalInstances = NULL;
 	halIndex = 0;
+#ifndef EBF_REMOVE_DEBUG_CODE
+	pErrorSerial = NULL;
+#endif
 #ifdef EBF_USE_INTERRUPTS
 	isRunFromISR = 0;
 	isPostInterruptProcessing = 0;
@@ -103,6 +106,7 @@ uint8_t EBF_Logic::Init(uint8_t maxTimers, uint8_t queueSize)
 
 	rc = this->msgQueue.Init(queueSize);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR_INT(rc);
 		return rc;
 	}
 
@@ -111,6 +115,7 @@ uint8_t EBF_Logic::Init(uint8_t maxTimers, uint8_t queueSize)
 	rc = this->timers.Init(maxTimers, NULL);
 #endif
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR_INT(rc);
 		return rc;
 	}
 
@@ -122,6 +127,7 @@ uint8_t EBF_Logic::Init(uint8_t maxTimers, uint8_t queueSize)
 		pHalInstances = (EBF_HalInstance**)malloc(sizeof(EBF_HalInstance*) * EBF_HalInstance::GetNumberOfInstances());
 
 		if (pHalInstances == NULL) {
+			EBF_REPORT_ERROR_INT(EBF_NOT_ENOUGH_MEMORY);
 			return EBF_NOT_ENOUGH_MEMORY;
 		}
 	}
@@ -129,9 +135,46 @@ uint8_t EBF_Logic::Init(uint8_t maxTimers, uint8_t queueSize)
 	return EBF_OK;
 }
 
+#ifndef EBF_REMOVE_DEBUG_CODE
+const char* EBF_Logic::ErrorCode2Str(EBF_ERROR_CODE code)
+{
+	switch (code)
+	{
+	case EBF_OK:					return "OK";
+	case EBF_NOT_ENOUGH_MEMORY:		return "NOT_ENOUGH_MEMORY";
+	case EBF_INDEX_OUT_OF_BOUNDS:	return "INDEX_OUT_OF_BOUNDS";
+	case EBF_RESOURCE_IS_IN_USE:	return "RESOURCE_IS_IN_USE";
+	case EBF_NOT_INITIALIZED:		return "NOT_INITIALIZED";
+	case EBF_INVALID_STATE:			return "INVALID_STATE";
+	case EBF_COMMUNICATION_PROBLEM:	return "COMMUNICATION_PROBLEM";
+	}
+
+	return NULL;
+}
+
+void EBF_Logic::ReportError(const char* pModuleName, uint32_t line, EBF_ERROR_CODE error)
+{
+	const char* pStr;
+
+	if (pErrorSerial != NULL) {
+		pErrorSerial->print(pModuleName);
+		pErrorSerial->print(":");
+		pErrorSerial->print(line);
+		pErrorSerial->print(" - ");
+		pStr = ErrorCode2Str(error);
+		if (pStr == NULL) {
+			pErrorSerial->println(error);
+		} else {
+			pErrorSerial->println(pStr);
+		}
+	}
+}
+#endif
+
 uint8_t EBF_Logic::AddHalInstance(EBF_HalInstance &instance)
 {
 	if (halIndex >= EBF_HalInstance::GetNumberOfInstances()) {
+		EBF_REPORT_ERROR_INT(EBF_INDEX_OUT_OF_BOUNDS);
 		return EBF_INDEX_OUT_OF_BOUNDS;
 	}
 
@@ -266,8 +309,16 @@ EBF_HalInstance *EBF_Logic::GetHalInstance(EBF_HalInstance::HAL_Type type, uint8
 #ifdef EBF_USE_INTERRUPTS
 uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode)
 {
+	uint8_t rc;
+
 	// Use interrupt number as the hint
-	return AttachInterrupt(interruptNumber, pHalInstance, mode, interruptNumber);
+	rc = AttachInterrupt(interruptNumber, pHalInstance, mode, interruptNumber);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR_INT(rc);
+		return rc;
+	}
+
+	return EBF_OK;
 }
 
 uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode, uint32_t hint)
@@ -282,6 +333,7 @@ uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHa
 #endif
 
 	if (interruptNumber > EXTERNAL_NUM_INTERRUPTS) {
+		EBF_REPORT_ERROR_INT(EBF_INDEX_OUT_OF_BOUNDS);
 		return EBF_INDEX_OUT_OF_BOUNDS;
 	}
 
@@ -366,18 +418,33 @@ void EBF_Logic::HandleIsr(uint8_t interruptNumber)
 
 uint8_t EBF_Logic::PostponeInterrupt(EBF_HalInstance *pHalInstance)
 {
-	return PostponeInterrupt(pHalInstance, 0);
+	uint8_t rc;
+
+	rc = PostponeInterrupt(pHalInstance, 0);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR_INT(rc);
+		return rc;
+	}
+
+	return EBF_OK;
 }
 
 uint8_t EBF_Logic::PostponeInterrupt(EBF_HalInstance *pHalInstance, uint32_t param1)
 {
+	uint8_t rc;
 	EBF_MessageQueue::MessageEntry msg;
 
 	memset(&msg, 0, sizeof(EBF_MessageQueue::MessageEntry));
 	msg.pHalInstance = pHalInstance;
 	msg.param1 = param1;
 
-	return msgQueue.AddMessage(msg);
+	rc = msgQueue.AddMessage(msg);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR_INT(rc);
+		return rc;
+	}
+
+	return EBF_OK;
 }
 #endif
 

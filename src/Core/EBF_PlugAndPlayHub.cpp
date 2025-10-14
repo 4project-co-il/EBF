@@ -1,5 +1,6 @@
 #include "EBF_PlugAndPlayHub.h"
 #include "EBF_Logic.h"
+#include "EBF_Core.h"
 
 EBF_PlugAndPlayHub::EBF_PlugAndPlayHub()
 {
@@ -17,6 +18,7 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 	// This class handles only the HUB devices
 	if (deviceInfo.deviceIDs[0] != PnP_DeviceId::PNP_ID_EMBEDDED_HUB &&
 		deviceInfo.deviceIDs[0] != PnP_DeviceId::PNP_ID_EXTENDER_HUB) {
+		EBF_REPORT_ERROR(EBF_INVALID_STATE);
 		return EBF_INVALID_STATE;
 	}
 
@@ -33,6 +35,7 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 
 	rc = EBF_HalInstance::Init(HAL_Type::I2C_INTERFACE, parentPort);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -45,6 +48,7 @@ uint8_t EBF_PlugAndPlayHub::Init(EBF_PlugAndPlayHub *pParentHub, uint8_t parentP
 	// Allocate port info structure. HAL pointer will be used to pass the interrrupts to connected instances
 	pPortInfo = (PortInfo*)malloc(sizeof(PortInfo) * numberOfPorts);
 	if(pPortInfo == NULL) {
+		EBF_REPORT_ERROR(EBF_NOT_ENOUGH_MEMORY);
 		return EBF_NOT_ENOUGH_MEMORY;
 	}
 
@@ -106,13 +110,13 @@ uint8_t EBF_PlugAndPlayHub::AssignEmbeddedHubLine(uint8_t pinNumber, PnP_Interru
 				rc = pLogic->AttachInterrupt(pinNumber, this, GetArduinoInterruptMode(intMode), intHint.uint32);
 
 				if (rc != EBF_OK) {
+					EBF_REPORT_ERROR(rc);
 					return rc;
 				}
 			}
 	}
 
 	return EBF_OK;
-
 }
 
 uint8_t EBF_PlugAndPlayHub::AssignInterruptLines(uint8_t portNumber, uint8_t endpointNumber, PnP_DeviceInfo &deviceInfo)
@@ -143,12 +147,14 @@ uint8_t EBF_PlugAndPlayHub::AssignInterruptLines(uint8_t portNumber, uint8_t end
 
 		rc = this->AssignEmbeddedHubLine(interruptMapping[portNumber*2 + 0], int1Mode, hint);
 		if (rc != EBF_OK) {
+			EBF_REPORT_ERROR(rc);
 			return rc;
 		}
 
 		hint.fields.interruptNumber = 1;
 		rc = this->AssignEmbeddedHubLine(interruptMapping[portNumber*2 + 1], int2Mode, hint);
 		if (rc != EBF_OK) {
+			EBF_REPORT_ERROR(rc);
 			return rc;
 		}
 	} else {
@@ -157,6 +163,7 @@ uint8_t EBF_PlugAndPlayHub::AssignInterruptLines(uint8_t portNumber, uint8_t end
 		// HUBs are always on the first endpoint
 		rc = pParentHub->AssignInterruptLines(parentPortNumber, 0, deviceInfo);
 		if (rc != EBF_OK) {
+			EBF_REPORT_ERROR(rc);
 			return rc;
 		}
 
@@ -210,6 +217,7 @@ uint8_t EBF_PlugAndPlayHub::Process()
 					rc = pPortInfo[i].pConnectedInstanes[j]->Process();
 
 					if (rc != EBF_OK) {
+						EBF_REPORT_ERROR(rc);
 						return rc;
 					}
 				}
@@ -253,6 +261,7 @@ uint8_t EBF_PlugAndPlayHub::SwitchToPort(EBF_I2C* pPnpI2C, uint8_t portNumber)
 			// Switch parent HUBs first (from the main HUB up to this)
 			rc = pParentHub->SwitchToPort(pPnpI2C, parentPortNumber);
 			if (rc != EBF_OK) {
+				EBF_REPORT_ERROR(rc);
 				return rc;
 			}
 		}
@@ -262,6 +271,7 @@ uint8_t EBF_PlugAndPlayHub::SwitchToPort(EBF_I2C* pPnpI2C, uint8_t portNumber)
 		((EBF_I2C*)pPnpI2C)->EBF_I2C::write(1 << portNumber);
 		rc = ((EBF_I2C*)pPnpI2C)->EBF_I2C::endTransmission();
 		if (rc != 0) {
+			EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
 			return EBF_COMMUNICATION_PROBLEM;
 		}
 	}
@@ -280,6 +290,7 @@ uint8_t EBF_PlugAndPlayHub::SetIntLine(EBF_I2C* pPnpI2C, uint8_t portNumber, uin
 		if (interruptMapping[portNumber*2 + intLineNumber] != (uint8_t)(-1)) {
 			digitalWrite(interruptMapping[portNumber*2 + intLineNumber], value & 0x01);
 		} else {
+			EBF_REPORT_ERROR(EBF_NOT_INITIALIZED);
 			return EBF_NOT_INITIALIZED;
 		}
 	} else {
@@ -321,6 +332,7 @@ uint8_t EBF_PlugAndPlayHub::SetIntLinesValue(EBF_I2C* pPnpI2C, uint8_t portNumbe
 			// Switch parent HUBs first (from the main HUB up to this)
 			rc = pParentHub->SwitchToPort(pPnpI2C, parentPortNumber);
 			if (rc != EBF_OK) {
+				EBF_REPORT_ERROR(rc);
 				return rc;
 			}
 		}
@@ -357,6 +369,7 @@ uint8_t EBF_PlugAndPlayHub::GetIntLinesValue(EBF_I2C* pPnpI2C, uint8_t portNumbe
 			// Switch parent HUBs first (from the main HUB up to this)
 			rc = pParentHub->SwitchToPort(pPnpI2C, parentPortNumber);
 			if (rc != EBF_OK) {
+				EBF_REPORT_ERROR(rc);
 				return rc;
 			}
 		}
@@ -375,6 +388,7 @@ uint8_t EBF_PlugAndPlayHub::GetIntLine(EBF_I2C* pPnpI2C, uint8_t portNumber, uin
 
 	// Line can be only 0 or 1 (the interrupt line number)
 	if (intLineNumber > 1) {
+		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
 		return EBF_INDEX_OUT_OF_BOUNDS;
 	}
 
@@ -384,6 +398,7 @@ uint8_t EBF_PlugAndPlayHub::GetIntLine(EBF_I2C* pPnpI2C, uint8_t portNumber, uin
 		if (interruptMapping[portNumber*2 + intLineNumber] != (uint8_t)(-1)) {
 			value |= digitalRead(interruptMapping[portNumber*2 + intLineNumber]);
 		} else {
+			EBF_REPORT_ERROR(EBF_NOT_INITIALIZED);
 			return EBF_NOT_INITIALIZED;
 		}
 	} else {
@@ -393,6 +408,7 @@ uint8_t EBF_PlugAndPlayHub::GetIntLine(EBF_I2C* pPnpI2C, uint8_t portNumber, uin
 			// Switch parent HUBs first (from the main HUB up to this)
 			rc = pParentHub->SwitchToPort(pPnpI2C, parentPortNumber);
 			if (rc != EBF_OK) {
+				EBF_REPORT_ERROR(rc);
 				return rc;
 			}
 		}

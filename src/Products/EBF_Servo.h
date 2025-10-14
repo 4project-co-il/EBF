@@ -13,6 +13,9 @@
 #include <Servo.h>
 
 class EBF_Servo : protected EBF_HalInstance {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_Servo");
+
 	public:
 		uint8_t Init(uint8_t pinNumber);
 		uint8_t SetPosition(uint8_t percent);

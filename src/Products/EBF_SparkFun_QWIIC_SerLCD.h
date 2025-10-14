@@ -13,6 +13,9 @@
 #include <Wire.h>
 
 class EBF_SparkFun_QWIIC_SerLCD : protected EBF_HalInstance, protected EBF_I2CDevice, public Print {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_SparkFun_QWIIC_SerLCD");
+
 	protected:
 		const uint8_t MAX_ROWS =	4;
 		const uint8_t MAX_COLUMNS =	20;

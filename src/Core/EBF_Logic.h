@@ -10,8 +10,12 @@
 #include "EBF_Timers.h"
 #include "EBF_MessageQueue.h"
 #include "EBF_HalInstance.h"
+#include "EBF_Serial.h"
 
 class EBF_Logic {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_Logic");
+
 	public:
 		EBF_Logic();
 
@@ -21,6 +25,13 @@ class EBF_Logic {
 
 		static EBF_Logic *GetInstance();
 		EBF_HalInstance *GetHalInstance(EBF_HalInstance::HAL_Type type, uint8_t id);
+
+#ifndef EBF_REMOVE_DEBUG_CODE
+		void SetErrorHandlerSerial(EBF_Serial &serial) { pErrorSerial = &serial; }
+		void ReportError(const char* pModuleName, uint32_t line, EBF_ERROR_CODE error);
+
+		const char* ErrorCode2Str(EBF_ERROR_CODE code);
+#endif
 
 	public:
 		// Timer functions
@@ -128,6 +139,11 @@ class EBF_Logic {
 #endif
 		EBF_HalInstance **pHalInstances;
 		uint8_t halIndex;
+
+#ifndef EBF_REMOVE_DEBUG_CODE
+		// EBF_Serial instance to print error messages
+		EBF_Serial* pErrorSerial;
+#endif
 };
 
 #endif

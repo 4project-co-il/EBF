@@ -13,6 +13,7 @@ uint8_t EBF_DigitalInput::Init(
 
 	rc = EBF_HalInstance::Init(HAL_Type::DIGITAL_INPUT, pinNumber);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -59,6 +60,7 @@ uint8_t EBF_DigitalInput::AttachInterrupt()
 		}
 #endif
 
+	EBF_REPORT_ERROR(EBF_INVALID_STATE);
 	return EBF_INVALID_STATE;
 }
 

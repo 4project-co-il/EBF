@@ -1,4 +1,5 @@
 #include "PnP_Module_2ButtonsInput.h"
+#include "../Core/EBF_Core.h"
 
 extern void EBF_EmptyCallback();
 
@@ -18,7 +19,7 @@ PnP_Module_2ButtonsInput::PnP_Module_2ButtonsInput()
 
 uint8_t PnP_Module_2ButtonsInput::Init()
 {
-	uint8_t rc = EBF_OK;
+	uint8_t rc;
 	PnP_DeviceInfo deviceInfo;
 	uint8_t endpointIndex;
 	EBF_PlugAndPlayI2C *pPnPI2C;
@@ -29,6 +30,7 @@ uint8_t PnP_Module_2ButtonsInput::Init()
 	// Assign the current instance to physical PnP device and get all needed information
 	rc = pPnpManager->AssignDevice(this, deviceInfo, endpointIndex, &pPnPI2C, &pAssignedHub);
 	if(rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -39,6 +41,7 @@ uint8_t PnP_Module_2ButtonsInput::Init()
 	// Initialize the instance
 	rc = EBF_HalInstance::Init(HAL_Type::PnP_DEVICE, PnP_DeviceId::PNP_ID_2BUTTONS_INPUT);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -48,10 +51,11 @@ uint8_t PnP_Module_2ButtonsInput::Init()
 	// Attach interrupt lines for that device
 	rc = pAssignedHub->AssignInterruptLines(pPnPI2C->GetPortNumber(), endpointIndex, deviceInfo);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
-	return rc;
+	return EBF_OK;
 }
 
 // Called by the EBF from normal run to take care of the events
@@ -107,6 +111,7 @@ uint8_t PnP_Module_2ButtonsInput::GetValue(uint8_t index)
 
 	rc = GetIntLine(index, value);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return 0;
 	}
 
@@ -116,12 +121,13 @@ uint8_t PnP_Module_2ButtonsInput::GetValue(uint8_t index)
 // Returns HIGH or LOW for all input lines
 uint8_t PnP_Module_2ButtonsInput::GetValue()
 {
-	uint8_t rc = EBF_OK;
+	uint8_t rc;
 	EBF_PlugAndPlayHub *pHub = pPnPI2C->GetHub();
 	uint8_t value;
 
 	rc = pHub->GetIntLinesValue(pPnPI2C, pPnPI2C->GetPortNumber(), value);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return 0;
 	}
 
@@ -147,11 +153,12 @@ PnP_InputInterface* PnP_Module_2ButtonsInput::GetCurrentInterface()
 
 uint8_t PnP_Module_2ButtonsInput::GetIntLine(uint8_t line, uint8_t &value)
 {
-	uint8_t rc = EBF_OK;
+	uint8_t rc;
 	EBF_PlugAndPlayHub *pHub = pPnPI2C->GetHub();
 
 	rc = pHub->GetIntLine(pPnPI2C, pPnPI2C->GetPortNumber(), line, value);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -203,13 +210,18 @@ uint8_t PnP_Module_2ButtonsInput::PostponeProcessing()
 
 	// Pass the control back to EBF, so it will call the Process() function from normal run
 	rc = pLogic->PostponeInterrupt(this, data.uint32);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
 
-	return rc;
+	return EBF_OK;
 }
 
 uint8_t PnP_Module_2ButtonsInput::SetOnChange(uint8_t index, EBF_CallbackType onChangeCallback)
 {
 	if (index > numberOfButtons) {
+		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
 		return EBF_INDEX_OUT_OF_BOUNDS;
 	}
 
@@ -221,6 +233,7 @@ uint8_t PnP_Module_2ButtonsInput::SetOnChange(uint8_t index, EBF_CallbackType on
 uint8_t PnP_Module_2ButtonsInput::AssignInterface(uint8_t index, PnP_InputInterface* pIfInstance)
 {
 	if (index > numberOfButtons) {
+		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
 		return EBF_INDEX_OUT_OF_BOUNDS;
 	}
 

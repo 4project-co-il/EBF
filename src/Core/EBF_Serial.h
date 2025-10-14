@@ -11,6 +11,9 @@
 #include "EBF_HalInstance.h"
 
 class EBF_Serial : protected EBF_HalInstance, public Stream {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_Serial");
+
 	public:
 #if defined(ARDUINO_ARCH_AVR)
 		EBF_Serial();

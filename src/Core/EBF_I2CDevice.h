@@ -10,6 +10,9 @@
 #include "../Core/EBF_I2C.h"
 
 class EBF_I2CDevice {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_I2CDevice");
+
 	public:
 		EBF_I2CDevice(EBF_I2C *pI2C) : pI2C(pI2C) {};
 

@@ -14,6 +14,9 @@
 class EBF_PlugAndPlayManager;
 
 class EBF_PlugAndPlayHub : protected EBF_HalInstance {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_PlugAndPlayHub");
+
 	public:
 		friend class EBF_PlugAndPlayManager;
 

@@ -13,6 +13,9 @@
 #include "../Core/EBF_PlugAndPlayI2C.h"
 
 class PnP_Module_1Input : protected EBF_HalInstance {
+	private:
+		EBF_DEBUG_MODULE_NAME("PnP_Module_1Input");
+
 	public:
 		PnP_Module_1Input();
 

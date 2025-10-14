@@ -3,6 +3,7 @@
 #include "EBF_PlugAndPlayManager.h"
 #include "EBF_PlugAndPlayHub.h"
 #include "EBF_PlugAndPlayI2C.h"
+#include "EBF_Core.h"
 
 #ifdef PNP_DEBUG_ENUMERATION
 #include "PnP_Serial.h"
@@ -29,7 +30,7 @@ EBF_PlugAndPlayManager *EBF_PlugAndPlayManager::GetInstance()
 
 uint8_t EBF_PlugAndPlayManager::Init()
 {
-	uint8_t rc = EBF_OK;
+	uint8_t rc;
 	PnP_DeviceInfo deviceInfo;
 	uint8_t interruptMapping[EBF_PlugAndPlayHub::maxPorts * 2] = { (uint8_t)(-1) };	// 2 interrupts per port, up to 8 ports
 
@@ -64,6 +65,7 @@ uint8_t EBF_PlugAndPlayManager::Init()
 		}
 
 		if (pnpI2CArr[i] == NULL) {
+			EBF_REPORT_ERROR(EBF_NOT_ENOUGH_MEMORY);
 			return EBF_NOT_ENOUGH_MEMORY;
 		}
 
@@ -73,6 +75,7 @@ uint8_t EBF_PlugAndPlayManager::Init()
 
 	pMainHub = new EBF_PlugAndPlayHub();
 	if (pMainHub == NULL) {
+		EBF_REPORT_ERROR(EBF_NOT_ENOUGH_MEMORY);
 		return EBF_NOT_ENOUGH_MEMORY;
 	}
 
@@ -80,14 +83,16 @@ uint8_t EBF_PlugAndPlayManager::Init()
 	// Devices are considered as level 0, main hub - level 3, extender hubs - levels 4,5,6,7
 	// Controller I2C interface is specified in variants.h
 	rc = GetDeviceInfo(pnpI2CArr[PNP_CONTROLLER_INTERNAL_I2C_INTERFACE_INDEX], deviceInfo, PNP_EEPROM_MAIN_HUB);
-	if (rc != 0) {
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
 		return EBF_COMMUNICATION_PROBLEM;
 	}
 
 	// There are parameters, for embedded HUBs those are interrupt mappings
 	if (deviceInfo.paramsLength != 0) {
 		rc = GetDeviceParameters(pnpI2CArr[PNP_CONTROLLER_INTERNAL_I2C_INTERFACE_INDEX], PNP_EEPROM_MAIN_HUB, interruptMapping, min(deviceInfo.paramsLength, sizeof(interruptMapping)));
-		if (rc != 0) {
+		if (rc != EBF_OK) {
+			EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
 			return EBF_COMMUNICATION_PROBLEM;
 		}
 	}
@@ -99,15 +104,17 @@ uint8_t EBF_PlugAndPlayManager::Init()
 
 	rc = pMainHub->Init(NULL, 0, deviceInfo, interruptMapping);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
 	rc = InitHubs(pMainHub);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
-	return rc;
+	return EBF_OK;
 }
 
 uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
@@ -133,6 +140,7 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 		rc = pHub->SwitchToPort(pI2C, port);
 		if (rc != EBF_OK) {
 			// Something is wrong...
+			EBF_REPORT_ERROR(rc);
 			return rc;
 		}
 
@@ -176,6 +184,7 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 
 				if (rc != EBF_OK) {
 					// Something is wrong... should not happen
+					EBF_REPORT_ERROR(rc);
 					return rc;
 				}
 			}
@@ -189,6 +198,7 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 
 			rc = pNewHub->Init(pHub, port, deviceInfo, &parameters[0]);
 			if (rc != EBF_OK) {
+				EBF_REPORT_ERROR(rc);
 				return rc;
 			}
 
@@ -200,6 +210,7 @@ uint8_t EBF_PlugAndPlayManager::InitHubs(EBF_PlugAndPlayHub *pHub)
 			// Initialize the new HUB connections
 			rc = InitHubs(pNewHub);
 			if (rc != EBF_OK) {
+				EBF_REPORT_ERROR(rc);
 				return rc;
 			}
 		}
@@ -262,6 +273,7 @@ uint8_t EBF_PlugAndPlayManager::GetDeviceParameters(EBF_I2C* pPnpI2C, uint8_t ro
 	pPnpI2C->write(sizeof(PnP_DeviceInfo));
 	rc = pPnpI2C->endTransmission(false);
 	if (rc != 0) {
+		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
 		return EBF_COMMUNICATION_PROBLEM;
 	}
 
@@ -270,6 +282,7 @@ uint8_t EBF_PlugAndPlayManager::GetDeviceParameters(EBF_I2C* pPnpI2C, uint8_t ro
 	rc = pPnpI2C->readBytes(pParams, maxSize);
 	// Strange, should not happen with PnP device, skip it
 	if (rc != maxSize) {
+		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
 		return EBF_COMMUNICATION_PROBLEM;
 	}
 
@@ -308,6 +321,7 @@ uint8_t EBF_PlugAndPlayManager::AssignDevice(
 		rc = pHub->SwitchToPort(pI2C, port);
 		if (rc != EBF_OK) {
 			// Something is wrong
+			EBF_REPORT_ERROR(rc);
 			return rc;
 		}
 
@@ -362,12 +376,14 @@ uint8_t EBF_PlugAndPlayManager::AssignDevice(
 		*pAssignedHub = pHub;
 
 		if (*pI2CRouter == NULL) {
+			EBF_REPORT_ERROR(EBF_NOT_ENOUGH_MEMORY);
 			return EBF_NOT_ENOUGH_MEMORY;
 		}
 
 		return EBF_OK;
 	}
 
+	EBF_REPORT_ERROR(EBF_NOT_INITIALIZED);
 	return EBF_NOT_INITIALIZED;
 }
 
@@ -436,6 +452,7 @@ uint8_t EBF_PlugAndPlayManager::WriteDeviceEepromPage(uint8_t i2cAddress, uint8_
 	if (i2cAddress != 0x50 + EBF_PlugAndPlayManager::PNP_EEPROM_MAIN_HUB) {
 		rc = pMainHub->SwitchToPort(pPnpI2C, 0);
 		if (rc != EBF_OK) {
+			EBF_REPORT_ERROR(rc);
 			return rc;
 		}
 	}
@@ -446,13 +463,14 @@ uint8_t EBF_PlugAndPlayManager::WriteDeviceEepromPage(uint8_t i2cAddress, uint8_
 
 	rc = pPnpI2C->endTransmission(true);
 	if (rc != 0) {
+		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
 		return EBF_COMMUNICATION_PROBLEM;
 	}
 
 	// Add delay after each page. max write time is 5ms
 	delay(5);
 
-	return rc;
+	return EBF_OK;
 }
 
 #ifdef PNP_DEBUG_ENUMERATION

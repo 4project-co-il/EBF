@@ -10,6 +10,9 @@
 #include "../Core/EBF_AnalogInput.h"
 
 class EBF_Potentiometer : protected EBF_AnalogInput {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_Potentiometer");
+
 	public:
 		uint8_t Init(uint8_t pinNumber, uint8_t changePercent = 1, uint8_t averagingSamples = 1);
 		float GetValue();

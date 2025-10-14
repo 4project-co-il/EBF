@@ -1,4 +1,5 @@
 #include "EBF_Timers.h"
+#include "EBF_Core.h"
 
 uint8_t EBF_Timers::Init(uint8_t maxTimers, EBF_MessageQueue *pMsgQueue)
 {
@@ -18,6 +19,7 @@ uint8_t EBF_Timers::Init(uint8_t maxTimers, EBF_MessageQueue *pMsgQueue)
 uint8_t EBF_Timers::InitTimer(uint8_t timerId, EBF_CallbackType callbackPtr, uint16_t milliSec)
 {
 	if (timerId >= this->maxTimers) {
+		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
 		return EBF_INDEX_OUT_OF_BOUNDS;
 	}
 
@@ -32,17 +34,20 @@ uint8_t EBF_Timers::InitTimer(uint8_t timerId, EBF_CallbackType callbackPtr, uin
 uint8_t EBF_Timers::StartTimer(uint8_t timerId)
 {
 	if (timerId >= this->maxTimers) {
+		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
 		return EBF_INDEX_OUT_OF_BOUNDS;
 	}
 
 	TimerData &timer = this->timersData[timerId];
 
 	if (timer.callbackPtr == NULL) {
+		EBF_REPORT_ERROR(EBF_NOT_INITIALIZED);
 		return EBF_NOT_INITIALIZED;
 	}
 
 	// Timer is already running
 	if (timer.microsLeft != 0) {
+		EBF_REPORT_ERROR(EBF_RESOURCE_IS_IN_USE);
 		return EBF_RESOURCE_IS_IN_USE;
 	}
 
@@ -62,11 +67,13 @@ uint8_t EBF_Timers::StartTimer(uint8_t timerId, uint16_t milliSec)
 
 	rc = this->SetTimeout(timerId, milliSec);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
 	rc = this->StartTimer(timerId);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -112,6 +119,7 @@ uint32_t EBF_Timers::Process(unsigned long current)
 uint8_t EBF_Timers::StopTimer(uint8_t timerId)
 {
 	if (timerId >= this->maxTimers) {
+		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
 		return EBF_INDEX_OUT_OF_BOUNDS;
 	}
 
@@ -125,6 +133,7 @@ uint8_t EBF_Timers::StopTimer(uint8_t timerId)
 uint8_t EBF_Timers::SetTimeout(uint8_t timerId, uint16_t milliSec)
 {
 	if (timerId >= this->maxTimers) {
+		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
 		return EBF_INDEX_OUT_OF_BOUNDS;
 	}
 
@@ -141,11 +150,13 @@ uint8_t EBF_Timers::RestartTimer(uint8_t timerId)
 
 	rc = StopTimer(timerId);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
 	rc = StartTimer(timerId);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 

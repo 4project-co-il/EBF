@@ -1,6 +1,7 @@
 #include "EBF_STTS22H_TemperatureSensor.h"
 #include "../Core/EBF_Logic.h"
 #include "../Core/EBF_DigitalInput.h"
+#include "../Core/EBF_Core.h"
 
 extern void EBF_EmptyCallback();
 
@@ -29,17 +30,20 @@ uint8_t EBF_STTS22H_TemperatureSensor::Init(uint8_t i2cAddress, OperationMode mo
 
 	rc = EBF_HalInstance::Init(HAL_Type::I2C_INTERFACE, i2cAddress);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
 	// Reading status register to reset the interrupt line
 	rc = GetStatusRegister(status);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
 	rc = SetOperationMode(mode);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -54,6 +58,7 @@ uint8_t EBF_STTS22H_TemperatureSensor::AttachInterrupt(uint8_t interruptPin)
 
 	rc = pLogic->AttachInterrupt(interruptPin, this, EBF_DigitalInput::InterruptMode::MODE_LOW);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -122,23 +127,31 @@ void EBF_STTS22H_TemperatureSensor::UpdatePollInterval()
 
 uint8_t EBF_STTS22H_TemperatureSensor::GetControlRegister(ControlRegister_t &ctrl)
 {
-	uint8_t rc = EBF_OK;
+	uint8_t rc;
 
 	rc = Read8bitRegister(regControl, ctrl.reg);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
 
-	return rc;
+	return EBF_OK;
 }
 
 uint8_t EBF_STTS22H_TemperatureSensor::SetControlRegister(ControlRegister_t ctrl)
 {
-	uint8_t rc = EBF_OK;
+	uint8_t rc;
 
 	// Address increment should be turned ON for all operations
 	ctrl.fields.addrInc = 1;
 
 	rc = Write8bitRegister(regControl, ctrl.reg);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
 
-	return rc;
+	return EBF_OK;
 }
 
 uint8_t EBF_STTS22H_TemperatureSensor::GetValueRaw(int16_t &value)
@@ -165,7 +178,12 @@ uint8_t EBF_STTS22H_TemperatureSensor::GetValueRaw(int16_t &value)
 	} while (0);
 	interrupts();
 
-	return rc;
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
 }
 
 // Changes device operation mode
@@ -181,6 +199,7 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetOperationMode(OperationMode mode)
 	ctrl.fields.mode_1Hz = 0;
 	rc = SetControlRegister(ctrl);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -259,11 +278,15 @@ uint8_t EBF_STTS22H_TemperatureSensor::IsBusy()
 // Returns Status register content
 uint8_t EBF_STTS22H_TemperatureSensor::GetStatusRegister(StatusRegister_t &status)
 {
-	uint8_t rc = EBF_OK;
+	uint8_t rc;
 
 	rc = Read8bitRegister(regStatus, status.reg);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
 
-	return rc;
+	return EBF_OK;
 }
 
 // Returns the measured temperature in Celsius
@@ -388,57 +411,77 @@ uint8_t EBF_STTS22H_TemperatureSensor::PostponeProcessing()
 
 	// Pass the control back to EBF, so it will call the Process() function from normal run
 	rc = pLogic->PostponeInterrupt(this, currentInterruptProcessing.reg);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
 
-	return rc;
+	return EBF_OK;
 }
 #endif
 
 // Sets high threshold value
 uint8_t EBF_STTS22H_TemperatureSensor::SetThresholdHigh(float temp)
 {
-	uint8_t rc = EBF_OK;
+	uint8_t rc;
 
 	highThresholdSet = 1;
 	// Threshold = (temp_limit_reg -63) *0.64°C
 	rc = Write8bitRegister(regTempHighLimit, (uint8_t)floor((temp / 0.64 + 63 + 0.5)));
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
 
-	return rc;
+	return EBF_OK;
 }
 
 // Sets low threshold value
 uint8_t EBF_STTS22H_TemperatureSensor::SetThresholdLow(float temp)
 {
-	uint8_t rc = EBF_OK;
+	uint8_t rc;
 
 	lowThresholdSet = 1;
 	// Threshold = (temp_limit_reg -63) *0.64°C
 	rc = Write8bitRegister(regTempLowLimit, (uint8_t)floor((temp / 0.64 + 63 + 0.5)));
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
 
-	return rc;
+	return EBF_OK;
 }
 
 // Disable high threshold triggering
 uint8_t EBF_STTS22H_TemperatureSensor::DisableThresholdHigh()
 {
-	uint8_t rc = EBF_OK;
+	uint8_t rc;
 
 	highThresholdSet = 0;
 	// Value 0 disables the threshold
 	rc = Write8bitRegister(regTempHighLimit, 0);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
 
-	return rc;
+	return EBF_OK;
 }
 
 // Disable low threshold triggering
 uint8_t EBF_STTS22H_TemperatureSensor::DisableThresholdLow()
 {
-	uint8_t rc = EBF_OK;
+	uint8_t rc;
 
 	lowThresholdSet = 0;
 	// Value 0 disables the threshold
 	rc = Write8bitRegister(regTempLowLimit, 0);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
 
-	return rc;
+	return EBF_OK;
 }
 
 void EBF_STTS22H_TemperatureSensor::ExecuteCallback(volatile StatusRegister_t& status)

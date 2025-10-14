@@ -1,4 +1,5 @@
 #include "EBF_Switch.h"
+#include "../Core/EBF_Core.h"
 
 extern void EBF_EmptyCallback();
 
@@ -9,6 +10,7 @@ uint8_t EBF_Switch::Init(uint8_t pinNumber, bool internelPullup)
 	// Use empty callback function to allow Process and ProcessCallback calls
 	rc = EBF_DigitalInput::Init(pinNumber, EBF_EmptyCallback, EBF_DigitalInput::InterruptMode::MODE_CHANGE, internelPullup);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -70,6 +72,7 @@ uint8_t EBF_Switch::Process()
 
 	rc = EBF_DigitalInput::Process();
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 

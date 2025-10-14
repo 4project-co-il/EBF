@@ -1,4 +1,5 @@
 #include "EBF_Button.h"
+#include "../Core/EBF_Core.h"
 
 extern void EBF_EmptyCallback();
 
@@ -8,6 +9,7 @@ uint8_t EBF_Button::Init(uint8_t pinNumber, bool internelPullup)
 
 	rc = EBF_Switch::Init(pinNumber, internelPullup);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -62,6 +64,7 @@ uint8_t EBF_Button::Process()
 
 	rc = EBF_Switch::Process();
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 

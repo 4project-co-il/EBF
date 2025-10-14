@@ -1,4 +1,5 @@
 #include "EBF_I2C.h"
+#include "EBF_Core.h"
 
 uint8_t EBF_I2C::Init(EBF_CallbackType callbackFunc, uint8_t address)
 {
@@ -6,6 +7,7 @@ uint8_t EBF_I2C::Init(EBF_CallbackType callbackFunc, uint8_t address)
 
 	rc = EBF_HalInstance::Init(HAL_Type::I2C_INTERFACE, address);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 

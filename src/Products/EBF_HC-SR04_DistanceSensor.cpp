@@ -1,4 +1,5 @@
 #include "EBF_HC-SR04_DistanceSensor.h"
+#include "../Core/EBF_Core.h"
 
 extern void EBF_EmptyCallback();
 
@@ -9,11 +10,13 @@ uint8_t EBF_HCSR04_DistanceSensor::Init(uint8_t triggerPinNumber, uint8_t echoPi
 	// Use empty callback function to allow Process and ProcessCallback calls
 	rc = EBF_DigitalInput::Init(echoPinNumber, EBF_EmptyCallback, EBF_DigitalInput::InterruptMode::MODE_CHANGE);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
 	rc = trigger.Init(triggerPinNumber);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 

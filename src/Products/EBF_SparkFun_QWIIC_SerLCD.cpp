@@ -1,4 +1,5 @@
 #include "EBF_SparkFun_QWIIC_SerLCD.h"
+#include "../Core/EBF_Core.h"
 
 extern void EBF_EmptyCallback();
 
@@ -15,6 +16,7 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::Init(uint8_t i2cAddress)
 
 	rc = EBF_HalInstance::Init(HAL_Type::I2C_INTERFACE, i2cAddress);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -32,6 +34,7 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::Init(uint8_t i2cAddress)
 	rc = pI2C->endTransmission();
 
 	if (rc != 0) {
+		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
 		return EBF_COMMUNICATION_PROBLEM;
 	}
 
@@ -95,6 +98,7 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::SendSettingCommand(uint8_t command)
 	rc = pI2C->endTransmission();
 
 	if (rc != 0) {
+		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
 		return EBF_COMMUNICATION_PROBLEM;
 	}
 
@@ -110,6 +114,7 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::SendSpecialCommand(uint8_t command)
 	rc = pI2C->endTransmission();
 
 	if (rc != 0) {
+		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
 		return EBF_COMMUNICATION_PROBLEM;
 	}
 
@@ -129,6 +134,7 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::SendSpecialCommand(uint8_t command, uint8_t c
 	rc = pI2C->endTransmission();
 
 	if (rc != 0) {
+		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
 		return EBF_COMMUNICATION_PROBLEM;
 	}
 
@@ -142,6 +148,7 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::Clear()
 
 	rc = SendSettingCommand(LCD_SET_CLEAR);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -158,6 +165,7 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::Home()
 
 	rc = SendSettingCommand(LCD_CMD_RETURNHOME);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -284,6 +292,7 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::SetBacklight(uint8_t r, uint8_t g, uint8_t b)
 	rc = pI2C->endTransmission();
 
 	if (rc != 0) {
+		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
 		return EBF_COMMUNICATION_PROBLEM;
 	}
 
@@ -372,6 +381,7 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::setContrast(uint8_t contrast)
 	rc = pI2C->endTransmission();
 
 	if (rc != 0) {
+		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
 		return EBF_COMMUNICATION_PROBLEM;
 	}
 

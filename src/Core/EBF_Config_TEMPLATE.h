@@ -10,6 +10,14 @@
 	compilation path.
 */
 
+// Uncomment the EBF_REMOVE_DEBUG_CODE definition to remove the debug code from the EBF implementation.
+// This is highly not advised, unless the code was extensively checked and there is a high confidence
+// in your implementation.
+// The extra code will help you understand why your code doesn't work even without a dedicated debugger
+// and without a need to add printouts. To enable EBF's debug printouts, call EBF.SetErrorHandlerSerial(serial)
+// with serial defined as "EBF_Serial serial;"
+//#define EBF_REMOVE_DEBUG_CODE
+
 // Uncomment the EBF_USE_INTERRUPTS definition to enable usage of the interrupts when possible
 //#define EBF_USE_INTERRUPTS
 
@@ -25,7 +33,7 @@
 //
 //#define EBF_DIRECT_CALL_FROM_ISR
 
-// Uncomment the EBF_SLEEP_IMPLEMENTATION to allow power down modes for supported CPUs
+// Uncomment the EBF_SLEEP_IMPLEMENTATION to allow power save modes for supported CPUs
 //#define EBF_SLEEP_IMPLEMENTATION
 
 // Uncomment the EBF_REMOVE_SPI_IMPLEMENTATION to to remove the code for SPI communication

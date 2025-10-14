@@ -1,4 +1,5 @@
 #include "EBF_Serial.h"
+#include "EBF_Core.h"
 
 #if defined(ARDUINO_ARCH_AVR)
 EBF_Serial::EBF_Serial() : Stream(Serial)
@@ -45,6 +46,7 @@ uint8_t EBF_Serial::Init(
 
 	rc = EBF_HalInstance::Init(HAL_Type::UART_INTERFACE, serialNumber);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 

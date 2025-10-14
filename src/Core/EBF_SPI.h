@@ -14,6 +14,9 @@
 #include "SPI.h"
 
 class EBF_SPI : protected EBF_HalInstance {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_SPI");
+
 	public:
 #if defined(ARDUINO_ARCH_SAMD)
 		EBF_SPI();

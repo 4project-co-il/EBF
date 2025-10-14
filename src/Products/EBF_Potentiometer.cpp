@@ -1,4 +1,5 @@
 #include "EBF_Potentiometer.h"
+#include "../Core/EBF_Core.h"
 
 extern void EBF_EmptyCallback();
 
@@ -9,6 +10,7 @@ uint8_t EBF_Potentiometer::Init(uint8_t pinNumber, uint8_t changePercent, uint8_
 	// Use empty callback function to allow Process and ProcessCallback calls
 	rc = EBF_AnalogInput::Init(pinNumber, EBF_EmptyCallback, changePercent);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -17,6 +19,7 @@ uint8_t EBF_Potentiometer::Init(uint8_t pinNumber, uint8_t changePercent, uint8_
 	// allocate samples array
 	pSamples = (uint16_t*)malloc(sizeof(uint16_t) * numOfSamples);
 	if (pSamples == NULL) {
+		EBF_REPORT_ERROR(EBF_NOT_ENOUGH_MEMORY);
 		return EBF_NOT_ENOUGH_MEMORY;
 	}
 

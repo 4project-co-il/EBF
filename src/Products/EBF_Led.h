@@ -10,6 +10,9 @@
 #include "../Core/EBF_PwmOutput.h"
 
 class EBF_Led : protected EBF_PwmOutput {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_Led");
+
 	public:
 		uint8_t Init(uint8_t pinNumber);
 		uint8_t SetValue(uint8_t value);

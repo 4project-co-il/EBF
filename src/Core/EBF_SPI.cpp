@@ -1,4 +1,5 @@
 #include "EBF_SPI.h"
+#include "EBF_Core.h"
 
 #ifndef EBF_REMOVE_SPI_IMPLEMENTATION
 
@@ -25,6 +26,7 @@ uint8_t EBF_SPI::Init(
 
 	rc = EBF_HalInstance::Init(HAL_Type::SPI_INTERFACE, serialNumber);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 

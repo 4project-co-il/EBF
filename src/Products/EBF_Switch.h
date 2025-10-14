@@ -10,6 +10,9 @@
 #include "../Core/EBF_DigitalInput.h"
 
 class EBF_Switch : protected EBF_DigitalInput {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_Switch");
+
 	public:
 		enum SwitchState : uint8_t {
 			SWITCH_OFF = 0,

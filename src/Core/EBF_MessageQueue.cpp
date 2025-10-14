@@ -1,4 +1,5 @@
 #include "EBF_MessageQueue.h"
+#include "EBF_Core.h"
 
 uint8_t EBF_MessageQueue::Init(uint8_t queueSize)
 {
@@ -9,6 +10,11 @@ uint8_t EBF_MessageQueue::Init(uint8_t queueSize)
 
 	// Init queue data
 	this->pQueueData = (MessageEntry*)malloc(sizeof(MessageEntry) * this->queueSize);
+	if (this->pQueueData == NULL) {
+		EBF_REPORT_ERROR(EBF_NOT_ENOUGH_MEMORY);
+		return EBF_NOT_ENOUGH_MEMORY;
+	}
+
 	memset(this->pQueueData, 0, sizeof(MessageEntry) * this->queueSize);
 
 	this->pInLocation = this->pQueueData;
@@ -33,6 +39,7 @@ uint8_t EBF_MessageQueue::AddMessage(MessageEntry &message)
 {
     if (mesasgesInQueue == queueSize && pInLocation == pOutLocation) {
 		// Buffer is full
+		EBF_REPORT_ERROR(EBF_NOT_ENOUGH_MEMORY);
 		return EBF_NOT_ENOUGH_MEMORY;
 	}
 
@@ -58,6 +65,7 @@ uint8_t EBF_MessageQueue::GetMessage(MessageEntry &message)
 {
 	// Queue is empty
     if (mesasgesInQueue == 0) {
+		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
 		return EBF_INDEX_OUT_OF_BOUNDS;
 	}
 

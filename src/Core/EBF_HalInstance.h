@@ -9,6 +9,9 @@
 #include "EBF_Global.h"
 
 class EBF_HalInstance {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_HalInstance");
+
 	public:
 		friend class EBF_Logic;
 		friend class EBF_Core;

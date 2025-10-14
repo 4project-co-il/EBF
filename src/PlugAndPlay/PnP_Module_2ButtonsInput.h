@@ -15,6 +15,9 @@
 #include "../Core/PnP_InputInterfaceProvider.h"
 
 class PnP_Module_2ButtonsInput : protected EBF_HalInstance, public PnP_InputInterfaceProvider {
+	private:
+		EBF_DEBUG_MODULE_NAME("PnP_Module_2ButtonsInput");
+
 	public:
 		PnP_Module_2ButtonsInput();
 

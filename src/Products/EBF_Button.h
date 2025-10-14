@@ -10,6 +10,9 @@
 #include "EBF_Switch.h"
 
 class EBF_Button : public EBF_Switch {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_Button");
+
 	public:
 		enum ButtonState : uint8_t {
 			BUTTON_OFF = 0,

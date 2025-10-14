@@ -1,4 +1,5 @@
 #include "EBF_Led.h"
+#include "../Core/EBF_Core.h"
 
 uint8_t EBF_Led::Init(uint8_t pinNumber)
 {
@@ -6,6 +7,7 @@ uint8_t EBF_Led::Init(uint8_t pinNumber)
 
 	rc = EBF_PwmOutput::Init(pinNumber);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -94,13 +96,18 @@ uint8_t EBF_Led::SetBrightness(uint8_t percent)
 		break;
 	}
 
-	return rc;
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
 }
 
 // Turns on for msOn milliSeconds and stay off for msOff milliSeconds
 uint8_t EBF_Led::Blink(uint16_t msOn, uint16_t msOff)
 {
-	uint8_t rc = EBF_OK;
+	uint8_t rc;
 
 	onDuration = msOn;
 	offDuration = msOff;
@@ -113,8 +120,12 @@ uint8_t EBF_Led::Blink(uint16_t msOn, uint16_t msOff)
 	pollIntervalMs = 0;
 
 	rc = EBF_PwmOutput::SetValue(brightness);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
 
-	return rc;
+	return EBF_OK;
 }
 
 // The led will fade in, from OFF to ON (up to brightness)
@@ -122,7 +133,7 @@ uint8_t EBF_Led::Blink(uint16_t msOn, uint16_t msOff)
 // and will be done in the specified number of steps
 uint8_t EBF_Led::FadeIn(uint16_t msDuration, uint8_t steps)
 {
-	uint8_t rc = EBF_OK;
+	uint8_t rc;
 
 	// onDuration will be used to store step duration
 	onDuration = msDuration / steps;
@@ -138,8 +149,12 @@ uint8_t EBF_Led::FadeIn(uint16_t msDuration, uint8_t steps)
 	state = LED_FADING_IN;
 
 	rc = EBF_PwmOutput::SetValue((uint8_t)offDuration);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
 
-	return rc;
+	return EBF_OK;
 }
 
 // The led will fade out, from ON (current brightness) to OFF
@@ -147,7 +162,7 @@ uint8_t EBF_Led::FadeIn(uint16_t msDuration, uint8_t steps)
 // and will be done in the specified number of steps
 uint8_t EBF_Led::FadeOut(uint16_t msDuration, uint8_t steps)
 {
-	uint8_t rc = EBF_OK;
+	uint8_t rc;
 
 	// onDuration will be used to store step duration
 	onDuration = msDuration / steps;
@@ -163,8 +178,12 @@ uint8_t EBF_Led::FadeOut(uint16_t msDuration, uint8_t steps)
 	state = LED_FADING_OUT;
 
 	rc = EBF_PwmOutput::SetValue((uint8_t)offDuration);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
 
-	return rc;
+	return EBF_OK;
 }
 
 uint8_t EBF_Led::Process()
@@ -282,5 +301,10 @@ uint8_t EBF_Led::Process()
 		break;
 	}
 
-	return rc;
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
 }

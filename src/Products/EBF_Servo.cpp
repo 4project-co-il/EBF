@@ -1,4 +1,5 @@
 #include "EBF_Servo.h"
+#include "../Core/EBF_Core.h"
 
 // Initializing EBF_Servo class instance.
 // The pinNumber should be on hardware line that is supported by Arduino's Servo library.
@@ -12,6 +13,7 @@ uint8_t EBF_Servo::Init(uint8_t pinNumber)
 
 	rc = EBF_HalInstance::Init(EBF_HalInstance::HAL_Type::PWM_OUTPUT, pinNumber);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -86,7 +88,6 @@ uint8_t EBF_Servo::SetPosition(uint8_t percent, uint16_t msDuration, uint8_t ste
 
 uint8_t EBF_Servo::Process()
 {
-	uint8_t rc = EBF_OK;
 	uint8_t pos;
 	int8_t diff;
 	unsigned long timePassed;
@@ -121,5 +122,5 @@ uint8_t EBF_Servo::Process()
 		}
 	}
 
-	return rc;
+	return EBF_OK;
 }

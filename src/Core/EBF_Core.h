@@ -11,6 +11,7 @@
 #include "EBF_HalInstance.h"
 #include "EBF_Timers.h"
 #include "EBF_DigitalInput.h"
+#include "EBF_Serial.h"
 
 // EBF_Logic is a wrapper class to hide the usage of the singleton from the user
 // and make the APIs a bit easier for usage
@@ -24,6 +25,11 @@ class EBF_Core {
 		uint8_t Process();
 
 		EBF_HalInstance *GetHalInstance(EBF_HalInstance::HAL_Type type, uint8_t id);
+
+#ifndef EBF_REMOVE_DEBUG_CODE
+		void SetErrorHandlerSerial(EBF_Serial &serial);
+		static void ReportError(const char* pModuleName, uint32_t line, EBF_ERROR_CODE error);
+#endif
 
 	public:
 		// Timer functions

@@ -11,6 +11,9 @@
 #include "../Core/EBF_DigitalOutput.h"
 
 class EBF_HCSR04_DistanceSensor : protected EBF_DigitalInput {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_HCSR04_DistanceSensor");
+
 	public:
 		uint8_t Init(uint8_t triggerPinNumber, uint8_t echoPinNumber);
 		float GetValue();

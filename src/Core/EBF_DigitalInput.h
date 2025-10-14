@@ -10,6 +10,9 @@
 #include "EBF_HalInstance.h"
 
 class EBF_DigitalInput : protected EBF_HalInstance {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_DigitalInput");
+
 	public:
 		friend class EBF_Core;
 

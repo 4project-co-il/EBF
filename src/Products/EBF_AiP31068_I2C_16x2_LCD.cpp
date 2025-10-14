@@ -1,4 +1,5 @@
 #include "EBF_AiP31068_I2C_16x2_LCD.h"
+#include "../Core/EBF_Core.h"
 
 extern void EBF_EmptyCallback();
 
@@ -15,6 +16,7 @@ uint8_t EBF_AiP31068_I2C_16x2_LCD::Init(uint8_t i2cAddress)
 
 	rc = EBF_HalInstance::Init(HAL_Type::I2C_INTERFACE, i2cAddress);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -30,6 +32,7 @@ uint8_t EBF_AiP31068_I2C_16x2_LCD::Init(uint8_t i2cAddress)
 	// Initialize the LCD for 2 line move
 	rc = SendCommand(LCD_FUNCTIONSET | LCD_FUNC_2LINE);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -37,12 +40,14 @@ uint8_t EBF_AiP31068_I2C_16x2_LCD::Init(uint8_t i2cAddress)
     displayControl = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF;
 	rc = SendCommand(LCD_DISPLAYCONTROL | displayControl);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
 	// Clear the display
 	rc = Clear();
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -50,6 +55,7 @@ uint8_t EBF_AiP31068_I2C_16x2_LCD::Init(uint8_t i2cAddress)
     displayMode = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDEC;
     rc = SendCommand(LCD_ENTRYMODESET | displayMode);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -65,6 +71,7 @@ uint8_t EBF_AiP31068_I2C_16x2_LCD::SendCommand(uint8_t command)
 	rc = pI2C->endTransmission();
 
 	if (rc != 0) {
+		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
 		return EBF_COMMUNICATION_PROBLEM;
 	}
 
@@ -101,6 +108,7 @@ uint8_t EBF_AiP31068_I2C_16x2_LCD::Clear()
 
 	rc = SendCommand(LCD_CLEARDISPLAY);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -117,6 +125,7 @@ uint8_t EBF_AiP31068_I2C_16x2_LCD::Home()
 
 	rc = SendCommand(LCD_RETURNHOME);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
@@ -194,6 +203,7 @@ uint8_t EBF_AiP31068_I2C_16x2_LCD::ScrollLeft(uint8_t count)
 	for (uint8_t i=0; i<count; i++) {
 		rc = ScrollLeft();
 		if (rc != EBF_OK) {
+			EBF_REPORT_ERROR(rc);
 			return rc;
 		}
 
@@ -218,6 +228,7 @@ uint8_t EBF_AiP31068_I2C_16x2_LCD::ScrollRight(uint8_t count)
 	for (uint8_t i=0; i<count; i++) {
 		rc = ScrollRight();
 		if (rc != EBF_OK) {
+			EBF_REPORT_ERROR(rc);
 			return rc;
 		}
 

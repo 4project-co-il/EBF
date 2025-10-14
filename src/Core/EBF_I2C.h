@@ -12,6 +12,9 @@
 #include "EBF_HalInstance.h"
 
 class EBF_I2C : protected EBF_HalInstance, public Stream {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_I2C");
+
 	public:
 		EBF_I2C() : Stream(Wire), i2c(Wire) {}
 		EBF_I2C(TwoWire &i2cInstance) : Stream(i2cInstance), i2c(i2cInstance) { }

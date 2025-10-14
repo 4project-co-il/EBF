@@ -10,6 +10,9 @@
 #include "../Core/EBF_DigitalOutput.h"
 
 class EBF_Relay : protected EBF_DigitalOutput {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_Relay");
+
 	public:
 		uint8_t Init(uint8_t pinNumber);
 		uint8_t SetValue(uint8_t value);

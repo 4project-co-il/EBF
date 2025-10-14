@@ -7,6 +7,9 @@
 class EBF_HalInstance;
 
 class EBF_MessageQueue {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_MessageQueue");
+
 	public:
 		typedef struct {
 			EBF_HalInstance *pHalInstance;

@@ -1,4 +1,5 @@
 #include "EBF_Relay.h"
+#include "../Core/EBF_Core.h"
 
 uint8_t EBF_Relay::Init(uint8_t pinNumber)
 {
@@ -6,6 +7,7 @@ uint8_t EBF_Relay::Init(uint8_t pinNumber)
 
 	rc = EBF_DigitalOutput::Init(pinNumber);
 	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 

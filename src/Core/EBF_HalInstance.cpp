@@ -1,5 +1,6 @@
 #include "EBF_HalInstance.h"
 #include "EBF_Logic.h"
+#include "EBF_Core.h"
 
 // Empty callback will be used instead of NULL pointer for callbacks in different classes
 // If you don't want a callback function to be called, pass NULL pointer to the initialization
@@ -18,11 +19,19 @@ EBF_HalInstance::EBF_HalInstance() {
 
 uint8_t EBF_HalInstance::Init(HAL_Type type, uint32_t id)
 {
+	uint8_t rc;
+
 	this->pollIntervalMs = 0;
 	this->type = type;
 	this->id = id;
 
-	return EBF_Logic::GetInstance()->AddHalInstance(*this);
+	rc = EBF_Logic::GetInstance()->AddHalInstance(*this);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
 }
 
 uint8_t EBF_HalInstance::GetNumberOfInstances()

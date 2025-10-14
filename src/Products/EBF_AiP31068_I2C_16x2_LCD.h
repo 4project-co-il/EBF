@@ -14,6 +14,9 @@
 
 // This class implements 16x2 LCDs based on the AiP31068 I2C driver
 class EBF_AiP31068_I2C_16x2_LCD : protected EBF_HalInstance, protected EBF_I2CDevice, public Print {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_AiP31068_I2C_16x2_LCD");
+
 	protected:
 		// commands
 		const uint8_t LCD_COMMAND_PREFIX =	0x80;

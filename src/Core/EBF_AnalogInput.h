@@ -9,6 +9,9 @@
 #include "EBF_HalInstance.h"
 
 class EBF_AnalogInput : protected EBF_HalInstance {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_AnalogInput");
+
 	public:
 		uint8_t Init(
 			uint8_t pinNumber,

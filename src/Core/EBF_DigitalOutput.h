@@ -10,6 +10,9 @@
 #include "EBF_HalInstance.h"
 
 class EBF_DigitalOutput : protected EBF_HalInstance {
+	private:
+		EBF_DEBUG_MODULE_NAME("EBF_DigitalOutput");
+
 	public:
 		uint8_t Init(uint8_t pinNumber);
 

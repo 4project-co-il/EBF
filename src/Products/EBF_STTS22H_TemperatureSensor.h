@@ -14,6 +14,9 @@
 
 class EBF_STTS22H_TemperatureSensor : protected EBF_HalInstance, protected EBF_I2CDevice {
 	private:
+		EBF_DEBUG_MODULE_NAME("EBF_STTS22H_TemperatureSensor");
+
+	private:
 		// Device registers data
 		const uint8_t regTempHighLimit 	= 0x02;
 		const uint8_t regTempLowLimit 	= 0x03;

@@ -33,6 +33,22 @@ uint8_t EBF_Core::AddHalInstance(EBF_HalInstance &instance)
 	return pLogic->AddHalInstance(instance);
 }
 
+#ifndef EBF_REMOVE_DEBUG_CODE
+void EBF_Core::SetErrorHandlerSerial(EBF_Serial &serial)
+{
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
+	pLogic->SetErrorHandlerSerial(serial);
+}
+
+void EBF_Core::ReportError(const char* pModuleName, uint32_t line, EBF_ERROR_CODE error)
+{
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
+	pLogic->ReportError(pModuleName, line, error);
+}
+#endif
+
 uint8_t EBF_Core::Process()
 {
 	EBF_Logic *pLogic = EBF_Logic::GetInstance();
