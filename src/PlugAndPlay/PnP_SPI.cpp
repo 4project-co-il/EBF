@@ -1,7 +1,6 @@
 #ifndef EBF_REMOVE_SPI_IMPLEMENTATION
 
 #include "PnP_SPI.h"
-#include "EBF_Logic.h"
 
 extern void EBF_EmptyCallback();
 
