@@ -15,7 +15,7 @@ class EBF_HalInstance {
 	public:
 		friend class EBF_Logic;
 		friend class EBF_Core;
-		friend class EBF_PlugAndPlayHub;
+		friend class PnP_PlugAndPlayHub;
 
 	public:
 		EBF_HalInstance();
