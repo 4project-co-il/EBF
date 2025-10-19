@@ -1,3 +1,10 @@
+Version 0.3.0
+	Interrupts code enhancement. EBF_DIRECT_CALL_FROM_ISR compilation flag allowing direct calls from ISRs.
+	EBF_Seeed_Monochrome_GROVE_16x2_LCD implementation. LCD based on the AiP31068 I2C driver.
+	Adding GetValue() API to EBF_Led class. All modules data should be self-contained from now on.
+	EEPROMs burning programs separated to it's own repo: https://github.com/4project-co-il/PlugAndPlay-EEPROMs
+	Separation of the Plug-n-Play code to a separate library: https://github.com/4project-co-il/PlugAndPlay
+
 Version 0.2.0
 	Adding PnP (Plug-and-Play) logic code
 	Adding several PnP devices support

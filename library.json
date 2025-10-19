@@ -1,6 +1,6 @@
 {
     "name": "EventBasedFramework",
-    "version": "0.2.0",
+    "version": "0.3.0",
     "keywords": "",
     "description": "EBF - Event Based Framework for Arduino",
     "repository": {
@@ -11,13 +11,12 @@
     "platforms": "*",
     "build": {
         "srcDir": ".",
-        "srcFilter": "+<*> -<examples> -<test> -<src/PlugAndPlay/EEPROMs>",
+        "srcFilter": "+<*> -<examples> -<test>",
         "libArchive": false,
         "flags": [
             "-I$PROJECT_INCLUDE_DIR",
             "-I./src/Core",
-            "-I./src/Products",
-            "-I./src/PlugAndPlay"
+            "-I./src/Products"
         ]
     },
     "dependencies": {
