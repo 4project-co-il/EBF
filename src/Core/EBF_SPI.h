@@ -5,8 +5,8 @@
 
 #include <Arduino.h>
 
-#if __has_include("EBF_Config.h")
-	#include "EBF_Config.h"
+#if __has_include("Project_Config.h")
+	#include "Project_Config.h"
 #endif
 
 #include "EBF_Global.h"

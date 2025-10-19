@@ -3,8 +3,8 @@
 
 #include <Arduino.h>
 #include <wiring_private.h>		// For EXTERNAL_NUM_INTERRUPTS
-#if __has_include("EBF_Config.h")
-	#include "EBF_Config.h"
+#if __has_include("Project_Config.h")
+	#include "Project_Config.h"
 #endif
 #include "EBF_Global.h"
 #include "EBF_Timers.h"

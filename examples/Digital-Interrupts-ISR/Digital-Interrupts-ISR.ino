@@ -17,11 +17,11 @@
 // flag to the compilation...
 // In the library src directory you will find the "EBF_Config_TEMPLATE.h" file, which include all the configuration
 // flags for the EBF library.
-// If you're using PlatformIO, you can save the content of that file as "EBF_Config.h" file in your project "include"
+// If you're using PlatformIO, you can save the content of that file as "Project_Config.h" file in your project "include"
 // directory.
-// If you're using Arduino IDE, copy that file and save it's content as "EBF_Config.h" file in the library "src" directory
+// If you're using Arduino IDE, copy that file and save it's content as "Project_Config.h" file in the library "src" directory
 //
-// In the "EBF_Config.h" file you will find the flag definition commented out:
+// In the "Project_Config.h" file you will find the flag definition commented out:
 // #define EBF_USE_INTERRUPTS
 // #define EBF_DIRECT_CALL_FROM_ISR
 // Uncomment those lines to have the interrupts code to be compiled into the EBF library

@@ -2,8 +2,8 @@
 #define __EBF_AIP31068_I2C_16X2_LCD_H__
 
 #include <Arduino.h>
-#if __has_include("EBF_Config.h")
-	#include "EBF_Config.h"
+#if __has_include("Project_Config.h")
+	#include "Project_Config.h"
 #endif
 
 #include "../Core/EBF_Global.h"
