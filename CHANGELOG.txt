@@ -1,3 +1,7 @@
+Version 0.3.1
+	Changes in polling interval APIs. All instances will use HAL's SetPollingInterval function.
+	Timers logic redesign, adding recalculate flag that might be requested by starting/stopping a timer or HalInstance SetPollingInterval.
+
 Version 0.3.0
 	Interrupts code enhancement. EBF_DIRECT_CALL_FROM_ISR compilation flag allowing direct calls from ISRs.
 	EBF_Seeed_Monochrome_GROVE_16x2_LCD implementation. LCD based on the AiP31068 I2C driver.
