@@ -23,6 +23,9 @@ class EBF_Logic {
 		uint8_t AddHalInstance(EBF_HalInstance &instance);
 		uint8_t Process();
 
+		// Should be called from HalInstance or timer to cause delay recalculation
+		void Recalculate() { recalculateNeeded = 1; }
+
 		static EBF_Logic *GetInstance();
 		EBF_HalInstance *GetHalInstance(EBF_HalInstance::HAL_Type type, uint8_t id);
 
@@ -109,6 +112,8 @@ class EBF_Logic {
 	private:
 		static EBF_Logic *pStaticInstance;
 		EBF_Timers timers;
+		uint8_t recalculateNeeded;
+
 #ifdef EBF_USE_INTERRUPTS
 		EBF_MessageQueue msgQueue;
 		EBF_MessageQueue::MessageEntry lastMessage;

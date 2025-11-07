@@ -1,5 +1,6 @@
 #include "EBF_Timers.h"
 #include "EBF_Core.h"
+#include "EBF_Logic.h"
 
 uint8_t EBF_Timers::Init(uint8_t maxTimers, EBF_MessageQueue *pMsgQueue)
 {
@@ -9,9 +10,6 @@ uint8_t EBF_Timers::Init(uint8_t maxTimers, EBF_MessageQueue *pMsgQueue)
 	// Init timers data
 	this->timersData = (TimerData*)malloc(sizeof(TimerData) * this->maxTimers);
 	memset(this->timersData, 0, sizeof(TimerData) * this->maxTimers);
-
-	// It's ok to use system micros() here, we're initializing, there is no power-saving yet
-	lastMicros = micros();
 
 	return EBF_OK;
 }
@@ -25,7 +23,8 @@ uint8_t EBF_Timers::InitTimer(uint8_t timerId, EBF_CallbackType callbackPtr, uin
 
 	TimerData &timer = this->timersData[timerId];
 	timer.callbackPtr = callbackPtr;
-	timer.microsLeft = 0;
+	timer.startingMicros = 0;
+	timer.isRunning = 0;
 	timer.milliSecTimeout = milliSec;
 
 	return EBF_OK;
@@ -33,6 +32,8 @@ uint8_t EBF_Timers::InitTimer(uint8_t timerId, EBF_CallbackType callbackPtr, uin
 
 uint8_t EBF_Timers::StartTimer(uint8_t timerId)
 {
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
 	if (timerId >= this->maxTimers) {
 		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
 		return EBF_INDEX_OUT_OF_BOUNDS;
@@ -46,17 +47,18 @@ uint8_t EBF_Timers::StartTimer(uint8_t timerId)
 	}
 
 	// Timer is already running
-	if (timer.microsLeft != 0) {
+	if (timer.isRunning != 0) {
 		EBF_REPORT_ERROR(EBF_RESOURCE_IS_IN_USE);
 		return EBF_RESOURCE_IS_IN_USE;
 	}
 
-	// Timer is not running, set ticks to be used
-	timer.microsLeft = timer.milliSecTimeout*1000L;
-	// Need a positive value to run, 0 means the timer is not running
-	if (timer.microsLeft == 0) {
-		timer.microsLeft = 1;
-	}
+	// Should use EBF's micros, since it's updated during power save mode
+	timer.startingMicros = pLogic->micros();
+
+	timer.isRunning = 1;
+
+	// Request recalculation of timeouts
+	pLogic->Recalculate();
 
 	return EBF_OK;
 }
@@ -80,36 +82,42 @@ uint8_t EBF_Timers::StartTimer(uint8_t timerId, uint16_t milliSec)
 	return EBF_OK;
 }
 
-uint32_t EBF_Timers::Process(unsigned long current)
+uint32_t EBF_Timers::Process()
 {
 	uint8_t i;
 	uint32_t nextMillis = 0xFFFFFFFF;
-	uint32_t microsPassed;
+	uint32_t millisPassed;
+	uint32_t millisLeft;
+	unsigned long currentMicros;
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
 
-	microsPassed = current - lastMicros;
-	lastMicros = current;
+	// Should use EBF's micros, since it's updated during power save mode
+	currentMicros = pLogic->micros();
 
 	for (i=0; i < this->maxTimers; i++) {
 		TimerData &timer = this->timersData[i];
 
 		// Non-active timer
-		if (timer.microsLeft == 0) {
+		if (timer.isRunning == 0) {
 			continue;
 		}
 
-		if (microsPassed >= timer.microsLeft) {
-			// Found timeout
-			timer.microsLeft = 0;
+		millisPassed = (currentMicros - timer.startingMicros)/1000L;
+
+		if (millisPassed >= timer.milliSecTimeout) {
+			// Timer expired
+			timer.isRunning = 0;
 
 			// Timers are processed from the user space, call the callback
 			timer.callbackPtr();
-		} else {
-			// Not yet, reduce the passed ticks for next run calculation
-			timer.microsLeft -= microsPassed;
+
+			// Continue to next timer, so we won't consider it for calculations
+			continue;
 		}
 
-		if (timer.microsLeft > 0 && timer.microsLeft/1000L < nextMillis) {
-			nextMillis = timer.microsLeft/1000L;
+		millisLeft = timer.milliSecTimeout - millisPassed;
+		if (millisLeft < nextMillis) {
+			nextMillis = millisLeft;
 		}
 	}
 
@@ -118,6 +126,8 @@ uint32_t EBF_Timers::Process(unsigned long current)
 
 uint8_t EBF_Timers::StopTimer(uint8_t timerId)
 {
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
 	if (timerId >= this->maxTimers) {
 		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
 		return EBF_INDEX_OUT_OF_BOUNDS;
@@ -125,7 +135,11 @@ uint8_t EBF_Timers::StopTimer(uint8_t timerId)
 
 	TimerData &timer = this->timersData[timerId];
 
-	timer.microsLeft = 0;
+	timer.isRunning = 0;
+	timer.startingMicros = 0;
+
+	// Request recalculation of timeouts
+	pLogic->Recalculate();
 
 	return EBF_OK;
 }

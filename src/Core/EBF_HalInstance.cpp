@@ -46,7 +46,12 @@ uint32_t EBF_HalInstance::GetPollingInterval()
 
 void EBF_HalInstance::SetPollingInterval(uint32_t ms)
 {
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
 	pollIntervalMs = ms;
+
+	// Recalculation of delays is needed after polling interval change
+	pLogic->Recalculate();
 }
 
 unsigned long EBF_HalInstance::GetLastPollMillis()

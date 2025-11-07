@@ -19,21 +19,21 @@ class EBF_Timers {
 		uint8_t RestartTimer(uint8_t timerId);
 
 		// Returns number of milliSeconds till the next timer, or 0xFFFFFFFF if there are no timers
-		uint32_t Process(unsigned long current);
+		uint32_t Process();
 
 	private:
 		typedef struct
 		{
 			EBF_CallbackType callbackPtr;
-			uint32_t microsLeft;
+			unsigned long startingMicros;
 			uint16_t milliSecTimeout;
+			uint8_t isRunning;
 		} TimerData;
 
 	private:
 		EBF_MessageQueue *pMsgQueue;
 		uint8_t maxTimers;
 		TimerData* timersData;
-		unsigned long lastMicros;
 };
 
 #endif

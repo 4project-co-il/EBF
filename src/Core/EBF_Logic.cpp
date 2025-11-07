@@ -194,8 +194,13 @@ uint8_t EBF_Logic::Process()
 	// Start counting time before the execution of the callbacks, that might take some time
 	uint32_t start = this->micros();
 
+	// Clear the recalculate flag before processing
+	// Timers Process() and Hal_Instance Process() calls might change the needed delay
+	// or start/restart a timer, so they will set that flag in the process
+	recalculateNeeded = 0;
+
 	// Process timers
-	delayWanted = timers.Process(start);
+	delayWanted = timers.Process();
 
 //	SerialUSB.print("Timers wanted: ");
 //	SerialUSB.println(delayWanted);
@@ -220,17 +225,19 @@ uint8_t EBF_Logic::Process()
 		if (ms - pHal->GetLastPollMillis() > pHal->GetPollingInterval()) {
 			pHal->SetLastPollMillis(ms);
 			pHal->Process();
-
-			if (pHal->GetPollingInterval() < delayWanted) {
-				delayWanted = pHal->GetPollingInterval();
-			}
-		} else {
-			uint16_t pollWanted = pHal->GetPollingInterval() - (ms - pHal->GetLastPollMillis());
-
-			if (pollWanted < delayWanted) {
-				delayWanted = pollWanted;
-			}
 		}
+
+		// Calculate the wanted ms interval
+		uint16_t pollWanted = pHal->GetPollingInterval() - (ms - pHal->GetLastPollMillis());
+
+		if (pollWanted < delayWanted) {
+			delayWanted = pollWanted;
+		}
+	}
+
+	// Recalculation needed, exit and the main loop will call that function again
+	if (recalculateNeeded) {
+		return EBF_OK;
 	}
 
 	// Should give other things some CPU time
@@ -273,6 +280,11 @@ uint8_t EBF_Logic::Process()
 #ifdef EBF_USE_INTERRUPTS
 		uint8_t rc;
 
+		// Clear the recalculate flag before processing
+		// Timers Process() and Hal_Instance Process() calls might change the needed delay
+		// or start/restart a timer, so they will set that flag in the process
+		recalculateNeeded = 0;
+
 		// Messages are used to pass information from interrupts to normal run
 		while (msgQueue.GetMessagesNumber() > 0) {
 			rc = msgQueue.GetMessage(lastMessage);
@@ -282,6 +294,11 @@ uint8_t EBF_Logic::Process()
 				lastMessage.pHalInstance->Process();
 				isPostInterruptProcessing = 0;
 			}
+		}
+
+		// Need to recalculate wanted delay after message processing
+		if(recalculateNeeded) {
+			return EBF_OK;
 		}
 #endif
 		while ( delayWanted > 0 && (this->micros() - start) >= 1000) {
