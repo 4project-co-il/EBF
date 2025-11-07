@@ -1,0 +1,6 @@
+#ifndef __EVENTBASEDFRAMEWORK_H__SHORTCUT_
+#define __EVENTBASEDFRAMEWORK_H__SHORTCUT_
+
+#include "src/EBF.h"
+
+#endif
