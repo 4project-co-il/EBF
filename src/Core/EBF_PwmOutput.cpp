@@ -19,7 +19,7 @@ uint8_t EBF_PwmOutput::Init(uint8_t pinNumber)
 	*/
 
 	// Hardware PWM outputs should not be polled
-	this->pollIntervalMs = EBF_NO_POLLING;
+	this->SetPollingInterval(EBF_NO_POLLING);
 
 	this->pinNumber = pinNumber;
 

@@ -15,7 +15,7 @@ uint8_t EBF_I2C::Init(EBF_CallbackType callbackFunc, uint8_t address)
 
 	if (callbackFunc == NULL) {
 		// No callback. No need to poll in that case
-		pollIntervalMs = EBF_NO_POLLING;
+		SetPollingInterval(EBF_NO_POLLING);
 	}
 
 	if (address == 0) {
@@ -27,13 +27,13 @@ uint8_t EBF_I2C::Init(EBF_CallbackType callbackFunc, uint8_t address)
 	return EBF_OK;
 }
 
-void EBF_I2C::SetPollInterval(uint32_t ms)
+void EBF_I2C::SetPollingInterval(uint32_t ms)
 {
 	// No polling needed if there is no callback to call
 	if (callbackFunc == NULL) {
-		pollIntervalMs = EBF_NO_POLLING;
+		EBF_HalInstance::SetPollingInterval(EBF_NO_POLLING);
 	} else {
-		pollIntervalMs = ms;
+		EBF_HalInstance::SetPollingInterval(ms);
 	}
 }
 

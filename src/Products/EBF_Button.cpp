@@ -52,8 +52,8 @@ void EBF_Button::ProcessSwitchCallback()
 		// The rest of the processing will be done in Process() function,
 		// since it's called every polling interval or change
 		// We will set the polling interval to the long press value if it's shorter
-		if (longPressTime < pollIntervalMs) {
-			pollIntervalMs = longPressTime;
+		if (longPressTime < GetPollingInterval()) {
+			SetPollingInterval(longPressTime);
 		}
 	}
 }

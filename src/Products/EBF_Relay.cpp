@@ -47,7 +47,7 @@ uint8_t EBF_Relay::Process()
 {
 	// Nothing to do
 	// No polling needed
-	pollIntervalMs = EBF_NO_POLLING;
+	SetPollingInterval(EBF_NO_POLLING);
 
 	return EBF_OK;
 }

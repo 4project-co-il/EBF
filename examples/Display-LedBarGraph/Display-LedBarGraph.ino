@@ -46,7 +46,7 @@ void setup()
 	// Initialize knock sensor on A0, for 1% change
 	analogInput.Init(A0, onAnalogChange, 1);
 	// Will poll the input every 10 mSec
-	analogInput.SetPollInterval(10);
+	analogInput.SetPollingInterval(10);
 
 	// loop over the leds array and set them all to output:
 	for (int thisLed = 0; thisLed < ledCount; thisLed++) {

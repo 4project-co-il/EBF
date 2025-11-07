@@ -67,8 +67,6 @@ class EBF_SparkFun_QWIIC_SerLCD : protected EBF_HalInstance, protected EBF_I2CDe
 		EBF_SparkFun_QWIIC_SerLCD(EBF_I2C *pI2cInterface) : EBF_I2CDevice(pI2cInterface) { }
 
 		uint8_t Init(uint8_t i2cAddress = 0x72);
-		// Setting polling interval in milli-seconds
-		void SetPollInterval(uint32_t ms) { pollIntervalMs = ms; }
 
 		// Print class interface
 		size_t write(uint8_t b);

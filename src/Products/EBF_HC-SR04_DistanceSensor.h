@@ -19,9 +19,6 @@ class EBF_HCSR04_DistanceSensor : protected EBF_DigitalInput {
 		float GetValue();
 		float GetLastValue() { return lastValue; }
 
-		// Setting polling interval in milli-seconds
-		void SetPollInterval(uint32_t ms) { pollIntervalMs = ms; }
-
 		void SetOnChange(EBF_CallbackType onChangeCallback, uint8_t changePercent = 5);
 
 	protected:

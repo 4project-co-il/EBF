@@ -109,9 +109,9 @@
             "files": ["Analog-AnalogInPwmOutSerial.ino"]
         },
         {
-            "name": "Analog - Analog In. PWM Out. Serial. SetPollInterval",
-            "base": "examples/Analog-AnalogInPwmOutSerialSetPollInterval",
-            "files": ["Analog-AnalogInPwmOutSerialSetPollInterval.ino"]
+            "name": "Analog - Analog In. PWM Out. Serial. SetPollingInterval",
+            "base": "examples/Analog-AnalogInPwmOutSerialSetPollingInterval",
+            "files": ["Analog-AnalogInPwmOutSerialSetPollingInterval.ino"]
         },
         {
             "name": "Analog - Analog Input",

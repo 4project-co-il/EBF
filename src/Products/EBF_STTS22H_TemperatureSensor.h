@@ -72,8 +72,6 @@ class EBF_STTS22H_TemperatureSensor : protected EBF_HalInstance, protected EBF_I
 		} OperationMode;
 
 		uint8_t Init(uint8_t i2cAddress, OperationMode mode = POWER_DOWN);
-		// Setting polling interval in milli-seconds
-		void SetPollInterval(uint32_t ms) { pollIntervalMs = ms; }
 
 #ifdef EBF_USE_INTERRUPTS
 		// Call to attach the device to an interrupt line

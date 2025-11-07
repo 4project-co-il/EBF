@@ -72,7 +72,7 @@ void setup()
 	// You could decrease the polling interval to it's minimal, but that will not allow
 	// to save power, if it was possible.
 	// The solution is to use interrupts (if possible). See "Digital-Interrupts" example.
-	button.SetPollInterval(500);
+	button.SetPollingInterval(500);
 }
 
 void loop()

@@ -46,7 +46,7 @@ void setup()
 	// EBF_Switch implementation temporary changes the polling time when debounce should
 	// be measured. For this example, the polling is set higher than the debounce time,
 	// so during the change of the input the polling will temporary be changed to 20 mSec
-	sw.SetPollInterval(100);
+	sw.SetPollingInterval(100);
 }
 
 void loop()

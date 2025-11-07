@@ -75,7 +75,7 @@ void EBF_STTS22H_TemperatureSensor::UpdatePollInterval()
 	uint8_t needPolling = 0;
 
 	// No need to poll, unless some callbacks are needed and there is no interrupt attached
-	pollIntervalMs = EBF_NO_POLLING;
+	SetPollingInterval(EBF_NO_POLLING);
 
 	if (onChangeCallback != NULL && onChangeCallback != EBF_EmptyCallback) {
 		needPolling = 1;
@@ -95,31 +95,31 @@ void EBF_STTS22H_TemperatureSensor::UpdatePollInterval()
 		switch (operationMode)
 		{
 		case OperationMode::POWER_DOWN:
-			pollIntervalMs = EBF_NO_POLLING;
+			SetPollingInterval(EBF_NO_POLLING);
 			break;
 
 		case OperationMode::MODE_ONE_SHOT:
-			pollIntervalMs = 0;
+			SetPollingInterval(0);
 			break;
 
 		case OperationMode::MODE_1HZ:
-			pollIntervalMs = 1000;
+			SetPollingInterval(1000);
 			break;
 
 		case OperationMode::MODE_25HZ:
-			pollIntervalMs = 1000 / 25;
+			SetPollingInterval(1000 / 25);
 			break;
 
 		case OperationMode::MODE_50HZ:
-			pollIntervalMs = 1000 / 50;
+			SetPollingInterval(1000 / 50);
 			break;
 
 		case OperationMode::MODE_100HZ:
-			pollIntervalMs = 1000 / 100;
+			SetPollingInterval(1000 / 100);
 			break;
 
 		case OperationMode::MODE_200HZ:
-			pollIntervalMs = 1000 / 200;
+			SetPollingInterval(1000 / 200);
 			break;
 		}
 	}
@@ -157,6 +157,7 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetControlRegister(ControlRegister_t ctrl
 uint8_t EBF_STTS22H_TemperatureSensor::GetValueRaw(int16_t &value)
 {
 	uint8_t rc = EBF_OK;
+	uint8_t readVal = 0;
 
 	noInterrupts();
 	do {
@@ -170,11 +171,11 @@ uint8_t EBF_STTS22H_TemperatureSensor::GetValueRaw(int16_t &value)
 
 		pI2C->requestFrom(i2cAddress, 2);
 
-		rc = pI2C->read();
-		value = rc;
+		readVal = pI2C->read();
+		value = readVal;
 
-		rc = pI2C->read();
-		value |= rc << 8;
+		readVal = pI2C->read();
+		value |= readVal << 8;
 	} while (0);
 	interrupts();
 
@@ -339,7 +340,7 @@ uint8_t EBF_STTS22H_TemperatureSensor::Process()
 		if (!IsBusy()) {
 			// state is changed to IDLE after one-shot is complete and there is no need to poll it again
 			state = InstanceState::STATE_IDLE;
-			pollIntervalMs = EBF_NO_POLLING;
+			SetPollingInterval(EBF_NO_POLLING);
 
 			onMeasureComplete();
 		}

@@ -24,7 +24,7 @@ class EBF_AnalogInput : protected EBF_HalInstance {
 		float GetLastValue();
 		uint16_t GetRawLastValue();
 
-		void SetPollInterval(uint32_t ms);
+		void SetPollingInterval(uint32_t ms);
 
 	protected:
 		uint8_t Process();

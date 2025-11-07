@@ -41,7 +41,7 @@ void setup()
 	// Initialize knock sensor on A0, for 1% change
 	sensor.Init(A0, onSensorChange, 1);
 	// Will poll the sensor every 100 mSec
-	sensor.SetPollInterval(100);
+	sensor.SetPollingInterval(100);
 
 	// Initialize built-in led (generally on line 13)
 	led.Init(LED_BUILTIN);

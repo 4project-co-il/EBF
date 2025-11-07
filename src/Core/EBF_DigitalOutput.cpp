@@ -12,7 +12,7 @@ uint8_t EBF_DigitalOutput::Init(uint8_t pinNumber)
 	}
 
 	// Digital outputs should not be polled
-	this->pollIntervalMs = EBF_NO_POLLING;
+	this->SetPollingInterval(EBF_NO_POLLING);
 
 	this->pinNumber = pinNumber;
 

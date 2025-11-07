@@ -70,7 +70,7 @@ void setup()
 	// You can also change the polling interval if you don't need maximal responsivnes
 	// EBF_Button implementation temporary changes the polling time when debounce should
 	// be measured.
-	button.SetPollInterval(5);
+	button.SetPollingInterval(5);
 
 	// You can change the long-press time
 	button.SetLongPressTime(5000);

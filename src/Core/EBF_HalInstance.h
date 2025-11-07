@@ -57,14 +57,15 @@ class EBF_HalInstance {
 		unsigned long GetLastPollMillis();
 		void SetLastPollMillis(unsigned long ms);
 
-		uint32_t pollIntervalMs;		// in milli-Sec
-		unsigned long lastPollMillis;
-
 		HAL_Type type;
 		uint32_t id;
 
 	private:
 		static uint8_t numberOfInstances;
+
+		uint32_t pollIntervalMs;		// in milli-Sec
+		unsigned long lastPollMillis;
+
 
 };
 

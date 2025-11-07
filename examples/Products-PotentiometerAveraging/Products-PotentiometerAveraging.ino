@@ -30,7 +30,7 @@ void setup()
 	potentiometer.SetOnChange(onValueChange);
 
 	// We can specify the polling time in milli-seconds
-	potentiometer.SetPollInterval(10);
+	potentiometer.SetPollingInterval(10);
 }
 
 void loop()

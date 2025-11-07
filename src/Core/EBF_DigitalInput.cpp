@@ -32,7 +32,7 @@ uint8_t EBF_DigitalInput::Init(
 		lastValue = digitalRead(pinNumber);
 	} else {
 		// No callback. No need to poll in that case
-		pollIntervalMs = EBF_NO_POLLING;
+		SetPollingInterval(EBF_NO_POLLING);
 	}
 
 	return EBF_OK;
@@ -53,7 +53,7 @@ uint8_t EBF_DigitalInput::AttachInterrupt()
 				interruptAttached = 1;
 
 				// No need to poll
-				pollIntervalMs = EBF_NO_POLLING;
+				SetPollingInterval(EBF_NO_POLLING);
 			}
 
 			return EBF_OK;
@@ -64,13 +64,13 @@ uint8_t EBF_DigitalInput::AttachInterrupt()
 	return EBF_INVALID_STATE;
 }
 
-void EBF_DigitalInput::SetPollInterval(uint32_t ms)
+void EBF_DigitalInput::SetPollingInterval(uint32_t ms)
 {
 	// No polling needed if there is no callback to call
 	if (callbackFunc == NULL) {
-		pollIntervalMs = EBF_NO_POLLING;
+		EBF_HalInstance::SetPollingInterval(EBF_NO_POLLING);
 	} else {
-		pollIntervalMs = ms;
+		EBF_HalInstance::SetPollingInterval(ms);
 	}
 }
 

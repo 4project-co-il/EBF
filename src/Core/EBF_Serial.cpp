@@ -54,7 +54,7 @@ uint8_t EBF_Serial::Init(
 
 	if (callbackFunc == NULL) {
 		// No callback. No need to poll in that case
-		pollIntervalMs = EBF_NO_POLLING;
+		SetPollingInterval(EBF_NO_POLLING);
 	}
 
 	switch (type)
@@ -81,13 +81,13 @@ uint8_t EBF_Serial::Init(
 	return EBF_OK;
 }
 
-void EBF_Serial::SetPollInterval(uint32_t ms)
+void EBF_Serial::SetPollingInterval(uint32_t ms)
 {
 	// No polling needed if there is no callback to call
 	if (callbackFunc == NULL) {
-		pollIntervalMs = EBF_NO_POLLING;
+		EBF_HalInstance::SetPollingInterval(EBF_NO_POLLING);
 	} else {
-		pollIntervalMs = ms;
+		EBF_HalInstance::SetPollingInterval(ms);
 	}
 }
 

@@ -24,7 +24,7 @@ class EBF_I2C : protected EBF_HalInstance, public Stream {
 
 		uint8_t Process();
 
-		void SetPollInterval(uint32_t ms);
+		void SetPollingInterval(uint32_t ms);
 
 		// Stream and Print interfaces
 		inline size_t write(unsigned long n) { return i2c.write((uint8_t)n); }

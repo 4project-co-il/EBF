@@ -34,7 +34,7 @@ void onAnalog0Change()
 
 	// Don't use delay() with the Event Based Framework!
 	// There is a small delay in the main loop to let everthing work properly
-	// If the changes are comming too fast, you can use SetPollInterval to limit polling speed
+	// If the changes are comming too fast, you can use SetPollingInterval to limit polling speed
 }
 
 void setup()
@@ -48,7 +48,7 @@ void setup()
 	// Initialize the analog input on line 0, for any change (0% threshold)
 	analongInput.Init(A0, onAnalog0Change, 0);
 	// Limit polling of that analog input to once in 50 mSec
-	analongInput.SetPollInterval(50);
+	analongInput.SetPollingInterval(50);
 
 	// Initialize PWM output on line 9
 	pwmOutput.Init(9);

@@ -24,7 +24,7 @@ void setup()
 	// the onDistanceChange function will be called when the distance will be change more than 1%
 	sensor.SetOnChange(onDistanceChange, 1);
 	// The sensor will be polled every 100 mSec
-	sensor.SetPollInterval(100);
+	sensor.SetPollingInterval(100);
 }
 
 

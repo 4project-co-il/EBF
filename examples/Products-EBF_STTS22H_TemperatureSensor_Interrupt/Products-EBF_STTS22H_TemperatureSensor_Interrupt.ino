@@ -117,7 +117,7 @@ void setup()
 	// For example, for 1Hz mode, polling will be 1000mSec
 	tempSensor.SetOperationMode(EBF_STTS22H_TemperatureSensor::OperationMode::MODE_1HZ);
 	// We will use the interrupt line to trigger the threshold level notifications, so no polling is needed
-	tempSensor.SetPollInterval(EBF_NO_POLLING);
+	tempSensor.SetPollingInterval(EBF_NO_POLLING);
 }
 
 void loop()

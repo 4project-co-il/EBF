@@ -117,7 +117,7 @@ uint8_t EBF_Led::Blink(uint16_t msOn, uint16_t msOff)
 	effectStart = micros();
 
 	// Force processing, it will recalculate the needed polling interval there
-	pollIntervalMs = 0;
+	SetPollingInterval(0);
 
 	rc = EBF_PwmOutput::SetValue(brightness);
 	if (rc != EBF_OK) {
@@ -137,7 +137,7 @@ uint8_t EBF_Led::FadeIn(uint16_t msDuration, uint8_t steps)
 
 	// onDuration will be used to store step duration
 	onDuration = msDuration / steps;
-	pollIntervalMs = onDuration;
+	SetPollingInterval(onDuration);
 
 	// offDuration will be used to store current brightness
 	// We will start from 0
@@ -166,7 +166,7 @@ uint8_t EBF_Led::FadeOut(uint16_t msDuration, uint8_t steps)
 
 	// onDuration will be used to store step duration
 	onDuration = msDuration / steps;
-	pollIntervalMs = onDuration;
+	SetPollingInterval(onDuration);
 
 	// offDuration will be used to store current brightness
 	// We will start from max brightness
@@ -197,7 +197,7 @@ uint8_t EBF_Led::Process()
 	case LED_OFF:
 		// Nothing to do
 		// No polling needed
-		pollIntervalMs = EBF_NO_POLLING;
+		SetPollingInterval(EBF_NO_POLLING);
 		break;
 
 	case LED_BLINKING_ON:
@@ -211,11 +211,11 @@ uint8_t EBF_Led::Process()
 			effectStart = micros();
 
 			// next polling is the duration of the OFF state
-			pollIntervalMs = offDuration;
+			SetPollingInterval(offDuration);
 		} else {
 			// On duration didn't pass yet, processing was called before needed
 			// Set polling to the time left
-			pollIntervalMs = onDuration - timePassed / 1000;
+			SetPollingInterval(onDuration - timePassed / 1000);
 		}
 		break;
 
@@ -230,11 +230,11 @@ uint8_t EBF_Led::Process()
 			effectStart = micros();
 
 			// next polling is the duration of the OFF state
-			pollIntervalMs = onDuration;
+			SetPollingInterval(onDuration);
 		} else {
 			// On duration didn't pass yet, processing was called before needed
 			// Set polling to the time left
-			pollIntervalMs = offDuration - timePassed / 1000;
+			SetPollingInterval(offDuration - timePassed / 1000);
 		}
 		break;
 
@@ -255,15 +255,15 @@ uint8_t EBF_Led::Process()
 				// We've reached max brightness
 				state = LED_ON;
 
-				pollIntervalMs = EBF_NO_POLLING;
+				SetPollingInterval(EBF_NO_POLLING);
 			} else {
 				effectStart = micros();
-				pollIntervalMs = onDuration;
+				SetPollingInterval(onDuration);
 			}
 		} else {
 			// Processing was called before needed
 			// Set polling to the time left
-			pollIntervalMs = onDuration - timePassed / 1000;
+			SetPollingInterval(onDuration - timePassed / 1000);
 		}
 		break;
 
@@ -284,15 +284,15 @@ uint8_t EBF_Led::Process()
 				// We've reached min brightness
 				state = LED_OFF;
 
-				pollIntervalMs = EBF_NO_POLLING;
+				SetPollingInterval(EBF_NO_POLLING);
 			} else {
 				effectStart = micros();
-				pollIntervalMs = onDuration;
+				SetPollingInterval(onDuration);
 			}
 		} else {
 			// Processing was called before needed
 			// Set polling to the time left
-			pollIntervalMs = onDuration - timePassed / 1000;
+			SetPollingInterval(onDuration - timePassed / 1000);
 		}
 		break;
 

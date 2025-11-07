@@ -59,7 +59,7 @@ void onButtonChange()
 }
 ```
 
-Serial will call your function when there is data to read. 
+Serial will call your function when there is data to read.
 ```
 // Serial data callback function
 void onSerial()
@@ -77,16 +77,16 @@ void onSerial()
 ## No more polling
 The EBF core will do all the polling needed to detect those changes for you, will check when the right time passes to call your function.
 That implementation allows power saving since all the timing is done in a cetralized code. When the EBF core knows that there is enough time to save some power, it might put the CPU into IDLE or PowerDown mode.
-You have control over the polling intervals, so instead of adding `delay()` to different parts of the code if you don't need an input to be polled too fast, just call the 'SetPollInterval()' function during setup.
+You have control over the polling intervals, so instead of adding `delay()` to different parts of the code if you don't need an input to be polled too fast, just call the 'SetPollingInterval()' function during setup.
 ```
 // Initialize knock sensor on A0, for 1% change
 analogInput.Init(A0, onAnalogChange, 1);
 // Will poll the input every 10 mSec
-analogInput.SetPollInterval(10);
+analogInput.SetPollingInterval(10);
 ```
 
 ## Interrupts
-Want to utilize the hardware interrupts instead of polling the ports to detect the change? No problem! 
+Want to utilize the hardware interrupts instead of polling the ports to detect the change? No problem!
 There's almost no code should be changed. Just compile the EBF library with interrupts support and your callback functions will be called the same way as they were done while polling method was used.
 The only change needed is to return the interrupt call (ISR) back to the EBF core, so it will call your function again from the normal run, where you can use Serial and other peripherials without blocking other interrupts.
 If you need faster execution with some small code, like counting pulses from an encoder, you might want to execute that code in the first call to the callback function, so there might not be a need to pass the control back to the EBF.
@@ -117,7 +117,7 @@ void onButtonChange()
 ```
 
 # Power save
-Power saving is currently implemented for the SAMD21 chips. 
+Power saving is currently implemented for the SAMD21 chips.
 With the SparkFun's SAMD21 Mini board with power LED jumper open, in configuration with one pin as digital output (to show some signs of life), we managed to get down to 530 uA power consumption in deep sleep mode.
 With onboard voltage regulator disconnected the consumption was only **22 uA**!
 

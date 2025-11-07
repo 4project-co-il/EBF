@@ -23,19 +23,19 @@ uint8_t EBF_AnalogInput::Init(
 		lastValue = analogRead(pinNumber);
 	} else {
 		// No callback. No need to poll in that case
-		pollIntervalMs = EBF_NO_POLLING;
+		SetPollingInterval(EBF_NO_POLLING);
 	}
 
 	return EBF_OK;
 }
 
-void EBF_AnalogInput::SetPollInterval(uint32_t ms)
+void EBF_AnalogInput::SetPollingInterval(uint32_t ms)
 {
 	// No polling needed if there is no callback to call
 	if (callbackFunc == NULL) {
-		pollIntervalMs = EBF_NO_POLLING;
+		EBF_HalInstance::SetPollingInterval(EBF_NO_POLLING);
 	} else {
-		pollIntervalMs = ms;
+		EBF_HalInstance::SetPollingInterval(ms);
 	}
 }
 

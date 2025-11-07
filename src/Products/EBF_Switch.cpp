@@ -31,13 +31,13 @@ uint8_t EBF_Switch::Init(uint8_t pinNumber, bool internelPullup)
 }
 
 // Setting polling interval in milli-seconds
-void EBF_Switch::SetPollInterval(uint32_t ms) {
-	pollIntervalMs = ms;
-	savedPollingInterval = pollIntervalMs;
+void EBF_Switch::SetPollingInterval(uint32_t ms) {
+	EBF_HalInstance::SetPollingInterval(ms);
+	savedPollingInterval = ms;
 }
 
 void EBF_Switch::RestorePollInterval() {
-	pollIntervalMs = savedPollingInterval;
+	SetPollingInterval(savedPollingInterval);
 }
 
 // Called when digital input change is detected
@@ -60,8 +60,8 @@ void EBF_Switch::ProcessCallback()
 		// The rest of the processing will be done in Process() function,
 		// since it's called every polling interval or change
 		// We will set the polling interval to the debounce value if it's shorter
-		if (debounceTime < pollIntervalMs) {
-			pollIntervalMs = debounceTime;
+		if (debounceTime < GetPollingInterval()) {
+			SetPollingInterval(debounceTime);
 		}
 	}
 }

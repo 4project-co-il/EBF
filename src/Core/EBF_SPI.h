@@ -30,7 +30,7 @@ class EBF_SPI : protected EBF_HalInstance {
 		);
 		uint8_t Process();
 
-		void SetPollInterval(uint32_t ms);
+		void SetPollingInterval(uint32_t ms);
 		void SetCallback(EBF_CallbackType callbackFunc) { this->callbackFunc = callbackFunc; }
 
 		inline void ssSelect() { digitalWrite(ssPin, LOW); }
