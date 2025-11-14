@@ -102,7 +102,7 @@ class EBF_SparkFun_QWIIC_SerLCD : protected EBF_HalInstance, protected EBF_I2CDe
 		uint8_t DirectionRTL();
 		uint8_t AutoScrollOn();
 		uint8_t AutoScrollOff();
-		uint8_t setContrast(uint8_t contrast);
+		uint8_t SetContrast(uint8_t contrast);
 
 	protected:
 		uint8_t Process();

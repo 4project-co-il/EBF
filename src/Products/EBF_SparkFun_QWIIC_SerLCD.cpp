@@ -370,7 +370,7 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::AutoScrollOff()
 
 // Set the conrast from 0 to 255. Default value is 120
 // This API changes the intensity of the backlight
-uint8_t EBF_SparkFun_QWIIC_SerLCD::setContrast(uint8_t contrast)
+uint8_t EBF_SparkFun_QWIIC_SerLCD::SetContrast(uint8_t contrast)
 {
 	uint8_t rc;
 
