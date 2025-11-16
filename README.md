@@ -40,7 +40,7 @@ void onTimer()
   led.SetValue(ledState);
 
   // EBF timers are one-shot in nature, restart it
-  EBF.StartTimer(LED_TIMER);
+  ledTimer.Start();
 }
 ```
 
@@ -152,7 +152,7 @@ void onTimer()
   }
 
   // EBF timers are one-shot in nature, restart it
-  EBF.StartTimer(LED_TIMER);
+  ledTimer.Start();
 }
 ```
 

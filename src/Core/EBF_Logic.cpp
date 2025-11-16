@@ -1,4 +1,5 @@
 #include "EBF_Logic.h"
+#include "EBF_Timer.h"
 #include "EBF_HalInstance.h"
 
 // EBF_Logic implementation
@@ -75,11 +76,16 @@ EBF_Logic *EBF_Logic::pStaticInstance = new EBF_Logic();
 
 EBF_Logic::EBF_Logic()
 {
+	pTimers = NULL;
+	timerIndex = 0;
+
 	pHalInstances = NULL;
 	halIndex = 0;
+
 #ifndef EBF_REMOVE_DEBUG_CODE
 	pErrorSerial = NULL;
 #endif
+
 #ifdef EBF_USE_INTERRUPTS
 	isRunFromISR = 0;
 	isPostInterruptProcessing = 0;
@@ -95,7 +101,7 @@ EBF_Logic *EBF_Logic::GetInstance()
 	return pStaticInstance;
 }
 
-uint8_t EBF_Logic::Init(uint8_t maxTimers, uint8_t queueSize)
+uint8_t EBF_Logic::Init(uint8_t queueSize)
 {
 	uint8_t rc;
 
@@ -109,14 +115,15 @@ uint8_t EBF_Logic::Init(uint8_t maxTimers, uint8_t queueSize)
 		EBF_REPORT_ERROR_INT(rc);
 		return rc;
 	}
-
-	rc = this->timers.Init(maxTimers, &msgQueue);
-#else
-	rc = this->timers.Init(maxTimers, NULL);
 #endif
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR_INT(rc);
-		return rc;
+
+	if (EBF_Timer::GetNumberOfTimers() > 0) {
+		pTimers = (EBF_Timer**)malloc(sizeof(EBF_Timer*) * EBF_Timer::GetNumberOfTimers());
+
+		if (pTimers == NULL) {
+			EBF_REPORT_ERROR_INT(EBF_NOT_ENOUGH_MEMORY);
+			return EBF_NOT_ENOUGH_MEMORY;
+		}
 	}
 
 #ifdef EBF_SLEEP_IMPLEMENTATION
@@ -171,6 +178,19 @@ void EBF_Logic::ReportError(const char* pModuleName, uint32_t line, EBF_ERROR_CO
 }
 #endif
 
+uint8_t EBF_Logic::AddTimer(EBF_Timer &timer)
+{
+	if (timerIndex >= EBF_Timer::GetNumberOfTimers()) {
+		EBF_REPORT_ERROR_INT(EBF_INDEX_OUT_OF_BOUNDS);
+		return EBF_INDEX_OUT_OF_BOUNDS;
+	}
+
+	pTimers[timerIndex] = &timer;
+	timerIndex++;
+
+	return EBF_OK;
+}
+
 uint8_t EBF_Logic::AddHalInstance(EBF_HalInstance &instance)
 {
 	if (halIndex >= EBF_HalInstance::GetNumberOfInstances()) {
@@ -188,8 +208,6 @@ uint8_t EBF_Logic::Process()
 {
 	uint8_t i;
 	uint32_t delayWanted = EBF_NO_POLLING;
-	EBF_HalInstance *pHal;
-	unsigned long ms;
 
 	// Start counting time before the execution of the callbacks, that might take some time
 	uint32_t start = this->micros();
@@ -200,14 +218,28 @@ uint8_t EBF_Logic::Process()
 	recalculateNeeded = 0;
 
 	// Process timers
-	delayWanted = timers.Process();
+	for (i=0; i<timerIndex; i++) {
+		EBF_Timer* pTimer = pTimers[i];
+
+		uint32_t pollWanted = pTimer->Process();
+
+		// Timer is not running
+		if (pollWanted == EBF_NO_POLLING) {
+			continue;
+		}
+
+		if (pollWanted < delayWanted) {
+			delayWanted = pollWanted;
+		}
+	}
 
 //	SerialUSB.print("Timers wanted: ");
 //	SerialUSB.println(delayWanted);
 
 	// Process HALs
 	for (i=0; i<halIndex; i++) {
-		pHal = pHalInstances[i];
+		unsigned long ms;
+		EBF_HalInstance* pHal = pHalInstances[i];
 
 //		SerialUSB.print("HAL ");
 //		SerialUSB.print(pHal->GetType());

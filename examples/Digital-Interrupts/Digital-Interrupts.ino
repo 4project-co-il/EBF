@@ -23,15 +23,9 @@
 // Uncomment that line to have the interrupts code to be compiled into the EBF library
 
 
-// Timers enumeration
-enum {
-	SEC_TIMER = 0,
-
-	NUMBER_OF_TIMERS
-};
-
 // EBF objects creation, should be global
 EBF_Core EBF;
+EBF_Timer timer;
 EBF_DigitalOutput led;
 EBF_DigitalInput button;
 
@@ -40,14 +34,14 @@ EBF_Serial serial;
 // You can use any other Serial interface if availalbe for your device
 //EBF_Serial serial(Serial2);
 
-// LED Timer callback function
+// Timer callback function
 void onTimer()
 {
 	// We will use the 1sec timer as a timing reference in printouts
 	serial.println("1sec passed");
 
 	// EBF timers are one-shot in nature, restart it
-	EBF.StartTimer(SEC_TIMER);
+	timer.Start();
 }
 
 // The callback function for the digital input change
@@ -70,11 +64,11 @@ void onButtonChange()
 
 void setup()
 {
-	// EBF is the first thing that should be initialized, with the maximum timers to be used
-	// Second parameter of the EBF Init function is the message queue size used to pass messages
+	// EBF is the first thing that should be initialized
+	// The parameter of the EBF Init function is the message queue size used to pass messages
 	// from interrupt to normal run. Think of it as a global flag flipped to indicate that
 	// there was an interrupt and additional processing should be done after it was detected
-	// The number of message is something very specific to the project and you will have to
+	// The number of messages is something very specific to the project and you will have to
 	// experiment with that. There might be one interrupt source that will generate big amount
 	// of messages, on the other hand there might be many sources for interrupts that arrive
 	// very slow, so the normal run will be able to execute them between the interrupts and
@@ -86,7 +80,7 @@ void setup()
 	// number the message queue reached during the program run.
 	// Those function might help you tune the system to get to the right needed message queue
 	// size and save some RAM memory if needed.
-	EBF.Init(NUMBER_OF_TIMERS, 4);
+	EBF.Init(4);
 
 	// Default Init is enough for printouts via Serial on 115200 boud speed
 	serial.Init();
@@ -94,10 +88,10 @@ void setup()
 	serial.println("Starting...");
 
 	// Initialize the timer for 1sec (1000 mSec), onTimer function will be called
-	EBF.InitTimer(SEC_TIMER, onTimer, 1000);
+	timer.Init(onTimer, 1000);
 
 	// Start the LED timer for the first time
-	EBF.StartTimer(SEC_TIMER);
+	timer.Start();
 
 	// Initialize built-in LED (generally on line 13)
 	led.Init(LED_BUILTIN);

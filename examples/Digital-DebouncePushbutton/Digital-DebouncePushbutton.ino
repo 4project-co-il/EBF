@@ -1,14 +1,9 @@
 #include <Arduino.h>
 #include "EBF.h"
 
-enum {
-	DEBOUNCE_TIMER = 0,
-
-	NUMBER_OF_TIMERS
-};
-
 // EBF objects creation, should be global
 EBF_Core EBF;
+EBF_Timer debounceTimer;
 EBF_DigitalInput button;
 EBF_DigitalOutput led;
 
@@ -24,8 +19,7 @@ void onButtonChange()
 
 	// Since the digital input callback is called only on change
 	// we can just re-start the timer
-	EBF.StopTimer(DEBOUNCE_TIMER);
-	EBF.StartTimer(DEBOUNCE_TIMER);
+	debounceTimer.Restart();
 
 	// When the timer will arrive, we'll be in the situation where the lastButtonState
 	// lasted for the debounce time and didn't change, otherwise we would re-start the timer
@@ -43,11 +37,11 @@ void onDebounceTimer()
 
 void setup()
 {
-	// EBF is the first thing that should be initialized, with the maximum timers to be used
-	EBF.Init(NUMBER_OF_TIMERS);
+	// EBF is the first thing that should be initialized
+	EBF.Init();
 
 	// Initialize debounce timer for 50 mSec, it will be started and stopped from onButtonChange function
-	EBF.InitTimer(DEBOUNCE_TIMER, onDebounceTimer, 50);
+	debounceTimer.Init(onDebounceTimer, 50);
 
 	// Initialize digital input button on line 2, onButtonChange function will be called on change
 	button.Init(2, onButtonChange);

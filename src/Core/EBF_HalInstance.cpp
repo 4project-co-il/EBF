@@ -34,16 +34,6 @@ uint8_t EBF_HalInstance::Init(HAL_Type type, uint32_t id)
 	return EBF_OK;
 }
 
-uint8_t EBF_HalInstance::GetNumberOfInstances()
-{
-	return EBF_HalInstance::numberOfInstances;
-}
-
-uint32_t EBF_HalInstance::GetPollingInterval()
-{
-	return pollIntervalMs;
-}
-
 void EBF_HalInstance::SetPollingInterval(uint32_t ms)
 {
 	EBF_Logic *pLogic = EBF_Logic::GetInstance();
@@ -52,16 +42,6 @@ void EBF_HalInstance::SetPollingInterval(uint32_t ms)
 
 	// Recalculation of delays is needed after polling interval change
 	pLogic->Recalculate();
-}
-
-unsigned long EBF_HalInstance::GetLastPollMillis()
-{
-	return lastPollMillis;
-}
-
-void EBF_HalInstance::SetLastPollMillis(unsigned long ms)
-{
-	lastPollMillis = ms;
 }
 
 unsigned long EBF_HalInstance::micros()

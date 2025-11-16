@@ -6,14 +6,9 @@
 // The EBF_Servo class uses Arduino's Servo library, so you will have to install
 // it in order to compile the example.
 
-enum {
-	SERVO_TIMER = 0,
-
-	NUMBER_OF_TIMERS
-};
-
 // EBF objects creation, should be global
 EBF_Core EBF;
+EBF_Timer servoTimer;
 EBF_Servo servo;
 
 // Starting from 0% value with positive step direction
@@ -44,19 +39,19 @@ void onServoTimer()
 	}
 
 	// EBF timers are one-shot in nature, restart it
-	EBF.StartTimer(SERVO_TIMER);
+	servoTimer.Start();
 }
 
 void setup()
 {
 	// EBF is the first thing that should be initialized
-	EBF.Init(NUMBER_OF_TIMERS);
+	EBF.Init();
 
 	// Initialize servo timer for 20 mSec
-	EBF.InitTimer(SERVO_TIMER, onServoTimer, 20);
+	servoTimer.Init(onServoTimer, 20);
 
 	// Start the timer
-	EBF.StartTimer(SERVO_TIMER);
+	servoTimer.Start();
 
 	// Initialize servo on line 9
 	servo.Init(9);

@@ -7,23 +7,14 @@
 
 uint8_t EBF_Core::Init()
 {
-	EBF_Logic *pLogic = EBF_Logic::GetInstance();
-
-	return pLogic->Init(0, 0);
+	return this->Init(0);
 }
 
-uint8_t EBF_Core::Init(uint8_t maxTimers)
+uint8_t EBF_Core::Init(uint8_t queueSize)
 {
 	EBF_Logic *pLogic = EBF_Logic::GetInstance();
 
-	return pLogic->Init(maxTimers, 0);
-}
-
-uint8_t EBF_Core::Init(uint8_t maxTimers, uint8_t queueSize)
-{
-	EBF_Logic *pLogic = EBF_Logic::GetInstance();
-
-	return pLogic->Init(maxTimers, queueSize);
+	return pLogic->Init(queueSize);
 }
 
 uint8_t EBF_Core::AddHalInstance(EBF_HalInstance &instance)
@@ -63,48 +54,6 @@ EBF_HalInstance *EBF_Core::GetHalInstance(EBF_HalInstance::HAL_Type type, uint8_
 	return pLogic->GetHalInstance(type, id);
 }
 
-// Timers access functions
-uint8_t EBF_Core::InitTimer(uint8_t timerId, EBF_CallbackType callbackPtr, uint16_t milliSec)
-{
-	EBF_Logic *pLogic = EBF_Logic::GetInstance();
-
-	return pLogic->InitTimer(timerId, callbackPtr, milliSec);
-}
-
-uint8_t EBF_Core::SetTimeout(uint8_t timerId, uint16_t milliSec)
-{
-	EBF_Logic *pLogic = EBF_Logic::GetInstance();
-
-	return pLogic->SetTimeout(timerId, milliSec);
-}
-
-uint8_t EBF_Core::StartTimer(uint8_t timerId)
-{
-	EBF_Logic *pLogic = EBF_Logic::GetInstance();
-
-	return pLogic->StartTimer(timerId);
-}
-
-uint8_t EBF_Core::StartTimer(uint8_t timerId, uint16_t milliSec)
-{
-	EBF_Logic *pLogic = EBF_Logic::GetInstance();
-
-	return pLogic->StartTimer(timerId, milliSec);
-}
-
-uint8_t EBF_Core::StopTimer(uint8_t timerId)
-{
-	EBF_Logic *pLogic = EBF_Logic::GetInstance();
-
-	return pLogic->StopTimer(timerId);
-}
-
-uint8_t EBF_Core::RestartTimer(uint8_t timerId)
-{
-	EBF_Logic *pLogic = EBF_Logic::GetInstance();
-
-	return pLogic->RestartTimer(timerId);
-}
 unsigned long EBF_Core::micros()
 {
 	EBF_Logic *pLogic = EBF_Logic::GetInstance();

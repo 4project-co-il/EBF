@@ -1,15 +1,9 @@
 #include <Arduino.h>
 #include "EBF_Products.h"
 
-// Timers enumeration
-enum {
-	RELAY_TIMER = 0,
-
-	NUMBER_OF_TIMERS
-};
-
 // EBF objects creation, should be global
 EBF_Core EBF;
+EBF_Timer relayTimer;
 EBF_Relay relay;
 
 // EBF_Relay are digital objects that can be turned ON and OFF
@@ -36,19 +30,19 @@ void onTimer()
 	}
 
 	// EBF timers are one-shot in nature, restart it
-	EBF.StartTimer(RELAY_TIMER);
+	relayTimer.Start();
 }
 
 void setup()
 {
-	// EBF is the first thing that should be initialized, with the maximum timers to be used
-	EBF.Init(NUMBER_OF_TIMERS);
+	// EBF is the first thing that should be initialized
+	EBF.Init();
 
 	// Initialize the timer for 1sec (1000 mSec), onTimer function will be called
-	EBF.InitTimer(RELAY_TIMER, onTimer, 1000);
+	relayTimer.Init(onTimer, 1000);
 
 	// Start the timer for the first time
-	EBF.StartTimer(RELAY_TIMER);
+	relayTimer.Start();
 
 	// Digital line 7 will be used
 	relay.Init(7);

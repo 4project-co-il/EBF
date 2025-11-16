@@ -24,18 +24,12 @@
 // Uncomment that file to have the interrupts code to be compiled into the EBF library
 
 
-// Timers enumeration
-enum {
-	TIMER1 = 0,
-
-	NUMBER_OF_TIMERS
-};
-
 // In that example we will use SERCOM2 on the SparkFun SAMD21 Mini board
 TwoWire Wire2(&sercom2, 4, 3);
 
 // EBF objects creation, should be global
 EBF_Core EBF;
+EBF_Timer timer;
 
 // EBF_I2C instance will use SERCOM2 assigned to Wire2 instance
 EBF_I2C i2c(Wire2);
@@ -74,16 +68,16 @@ void onTimer()
 {
 	serial.println(tempSensor.GetValueC());
 
-	EBF.StartTimer(TIMER1);
+	timer.Start();
 }
 
 void setup()
 {
-	EBF.Init(NUMBER_OF_TIMERS, 16);
+	EBF.Init(16);
 
 	// Timer will just print current temperature for debug
-	EBF.InitTimer(TIMER1, onTimer, 1000);
-	EBF.StartTimer(TIMER1);
+	timer.Init(onTimer, 1000);
+	timer.Start();
 
 	// Default Init is enough for printouts via Serial on 115200 boud speed
 	serial.Init();

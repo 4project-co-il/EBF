@@ -1,15 +1,9 @@
 #include <Arduino.h>
 #include "EBF.h"
 
-// Timers enumeration
-enum {
-	SEC_TIMER = 0,
-
-	NUMBER_OF_TIMERS
-};
-
 // EBF objects creation, should be global
 EBF_Core EBF;
+EBF_Timer timer;
 EBF_DigitalOutput led;
 EBF_DigitalInput button;
 
@@ -25,7 +19,7 @@ void onTimer()
 	serial.println("1sec passed");
 
 	// EBF timers are one-shot in nature, restart it
-	EBF.StartTimer(SEC_TIMER);
+	timer.Start();
 }
 
 // Set LED state based on the button state
@@ -45,17 +39,17 @@ void onButtonChange()
 
 void setup()
 {
-	// EBF is the first thing that should be initialized, with the maximum timers to be used
-	EBF.Init(NUMBER_OF_TIMERS);
+	// EBF is the first thing that should be initialized
+	EBF.Init();
 
 	// Default Init is enough for printouts via Serial on 115200 boud speed
 	serial.Init();
 
 	// Initialize the timer for 1sec (1000 mSec), onTimer function will be called
-	EBF.InitTimer(SEC_TIMER, onTimer, 1000);
+	timer.Init(onTimer, 1000);
 
 	// Start the LED timer for the first time
-	EBF.StartTimer(SEC_TIMER);
+	timer.Start();
 
 	// Initialize built-in LED (generally on line 13)
 	led.Init(LED_BUILTIN);

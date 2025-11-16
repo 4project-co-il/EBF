@@ -1,15 +1,9 @@
 #include <Arduino.h>
 #include "EBF.h"
 
-// Timers enumeration
-enum {
-	LED_TIMER = 0,
-
-	NUMBER_OF_TIMERS
-};
-
 // EBF objects creation, should be global
 EBF_Core EBF;
+EBF_Timer ledTimer;
 EBF_DigitalOutput led;
 
 bool ledState = LOW;
@@ -22,19 +16,19 @@ void onTimer()
 	led.SetValue(ledState);
 
 	// EBF timers are one-shot in nature, restart it
-	EBF.StartTimer(LED_TIMER);
+	ledTimer.Start();
 }
 
 void setup()
 {
-	// EBF is the first thing that should be initialized, with the maximum timers to be used
-	EBF.Init(NUMBER_OF_TIMERS);
+	// EBF is the first thing that should be initialized
+	EBF.Init();
 
 	// Initialize the timer for 1sec (1000 mSec), onTimer function will be called
-	EBF.InitTimer(LED_TIMER, onTimer, 1000);
+	ledTimer.Init(onTimer, 1000);
 
 	// Start the LED timer for the first time
-	EBF.StartTimer(LED_TIMER);
+	ledTimer.Start();
 
 	// Initialize built-in LED (generally on line 13)
 	led.Init(LED_BUILTIN);

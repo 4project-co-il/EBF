@@ -3,18 +3,14 @@
 
 #include "EBF_Products.h"
 
-// Timers enumeration
-enum {
-	TIMER1 = 0,
-
-	NUMBER_OF_TIMERS
-};
-
 // In that example we will use SERCOM2 on the SparkFun SAMD21 Mini board
 TwoWire Wire2(&sercom2, 4, 3);
 
 // EBF objects creation, should be global
 EBF_Core EBF;
+
+// Timer creation
+EBF_Timer timer;
 
 // We will use the LED as a status indication
 EBF_DigitalOutput led;
@@ -43,7 +39,7 @@ void onTimer()
 	tempSensor.SetOperationMode(EBF_STTS22H_TemperatureSensor::OperationMode::MODE_ONE_SHOT);
 
 	// EBF timers are one-shot in nature, restart it
-	EBF.StartTimer(TIMER1);
+	timer.Start();
 }
 
 void onMeasureComplete()
@@ -64,16 +60,16 @@ void onMeasureComplete()
 
 void setup()
 {
-	EBF.Init(NUMBER_OF_TIMERS);
+	EBF.Init();
 
 	// Default Init is enough for printouts via Serial on 115200 boud speed
 	serial.Init();
 
 	// Initialize the timer for 5sec (5000 mSec), onTimer function will be called
-	EBF.InitTimer(TIMER1, onTimer, 5000);
+	timer.Init(onTimer, 5000);
 
 	// Start the timer for the first time
-	EBF.StartTimer(TIMER1);
+	timer.Start();
 
 	// Built-in LED on digital output #13 will be used as an indication for a high temperature
 	led.Init(LED_BUILTIN);

@@ -1,3 +1,6 @@
+Version 0.3.2
+	Timers initialization change. Will be initialized in the same way as other HAL instances, with a global variable.
+
 Version 0.3.1
 	Changes in polling interval APIs. All instances will use HAL's SetPollingInterval function.
 	Timers logic redesign, adding recalculate flag that might be requested by starting/stopping a timer or HalInstance SetPollingInterval.

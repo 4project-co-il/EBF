@@ -12,7 +12,7 @@
 #include "../Core/EBF_I2CDevice.h"
 #include <Wire.h>
 
-class EBF_STTS22H_TemperatureSensor : protected EBF_HalInstance, protected EBF_I2CDevice {
+class EBF_STTS22H_TemperatureSensor : public EBF_HalInstance, protected EBF_I2CDevice {
 	private:
 		EBF_DEBUG_MODULE_NAME("EBF_STTS22H_TemperatureSensor");
 

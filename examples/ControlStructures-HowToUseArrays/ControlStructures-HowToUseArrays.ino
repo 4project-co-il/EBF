@@ -1,14 +1,9 @@
 #include <Arduino.h>
 #include "EBF.h"
 
-enum {
-	LED_TIMER = 0,
-
-	NUMBER_OF_TIMERS
-};
-
 // EBF objects creation, should be global
 EBF_Core EBF;
+EBF_Timer ledTimer;
 
 const uint8_t pinCount = 6;
 // Array of DigitalOutput objects
@@ -42,16 +37,16 @@ void onTimer()
 	leds[currentPin].SetValue(HIGH);
 
 	// Restart the timer
-	EBF.StartTimer(LED_TIMER);
+	ledTimer.Start();
 }
 
 void setup()
 {
 	// EBF is the first thing that should be initialized
-	EBF.Init(NUMBER_OF_TIMERS);
+	EBF.Init();
 
 	// Initialize the timer for 100 mSec
-	EBF.InitTimer(LED_TIMER, onTimer, 1000);
+	ledTimer.Init(onTimer, 1000);
 
 	// Initialize DigitalOutput objects in the loop
 	for (int currentLed = 0; currentLed < pinCount; currentLed++) {
@@ -63,7 +58,7 @@ void setup()
 	leds[currentPin].SetValue(HIGH);
 
 	// Start the timer to initiate the sequence
-	EBF.StartTimer(LED_TIMER);
+	ledTimer.Start();
 }
 
 void loop()

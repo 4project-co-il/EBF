@@ -1,14 +1,9 @@
 #include <Arduino.h>
 #include "EBF.h"
 
-enum {
-	DELAY_TIMER = 0,
-
-	NUMBER_OF_TIMERS
-};
-
 // EBF objects creation, should be global
 EBF_Core EBF;
+EBF_Timer delayTimer;
 EBF_AnalogInput analongInput;
 EBF_DigitalOutput led;
 
@@ -36,17 +31,17 @@ void onDelayTimeout()
 	led.SetValue(ledState);
 
 	// Re-start the timer based on the sensor value
-	EBF.StartTimer(DELAY_TIMER, sensorValue);
+	delayTimer.Start(sensorValue);
 }
 
 void setup()
 {
-	// EBF is the first thing that should be initialized, with the maximum timers to be used
-	EBF.Init(NUMBER_OF_TIMERS);
+	// EBF is the first thing that should be initialized
+	EBF.Init();
 
 	// Initialize and start the timer for 1 mSec as it's first run
-	EBF.InitTimer(DELAY_TIMER, onDelayTimeout, 1);
-	EBF.StartTimer(DELAY_TIMER);
+	delayTimer.Init(onDelayTimeout, 1);
+	delayTimer.Start();
 
 	// Initialize the analog input on line 0, no change callback is needed in that case
 	analongInput.Init(A0, NULL);

@@ -1,14 +1,9 @@
 #include <Arduino.h>
 #include "EBF.h"
 
-enum {
-	SENSOR_TIMER = 0,
-
-	NUMBER_OF_TIMERS
-};
-
 // EBF objects creation, should be global
 EBF_Core EBF;
+EBF_Timer sensorTimer;
 EBF_AnalogInput xAxis;
 EBF_AnalogInput yAxis;
 EBF_AnalogInput zAxis;
@@ -40,13 +35,13 @@ void onTimer()
   serial.println();
 
   // Restart the timer
-  EBF.StartTimer(SENSOR_TIMER);
+  sensorTimer.Start();
 }
 
 void setup()
 {
 	// EBF is the first thing that should be initialized
-	EBF.Init(NUMBER_OF_TIMERS);
+	EBF.Init();
 
 	// Initialize sensor analog inputs, no callback is used for AI change
 	xAxis.Init(A3);
@@ -64,8 +59,8 @@ void setup()
 	serial.Init();
 
 	// Initialize and start the 100 mSec polling timer
-	EBF.InitTimer(SENSOR_TIMER, onTimer, 100);
-	EBF.StartTimer(SENSOR_TIMER);
+	sensorTimer.Init(onTimer, 100);
+	sensorTimer.Start();
 }
 
 void loop()

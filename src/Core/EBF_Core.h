@@ -9,7 +9,6 @@
 
 #include "EBF_Global.h"
 #include "EBF_HalInstance.h"
-#include "EBF_Timers.h"
 #include "EBF_DigitalInput.h"
 #include "EBF_Serial.h"
 
@@ -18,8 +17,7 @@
 class EBF_Core {
 	public:
 		uint8_t Init();
-		uint8_t Init(uint8_t maxTimers);
-		uint8_t Init(uint8_t maxTimers, uint8_t queueSize);
+		uint8_t Init(uint8_t queueSize);
 
 		uint8_t AddHalInstance(EBF_HalInstance &instance);
 		uint8_t Process();
@@ -32,14 +30,6 @@ class EBF_Core {
 #endif
 
 	public:
-		// Timer functions
-		uint8_t InitTimer(uint8_t timerId, EBF_CallbackType callbackPtr, uint16_t milliSec);
-		uint8_t SetTimeout(uint8_t timerId, uint16_t milliSec);
-		uint8_t StartTimer(uint8_t timerId);
-		uint8_t StartTimer(uint8_t timerId, uint16_t milliSec);
-		uint8_t StopTimer(uint8_t timerId);
-		uint8_t RestartTimer(uint8_t timerId);
-
 		unsigned long micros();
 		unsigned long millis();
 

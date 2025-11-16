@@ -7,9 +7,9 @@
 	#include "Project_Config.h"
 #endif
 #include "EBF_Global.h"
-#include "EBF_Timers.h"
 #include "EBF_MessageQueue.h"
 #include "EBF_HalInstance.h"
+#include "EBF_Timer.h"
 #include "EBF_Serial.h"
 
 class EBF_Logic {
@@ -19,7 +19,8 @@ class EBF_Logic {
 	public:
 		EBF_Logic();
 
-		uint8_t Init(uint8_t maxTimers, uint8_t queueSize);
+		uint8_t Init(uint8_t queueSize);
+		uint8_t AddTimer(EBF_Timer &timer);
 		uint8_t AddHalInstance(EBF_HalInstance &instance);
 		uint8_t Process();
 
@@ -37,37 +38,6 @@ class EBF_Logic {
 #endif
 
 	public:
-		// Timer functions
-		inline uint8_t InitTimer(uint8_t timerId, EBF_CallbackType callbackPtr, uint16_t milliSec)
-		{
-			return timers.InitTimer(timerId, callbackPtr, milliSec);
-		}
-
-		inline uint8_t SetTimeout(uint8_t timerId, uint16_t milliSec)
-		{
-			return timers.SetTimeout(timerId, milliSec);
-		}
-
-		inline uint8_t StartTimer(uint8_t timerId)
-		{
-			return timers.StartTimer(timerId);
-		}
-
-		inline uint8_t StartTimer(uint8_t timerId, uint16_t milliSec)
-		{
-			return timers.StartTimer(timerId, milliSec);
-		}
-
-		inline uint8_t StopTimer(uint8_t timerId)
-		{
-			return timers.StopTimer(timerId);
-		}
-
-		inline uint8_t RestartTimer(uint8_t timerId)
-		{
-			return timers.RestartTimer(timerId);
-		}
-
 #ifdef EBF_SLEEP_IMPLEMENTATION
 		inline unsigned long micros() { return ::micros() + microsAddition; }
 		inline unsigned long millis() { return ::millis() + microsAddition/1000; }
@@ -111,7 +81,6 @@ class EBF_Logic {
 
 	private:
 		static EBF_Logic *pStaticInstance;
-		EBF_Timers timers;
 		uint8_t recalculateNeeded;
 
 #ifdef EBF_USE_INTERRUPTS
@@ -142,7 +111,12 @@ class EBF_Logic {
 		uint32_t apbBMask;
 		uint32_t apbCMask;
 #endif
-		EBF_HalInstance **pHalInstances;
+		// Array of timer pointers
+		EBF_Timer** pTimers;
+		uint8_t timerIndex;
+
+		// Array of HAL instance pointers
+		EBF_HalInstance** pHalInstances;
 		uint8_t halIndex;
 
 #ifndef EBF_REMOVE_DEBUG_CODE

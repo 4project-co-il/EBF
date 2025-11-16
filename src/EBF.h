@@ -9,7 +9,7 @@
 
 #include "Core/EBF_Core.h"
 #include "Core/EBF_Logic.h"
-#include "Core/EBF_Timers.h"
+#include "Core/EBF_Timer.h"
 #include "Core/EBF_MessageQueue.h"
 #include "Core/EBF_HalInstance.h"
 

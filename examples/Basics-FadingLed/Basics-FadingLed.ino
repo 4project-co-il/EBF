@@ -1,14 +1,9 @@
 #include <Arduino.h>
 #include "EBF.h"
 
-enum {
-	FADING_TIMER = 0,
-
-	NUMBER_OF_TIMERS
-};
-
 // EBF objects creation, should be global
 EBF_Core EBF;
+EBF_Timer fadingTimer;
 EBF_PwmOutput pwmLed;
 
 int brightness = 0; // how bright the LED is
@@ -28,20 +23,20 @@ void onFadingTimer()
 	}
 
 	// Restart the fading timer
-	EBF.StartTimer(FADING_TIMER);
+	fadingTimer.Start();
 }
 
 void setup()
 {
-	// EBF is the first thing that should be initialized, with the maximum timers to be used
-	EBF.Init(NUMBER_OF_TIMERS);
+	// EBF is the first thing that should be initialized
+	EBF.Init();
 
 	// Initialize fading timer for 30 mSec
-	EBF.InitTimer(FADING_TIMER, onFadingTimer, 30);
-	EBF.StartTimer(FADING_TIMER);
+	fadingTimer.Init(onFadingTimer, 30);
+	fadingTimer.Start();
 
-	// Initialize LED connected to PWM output on line 9
-	pwmLed.Init(9);
+	// Initialize built-in LED. Should be changed if your development board internal led is not PWM-capable
+	pwmLed.Init(LED_BUILTIN);
 }
 
 void loop()
