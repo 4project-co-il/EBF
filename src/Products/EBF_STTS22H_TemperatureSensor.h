@@ -71,7 +71,7 @@ class EBF_STTS22H_TemperatureSensor : public EBF_HalInstance, protected EBF_I2CD
 			MODE_200HZ
 		} OperationMode;
 
-		uint8_t Init(uint8_t i2cAddress, OperationMode mode = POWER_DOWN);
+		uint8_t Init(uint8_t i2cAddress = 0x3C, OperationMode mode = POWER_DOWN);
 
 #ifdef EBF_USE_INTERRUPTS
 		// Call to attach the device to an interrupt line
