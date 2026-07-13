@@ -19,8 +19,12 @@ class EBF_I2CDevice {
 		EBF_I2C *pI2C;
 		uint8_t i2cAddress;
 
+	protected:
 		uint8_t Read8bitRegister(uint8_t regAddress, uint8_t& value);
 		uint8_t Write8bitRegister(uint8_t regAddress, uint8_t value);
+
+		uint8_t Read16bitRegister(uint8_t regAddress, uint16_t& value);
+		uint8_t Write16bitRegister(uint8_t regAddress, uint16_t value);
 };
 
 #endif
