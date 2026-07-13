@@ -1,0 +1,282 @@
+#include "EBF_HAL_TCAL9538.h"
+
+// Returns input register
+uint8_t EBF_HAL_TCAL9538::GetInput(uint8_t &input)
+{
+	uint8_t rc;
+
+	rc = Read8bitRegister(regInputPort, input);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
+}
+
+// Sets output register
+uint8_t EBF_HAL_TCAL9538::SetOutput(uint8_t output)
+{
+	uint8_t rc;
+
+	rc = Write8bitRegister(regOutputPort, output);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
+}
+
+// Returns current output flip-flops state
+uint8_t EBF_HAL_TCAL9538::GetOuput(uint8_t &output)
+{
+	uint8_t rc;
+
+	rc = Read8bitRegister(regOutputPort, output);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
+}
+
+// Sets polarity inversion (1=inverted, 0=non-inverted)
+uint8_t EBF_HAL_TCAL9538::SetPolarityInversion(uint8_t inversion)
+{
+	uint8_t rc;
+
+	rc = Write8bitRegister(regPolarityInversion, inversion);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
+}
+
+// Returns current polarity inversion setting
+uint8_t EBF_HAL_TCAL9538::GetPolarityInversion(uint8_t &inversion)
+{
+	uint8_t rc;
+
+	rc = Read8bitRegister(regPolarityInversion, inversion);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
+}
+
+// Sets ports configuration (1=input, 0=output)
+uint8_t EBF_HAL_TCAL9538::SetConfiguration(uint8_t config)
+{
+	uint8_t rc;
+
+	rc = Write8bitRegister(regConfiguration, config);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
+}
+
+// Gets current port configuration
+uint8_t EBF_HAL_TCAL9538::GetConfiguration(uint8_t &config)
+{
+	uint8_t rc;
+
+	rc = Read8bitRegister(regConfiguration, config);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
+}
+
+// Sets output drivers strength. 2bits for every port (00=0.25x, 01=0.50x, 10=0.75x, 11=1.0x)
+uint8_t EBF_HAL_TCAL9538::SetOuputStrength(uint16_t strength)
+{
+	uint8_t rc;
+
+	rc = Write16bitRegister(regOutputDriveStrength0, strength);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
+}
+
+// Gets current output drivers strength
+uint8_t EBF_HAL_TCAL9538::GetOutputStrngth(uint16_t &strength)
+{
+	uint8_t rc;
+
+	rc = Read16bitRegister(regOutputDriveStrength0, strength);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
+}
+
+// Sets input latch register (1=latch enabled, 0=no latch)
+uint8_t EBF_HAL_TCAL9538::SetLatching(uint8_t latch)
+{
+	uint8_t rc;
+
+	rc = Write8bitRegister(regInputLatch, latch);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
+}
+
+// Gets current latch register setting
+uint8_t EBF_HAL_TCAL9538::GetLatching(uint8_t &latch)
+{
+	uint8_t rc;
+
+	rc = Read8bitRegister(regInputLatch, latch);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
+}
+
+// Sets pull-up/pull-down resistor connection (0=no connection, 1=connected)
+uint8_t EBF_HAL_TCAL9538::SetPullUpPullDownEnable(uint8_t resistorEnable)
+{
+	uint8_t rc;
+
+	rc = Write8bitRegister(regPullUpPullDownEnable, resistorEnable);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
+}
+
+// Gets current pull-up/pull-down resistor connection
+uint8_t EBF_HAL_TCAL9538::GetPullUpPullDownEnable(uint8_t &resistorEnable)
+{
+	uint8_t rc;
+
+	rc = Read8bitRegister(regPullUpPullDownEnable, resistorEnable);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
+}
+
+// Sets pull-up/pull-down resistor selection (0=pull-down, 1=pull-up)
+uint8_t EBF_HAL_TCAL9538::SetPullUpPullDownSelection(uint8_t resistorSelection)
+{
+	uint8_t rc;
+
+	rc = Write8bitRegister(regPullUpPullDownSelection, resistorSelection);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
+}
+
+// Gets current pull-up/pull-down resistor selection
+uint8_t EBF_HAL_TCAL9538::GetPullUpPullDownSelection(uint8_t &resistorSelection)
+{
+	uint8_t rc;
+
+	rc = Read8bitRegister(regPullUpPullDownSelection, resistorSelection);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
+}
+
+// Sets interrups mask (1=masked, 0=interrupt passed)
+uint8_t EBF_HAL_TCAL9538::SetInterruptMask(uint8_t intMask)
+{
+	uint8_t rc;
+
+	rc = Write8bitRegister(regInterruptMask, intMask);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
+}
+
+// Get current interrupt mask setting
+uint8_t EBF_HAL_TCAL9538::GetInterruptMask(uint8_t &intMask)
+{
+	uint8_t rc;
+
+	rc = Read8bitRegister(regInterruptMask, intMask);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
+}
+
+// Gets interrupt status register (1=port fired the interrupt, 0=No interrupt on that port)
+uint8_t EBF_HAL_TCAL9538::GetInterruptStatus(uint8_t &intStatus)
+{
+	uint8_t rc;
+
+	rc = Read8bitRegister(regInterruptStatus, intStatus);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
+}
+
+// Sets output port configuration (0=push-pull, 1=open-drain)
+// Should be called before configuring the ports as outputs
+uint8_t EBF_HAL_TCAL9538::SetOutputPortConfiguration(uint8_t outPortConfig)
+{
+	uint8_t rc;
+
+	rc = Write8bitRegister(regOutputPortConfiguration, outPortConfig);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
+}
+
+// Gets current output port configuration
+uint8_t EBF_HAL_TCAL9538::GetOutputPortConfiguration(uint8_t &outPortConfig)
+{
+	uint8_t rc;
+
+	rc = Read8bitRegister(regOutputPortConfiguration, outPortConfig);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return EBF_OK;
+}
