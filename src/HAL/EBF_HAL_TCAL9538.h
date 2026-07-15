@@ -18,8 +18,8 @@ class EBF_HAL_TCAL9538 : public EBF_I2CDevice {
 	public:
 		static const uint8_t defaultI2CAddress = 0x70;
 
-		EBF_HAL_TCAL9538(EBF_I2C &i2cInterface) : EBF_I2CDevice(&i2cInterface) { i2cAddress = defaultI2CAddress; }
-		EBF_HAL_TCAL9538(EBF_I2C *i2cInterface) : EBF_I2CDevice(i2cInterface) { i2cAddress = defaultI2CAddress; }
+		EBF_HAL_TCAL9538(EBF_I2C *i2cInterface);
+		EBF_HAL_TCAL9538(EBF_I2C &i2cInterface) : EBF_HAL_TCAL9538(&i2cInterface) { }
 
 	private:
 		// Registers

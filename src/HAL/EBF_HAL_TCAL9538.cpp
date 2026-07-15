@@ -1,5 +1,10 @@
 #include "EBF_HAL_TCAL9538.h"
 
+EBF_HAL_TCAL9538::EBF_HAL_TCAL9538(EBF_I2C *i2cInterface) : EBF_I2CDevice(i2cInterface)
+{
+	i2cAddress = defaultI2CAddress;
+}
+
 // Returns input register
 uint8_t EBF_HAL_TCAL9538::GetInput(uint8_t &input)
 {
