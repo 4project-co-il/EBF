@@ -1,5 +1,5 @@
-#ifndef __EBF_AIP31068_I2C_16X2_LCD_H__
-#define __EBF_AIP31068_I2C_16X2_LCD_H__
+#ifndef __EBF_HAL_AIP31068_H__
+#define __EBF_HAL_AIP31068_H__
 
 #include <Arduino.h>
 #if __has_include("Project_Config.h")
@@ -7,17 +7,23 @@
 #endif
 
 #include "../Core/EBF_Global.h"
-#include "../Core/EBF_Logic.h"
-#include "../Core/EBF_HalInstance.h"
+#include "../Core/EBF_Core.h"
 #include "../Core/EBF_I2CDevice.h"
-#include <Wire.h>
 
-// This class implements 16x2 LCDs based on the AiP31068 I2C driver
-class EBF_AiP31068_I2C_16x2_LCD : protected EBF_HalInstance, protected EBF_I2CDevice, public Print {
+// This class implements access to AiP31068 chip, I2C driver for 16x2 LCDs
+class EBF_HAL_AiP31068 : public EBF_I2CDevice {
 	private:
-		EBF_DEBUG_MODULE_NAME("EBF_AiP31068_I2C_16x2_LCD");
+		EBF_DEBUG_MODULE_NAME("EBF_HAL_AiP31068");
 
-	protected:
+	public:
+		static const uint8_t defaultI2CAddress = 0x3E;
+
+		EBF_HAL_AiP31068(EBF_I2C *i2cInterface);
+		EBF_HAL_AiP31068(EBF_I2C &i2cInterface) : EBF_HAL_AiP31068(&i2cInterface) {}
+
+		uint8_t Init();
+
+	private:
 		// commands
 		const uint8_t LCD_COMMAND_PREFIX =	0x80;
 		const uint8_t LCD_DATA_PREFIX =		0x40;
@@ -60,13 +66,7 @@ class EBF_AiP31068_I2C_16x2_LCD : protected EBF_HalInstance, protected EBF_I2CDe
 		const uint8_t LCD_MOVELEFT =		0x00;
 
 	public:
-		EBF_AiP31068_I2C_16x2_LCD(EBF_I2C &i2cInterface) : EBF_I2CDevice(&i2cInterface) { }
-		EBF_AiP31068_I2C_16x2_LCD(EBF_I2C *pI2cInterface) : EBF_I2CDevice(pI2cInterface) { }
-
-		uint8_t Init(uint8_t i2cAddress = 0x3E);
-
-		// Print class interface
-		size_t write(uint8_t b);
+		uint8_t WriteChar(uint8_t b);
 
 		// LCD commands
 		uint8_t Clear();
@@ -87,9 +87,7 @@ class EBF_AiP31068_I2C_16x2_LCD : protected EBF_HalInstance, protected EBF_I2CDe
 		uint8_t AutoScrollOn();
 		uint8_t AutoScrollOff();
 
-	protected:
-		uint8_t Process();
-
+	private:
 		uint8_t SendCommand(uint8_t command);
 
 		uint8_t displayControl;

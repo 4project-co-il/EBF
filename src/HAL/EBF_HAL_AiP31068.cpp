@@ -1,35 +1,27 @@
-#include "EBF_AiP31068_I2C_16x2_LCD.h"
+#include "EBF_HAL_AiP31068.h"
 #include "../Core/EBF_Core.h"
-
-extern void EBF_EmptyCallback();
 
 // Part of the code is based on the Grove_LCD_RGB_Backlight
 // https://github.com/Seeed-Studio/Grove_LCD_RGB_Backlight
 
-// Initializing EBF_AiP31068_I2C_16x2_LCD class instance.
-// The i2cAddress should specify the device I2C address (0x3E default)
-uint8_t EBF_AiP31068_I2C_16x2_LCD::Init(uint8_t i2cAddress)
+
+EBF_HAL_AiP31068::EBF_HAL_AiP31068(EBF_I2C *i2cInterface) : EBF_I2CDevice(i2cInterface)
 {
-	uint8_t rc;
-
-	this->i2cAddress = i2cAddress;
-
-	rc = EBF_HalInstance::Init(HAL_Type::I2C_INTERFACE, i2cAddress);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
-
-	// This is output only device, polling is not needed
-	SetPollingInterval(EBF_NO_POLLING);
+	i2cAddress = defaultI2CAddress;
 
 	displayControl = 0;
 	displayMode = 0;
 
-	// According to datasheet, the LCS needs more than 15mSec after power up. Have to delay
+	// According to datasheet, the LCD needs more than 15mSec after power up. Have to delay
 	delay(20);
+}
 
-	// Initialize the LCD for 2 line move
+// Inits the LCD to 2-line mode, Display ON, Cursor OFF, Blink OFF, LTR direction
+uint8_t EBF_HAL_AiP31068::Init()
+{
+	uint8_t rc;
+
+	// Initialize the LCD for 2 line mode
 	rc = SendCommand(LCD_FUNCTIONSET | LCD_FUNC_2LINE);
 	if (rc != EBF_OK) {
 		EBF_REPORT_ERROR(rc);
@@ -62,7 +54,7 @@ uint8_t EBF_AiP31068_I2C_16x2_LCD::Init(uint8_t i2cAddress)
 	return EBF_OK;
 }
 
-uint8_t EBF_AiP31068_I2C_16x2_LCD::SendCommand(uint8_t command)
+uint8_t EBF_HAL_AiP31068::SendCommand(uint8_t command)
 {
 	uint8_t rc;
 	pI2C->beginTransmission(i2cAddress);
@@ -78,14 +70,7 @@ uint8_t EBF_AiP31068_I2C_16x2_LCD::SendCommand(uint8_t command)
 	return EBF_OK;
 }
 
-// Called to process the instance after pollInterval
-// Nothing to do for output only device
-uint8_t EBF_AiP31068_I2C_16x2_LCD::Process()
-{
-	return EBF_OK;
-}
-
-size_t EBF_AiP31068_I2C_16x2_LCD::write(uint8_t b)
+uint8_t EBF_HAL_AiP31068::WriteChar(uint8_t b)
 {
 	uint8_t rc;
 
@@ -102,7 +87,7 @@ size_t EBF_AiP31068_I2C_16x2_LCD::write(uint8_t b)
 }
 
 // Clears the display and moves to the first row/col position
-uint8_t EBF_AiP31068_I2C_16x2_LCD::Clear()
+uint8_t EBF_HAL_AiP31068::Clear()
 {
 	uint8_t rc;
 
@@ -119,7 +104,7 @@ uint8_t EBF_AiP31068_I2C_16x2_LCD::Clear()
 }
 
 // Moves to the first row/col position without clearing the display
-uint8_t EBF_AiP31068_I2C_16x2_LCD::Home()
+uint8_t EBF_HAL_AiP31068::Home()
 {
 	uint8_t rc;
 
@@ -136,7 +121,7 @@ uint8_t EBF_AiP31068_I2C_16x2_LCD::Home()
 }
 
 // Moves the cursor to specified row and column
-uint8_t EBF_AiP31068_I2C_16x2_LCD::SetCursor(uint8_t col, uint8_t row)
+uint8_t EBF_HAL_AiP31068::SetCursor(uint8_t col, uint8_t row)
 {
 	if (row == 0) {
 		col |= 0x80;
@@ -148,55 +133,55 @@ uint8_t EBF_AiP31068_I2C_16x2_LCD::SetCursor(uint8_t col, uint8_t row)
 }
 
 // Turns ON the displayed text
-uint8_t EBF_AiP31068_I2C_16x2_LCD::DisplayOn()
+uint8_t EBF_HAL_AiP31068::DisplayOn()
 {
 	displayControl |= LCD_DISPLAYON;
 	return SendCommand(LCD_DISPLAYCONTROL | displayControl);
 }
 
 // Turns OFF the displayed text
-uint8_t EBF_AiP31068_I2C_16x2_LCD::DisplayOff()
+uint8_t EBF_HAL_AiP31068::DisplayOff()
 {
 	displayControl &= ~LCD_DISPLAYON;
 	return SendCommand(LCD_DISPLAYCONTROL | displayControl);
 }
 
 // Turns ON the underline cursor
-uint8_t EBF_AiP31068_I2C_16x2_LCD::CursorOn()
+uint8_t EBF_HAL_AiP31068::CursorOn()
 {
 	displayControl |= LCD_CURSORON;
 	return SendCommand(LCD_DISPLAYCONTROL | displayControl);
 }
 
 // Turns OFF the underline cursor
-uint8_t EBF_AiP31068_I2C_16x2_LCD::CursorOff()
+uint8_t EBF_HAL_AiP31068::CursorOff()
 {
 	displayControl &= ~LCD_CURSORON;
 	return SendCommand(LCD_DISPLAYCONTROL | displayControl);
 }
 
 // Enable the blinking cursor
-uint8_t EBF_AiP31068_I2C_16x2_LCD::BlinkOn()
+uint8_t EBF_HAL_AiP31068::BlinkOn()
 {
 	displayControl |= LCD_BLINKON;
 	return SendCommand(LCD_DISPLAYCONTROL | displayControl);
 }
 
 // Disable the blinking cursor
-uint8_t EBF_AiP31068_I2C_16x2_LCD::BlinkOff()
+uint8_t EBF_HAL_AiP31068::BlinkOff()
 {
 	displayControl &= ~LCD_BLINKON;
 	return SendCommand(LCD_DISPLAYCONTROL | displayControl);
 }
 
 // Scroll the display left by 1 character
-uint8_t EBF_AiP31068_I2C_16x2_LCD::ScrollLeft()
+uint8_t EBF_HAL_AiP31068::ScrollLeft()
 {
 	return SendCommand(LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVELEFT);
 }
 
 // Scroll the display left by specified number of characters
-uint8_t EBF_AiP31068_I2C_16x2_LCD::ScrollLeft(uint8_t count)
+uint8_t EBF_HAL_AiP31068::ScrollLeft(uint8_t count)
 {
 	uint8_t rc;
 
@@ -215,13 +200,13 @@ uint8_t EBF_AiP31068_I2C_16x2_LCD::ScrollLeft(uint8_t count)
 }
 
 // Scroll the display right by 1 character
-uint8_t EBF_AiP31068_I2C_16x2_LCD::ScrollRight()
+uint8_t EBF_HAL_AiP31068::ScrollRight()
 {
 	return SendCommand(LCD_CURSORSHIFT | LCD_DISPLAYMOVE | LCD_MOVERIGHT);
 }
 
 // Scroll the display right by specified number of characters
-uint8_t EBF_AiP31068_I2C_16x2_LCD::ScrollRight(uint8_t count)
+uint8_t EBF_HAL_AiP31068::ScrollRight(uint8_t count)
 {
 	uint8_t rc;
 
@@ -240,28 +225,28 @@ uint8_t EBF_AiP31068_I2C_16x2_LCD::ScrollRight(uint8_t count)
 }
 
 // Changes the direction of text flow to LTR - Left-To-Right
-uint8_t EBF_AiP31068_I2C_16x2_LCD::DirectionLTR()
+uint8_t EBF_HAL_AiP31068::DirectionLTR()
 {
 	displayMode |= LCD_ENTRYLEFT;
 	return SendCommand(LCD_ENTRYMODESET | displayMode);
 }
 
 // Changes the direction of text flow to RTL - Right-To-Left
-uint8_t EBF_AiP31068_I2C_16x2_LCD::DirectionRTL()
+uint8_t EBF_HAL_AiP31068::DirectionRTL()
 {
 	displayMode &= ~LCD_ENTRYLEFT;
 	return SendCommand(LCD_ENTRYMODESET | displayMode);
 }
 
 // Enable the autoscroll
-uint8_t EBF_AiP31068_I2C_16x2_LCD::AutoScrollOn()
+uint8_t EBF_HAL_AiP31068::AutoScrollOn()
 {
 	displayMode |= LCD_ENTRYSHIFTINC;
 	return SendCommand(LCD_ENTRYMODESET | displayMode);
 }
 
 // Disable the autoscroll
-uint8_t EBF_AiP31068_I2C_16x2_LCD::AutoScrollOff()
+uint8_t EBF_HAL_AiP31068::AutoScrollOff()
 {
 	displayMode &= ~LCD_ENTRYSHIFTINC;
 	return SendCommand(LCD_ENTRYMODESET | displayMode);
