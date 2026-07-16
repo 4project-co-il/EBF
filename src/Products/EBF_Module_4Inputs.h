@@ -1,5 +1,5 @@
-#ifndef __EBF_MODULE_4INPUT_H__
-#define __EBF_MODULE_4INPUT_H__
+#ifndef __EBF_MODULE_4INPUTS_H__
+#define __EBF_MODULE_4INPUTS_H__
 
 #include <Arduino.h>
 #if __has_include("Project_Config.h")
@@ -11,13 +11,13 @@
 #include "../Core/EBF_HalInstance.h"
 #include "../HAL/EBF_HAL_TCAL9538.h"
 
-class EBF_Module_4Input : public EBF_HalInstance {
+class EBF_Module_4Inputs : public EBF_HalInstance {
 	private:
-		EBF_DEBUG_MODULE_NAME("EBF_Module_4Input");
+		EBF_DEBUG_MODULE_NAME("EBF_Module_4Inputs");
 
 	public:
-		EBF_Module_4Input(EBF_I2C &i2cInterface) : chip(i2cInterface) {}
-		EBF_Module_4Input(EBF_I2C* pI2cInterface) : chip(pI2cInterface) {}
+		EBF_Module_4Inputs(EBF_I2C &i2cInterface) : chip(i2cInterface) {}
+		EBF_Module_4Inputs(EBF_I2C* pI2cInterface) : chip(pI2cInterface) {}
 
 		static const uint8_t numberOfInputs = 4;
 

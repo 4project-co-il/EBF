@@ -1,13 +1,13 @@
-#include "EBF_Module_4Input.h"
+#include "EBF_Module_4Inputs.h"
 #include "../Core/EBF_Logic.h"
 #include "../Core/EBF_DigitalInput.h"
 #include "../Core/EBF_Core.h"
 
 extern void EBF_EmptyCallback();
 
-// Initializing EBF_Module_4Input class instance.
+// Initializing EBF_Module_4Inputs class instance.
 // The i2cAddress should specify the device I2C address
-uint8_t EBF_Module_4Input::Init(uint8_t i2cAddress)
+uint8_t EBF_Module_4Inputs::Init(uint8_t i2cAddress)
 {
 	uint8_t rc;
 
@@ -54,7 +54,7 @@ uint8_t EBF_Module_4Input::Init(uint8_t i2cAddress)
 }
 
 #ifdef EBF_USE_INTERRUPTS
-uint8_t EBF_Module_4Input::AttachInterrupt(uint8_t interruptPin)
+uint8_t EBF_Module_4Inputs::AttachInterrupt(uint8_t interruptPin)
 {
 	uint8_t rc;
 	EBF_Logic *pLogic = EBF_Logic::GetInstance();
@@ -73,7 +73,7 @@ uint8_t EBF_Module_4Input::AttachInterrupt(uint8_t interruptPin)
 #endif
 
 // Called to process the instance after pollInterval
-uint8_t EBF_Module_4Input::Process()
+uint8_t EBF_Module_4Inputs::Process()
 {
 	EBF_Logic *pLogic = EBF_Logic::GetInstance();
 	PostponedInterruptData data = {0};
@@ -124,7 +124,7 @@ uint8_t EBF_Module_4Input::Process()
 }
 
 #ifdef EBF_USE_INTERRUPTS
-void EBF_Module_4Input::ProcessInterrupt()
+void EBF_Module_4Inputs::ProcessInterrupt()
 {
 	uint8_t rc;
 	uint8_t intStatus;
@@ -162,7 +162,7 @@ void EBF_Module_4Input::ProcessInterrupt()
 }
 
 // PostponeProcessing should be called to postpone the callback processing later in the normal loop
-uint8_t EBF_Module_4Input::PostponeProcessing(uint8_t eventIndex, uint8_t inputValues)
+uint8_t EBF_Module_4Inputs::PostponeProcessing(uint8_t eventIndex, uint8_t inputValues)
 {
 	uint8_t rc;
 	EBF_Logic *pLogic = EBF_Logic::GetInstance();
@@ -182,7 +182,7 @@ uint8_t EBF_Module_4Input::PostponeProcessing(uint8_t eventIndex, uint8_t inputV
 }
 #endif
 
-uint8_t EBF_Module_4Input::SetOnChange(uint8_t index, EBF_CallbackType onChangeCallback)
+uint8_t EBF_Module_4Inputs::SetOnChange(uint8_t index, EBF_CallbackType onChangeCallback)
 {
 	if (index >= numberOfInputs) {
 		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
@@ -195,7 +195,7 @@ uint8_t EBF_Module_4Input::SetOnChange(uint8_t index, EBF_CallbackType onChangeC
 }
 
 // Returns current value of the specified input line
-uint8_t EBF_Module_4Input::GetValue(uint8_t index)
+uint8_t EBF_Module_4Inputs::GetValue(uint8_t index)
 {
 	if (GetValues() & 1<<index) {
 		return 1;
@@ -205,7 +205,7 @@ uint8_t EBF_Module_4Input::GetValue(uint8_t index)
 }
 
 // Returns current values of all the input lines
-uint8_t EBF_Module_4Input::GetValues()
+uint8_t EBF_Module_4Inputs::GetValues()
 {
 	uint8_t rc;
 	uint8_t values;
@@ -220,7 +220,7 @@ uint8_t EBF_Module_4Input::GetValues()
 }
 
 // Returns last value of the specified input line as it appeared while reading from the chip
-uint8_t EBF_Module_4Input::GetLastValue(uint8_t index)
+uint8_t EBF_Module_4Inputs::GetLastValue(uint8_t index)
 {
 	if (lastValues & 1<<index) {
 		return 1;
@@ -230,12 +230,12 @@ uint8_t EBF_Module_4Input::GetLastValue(uint8_t index)
 }
 
 // Returns the value of the input line as it was registered during last interrupt
-uint8_t EBF_Module_4Input::GetLastValues()
+uint8_t EBF_Module_4Inputs::GetLastValues()
 {
 	return lastValues;
 }
 
-void EBF_Module_4Input::ExecuteCallback()
+void EBF_Module_4Inputs::ExecuteCallback()
 {
 	onChangeCallback[currentEventIndex]();
 }
