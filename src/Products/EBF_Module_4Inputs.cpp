@@ -59,7 +59,7 @@ uint8_t EBF_Module_4Inputs::AttachInterrupt(uint8_t interruptPin)
 	uint8_t rc;
 	EBF_Logic *pLogic = EBF_Logic::GetInstance();
 
-	rc = pLogic->AttachInterrupt(interruptPin, this, EBF_DigitalInput::InterruptMode::MODE_LOW);
+	rc = pLogic->AttachInterrupt(interruptPin, this, EBF_DigitalInput::InterruptMode::MODE_CHANGE);
 	if (rc != EBF_OK) {
 		EBF_REPORT_ERROR(rc);
 		return rc;
