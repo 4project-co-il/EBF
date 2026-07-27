@@ -65,6 +65,9 @@ uint8_t EBF_HAL_AiP31068::SendCommand(uint8_t command)
 	rc = pI2C->endTransmission();
 	interrupts();
 
+	// TODO: delay() is bad, but looks like there is no other way to do it
+	// According to datasheet, the controller needs 39uSec after every command
+	delayMicroseconds(50);
 
 	if (rc != 0) {
 		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
@@ -85,6 +88,9 @@ uint8_t EBF_HAL_AiP31068::WriteChar(uint8_t b)
 	rc = pI2C->endTransmission();
 	interrupts();
 
+	// TODO: delay() is bad, but looks like there is no other way to do it
+	// According to datasheet, the controller needs 43uSec after every data write
+	delayMicroseconds(50);
 
 	if (rc == 0) {
 		return 1;
@@ -106,6 +112,10 @@ uint8_t EBF_HAL_AiP31068::WriteChars(const uint8_t* pBuffer, uint8_t size)
 	rc = pI2C->endTransmission();
 	interrupts();
 
+	// TODO: delay() is bad, but looks like there is no other way to do it
+	// According to datasheet, the controller needs 43uSec after every data write
+	delayMicroseconds(50);
+
 
 	if (rc == 0) {
 		return 1;
@@ -126,7 +136,9 @@ uint8_t EBF_HAL_AiP31068::Clear()
 	}
 
 	// TODO: delay() is bad, but looks like there is no other way to do it
-	delayMicroseconds(1500);	// According to datasheet, the HD44780 needs 1.52mSec after clear command
+	// According to datasheet, the controller needs 1.52mSec after clear command
+	// 1500 uSec in addition to 50uSec in SendCommand
+	delayMicroseconds(1500);
 
 	return EBF_OK;
 }
@@ -143,7 +155,9 @@ uint8_t EBF_HAL_AiP31068::Home()
 	}
 
 	// TODO: delay() is bad, but looks like there is no other way to do it
-	delayMicroseconds(1500);	// According to datasheet, the HD44780 needs 1.52mSec after home command
+	// According to datasheet, the controller needs 1.52mSec after home command
+	// 1500 uSec in addition to 50uSec in SendCommand
+	delayMicroseconds(1500);
 
 	return EBF_OK;
 }
