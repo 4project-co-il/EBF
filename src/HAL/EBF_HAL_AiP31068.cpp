@@ -57,10 +57,14 @@ uint8_t EBF_HAL_AiP31068::Init()
 uint8_t EBF_HAL_AiP31068::SendCommand(uint8_t command)
 {
 	uint8_t rc;
+
+	noInterrupts();
 	pI2C->beginTransmission(i2cAddress);
 	pI2C->write(LCD_COMMAND_PREFIX);
 	pI2C->write(command);
 	rc = pI2C->endTransmission();
+	interrupts();
+
 
 	if (rc != 0) {
 		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
@@ -74,10 +78,13 @@ uint8_t EBF_HAL_AiP31068::WriteChar(uint8_t b)
 {
 	uint8_t rc;
 
+	noInterrupts();
 	pI2C->beginTransmission(i2cAddress);
 	pI2C->write(LCD_DATA_PREFIX);
 	pI2C->write(b);
 	rc = pI2C->endTransmission();
+	interrupts();
+
 
 	if (rc == 0) {
 		return 1;
@@ -90,12 +97,15 @@ uint8_t EBF_HAL_AiP31068::WriteChars(const uint8_t* pBuffer, uint8_t size)
 {
 	uint8_t rc;
 
+	noInterrupts();
 	pI2C->beginTransmission(i2cAddress);
 	pI2C->write(LCD_DATA_PREFIX);
 	for (uint8_t i=0; i<size; i++) {
 		pI2C->write(pBuffer[i]);
 	}
 	rc = pI2C->endTransmission();
+	interrupts();
+
 
 	if (rc == 0) {
 		return 1;

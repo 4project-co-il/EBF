@@ -24,6 +24,7 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::Init(uint8_t i2cAddress)
 	SetPollingInterval(EBF_NO_POLLING);
 
 	// Initialize the LCD
+	noInterrupts();
 	pI2C->beginTransmission(i2cAddress);
 	pI2C->write(SPECIAL_COMMAND);                      //Send special command character
 	pI2C->write(LCD_CMD_DISPLAYCONTROL | displayControl); //Send the display command
@@ -32,6 +33,7 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::Init(uint8_t i2cAddress)
 	pI2C->write(SETTING_COMMAND);                      //Put LCD into setting mode
 	pI2C->write(LCD_SET_CLEAR);                        //Send clear display command
 	rc = pI2C->endTransmission();
+	interrupts();
 
 	if (rc != 0) {
 		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
@@ -52,9 +54,11 @@ size_t EBF_SparkFun_QWIIC_SerLCD::write(uint8_t b)
 {
 	uint8_t rc;
 
+	noInterrupts();
 	pI2C->beginTransmission(i2cAddress);
 	pI2C->write(b);
 	rc = pI2C->endTransmission();
+	interrupts();
 
 	if (rc == 0) {
 		return 1;
@@ -67,11 +71,13 @@ size_t EBF_SparkFun_QWIIC_SerLCD::write(const uint8_t *buffer, size_t size)
 {
 	uint8_t rc;
 
+	noInterrupts();
 	pI2C->beginTransmission(i2cAddress);
 	for (size_t i=0; i<size; i++) {
 		pI2C->write(buffer[i]);
 	}
 	rc = pI2C->endTransmission();
+	interrupts();
 
 	if (rc == 0) {
 		return size;
@@ -92,10 +98,13 @@ size_t EBF_SparkFun_QWIIC_SerLCD::write(const char *str)
 uint8_t EBF_SparkFun_QWIIC_SerLCD::SendSettingCommand(uint8_t command)
 {
 	uint8_t rc;
+
+	noInterrupts();
 	pI2C->beginTransmission(i2cAddress);
 	pI2C->write(SETTING_COMMAND);
 	pI2C->write(command);
 	rc = pI2C->endTransmission();
+	interrupts();
 
 	if (rc != 0) {
 		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
@@ -108,10 +117,13 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::SendSettingCommand(uint8_t command)
 uint8_t EBF_SparkFun_QWIIC_SerLCD::SendSpecialCommand(uint8_t command)
 {
 	uint8_t rc;
+
+	noInterrupts();
 	pI2C->beginTransmission(i2cAddress);
 	pI2C->write(SPECIAL_COMMAND);
 	pI2C->write(command);
 	rc = pI2C->endTransmission();
+	interrupts();
 
 	if (rc != 0) {
 		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
@@ -124,14 +136,15 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::SendSpecialCommand(uint8_t command)
 uint8_t EBF_SparkFun_QWIIC_SerLCD::SendSpecialCommand(uint8_t command, uint8_t count)
 {
 	uint8_t rc;
-	pI2C->beginTransmission(i2cAddress);
 
+	noInterrupts();
+	pI2C->beginTransmission(i2cAddress);
 	for (uint8_t i=0; i<count; i++) {
 		pI2C->write(SPECIAL_COMMAND);
 		pI2C->write(command);
 	}
-
 	rc = pI2C->endTransmission();
+	interrupts();
 
 	if (rc != 0) {
 		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
@@ -283,6 +296,7 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::SetBacklight(uint8_t r, uint8_t g, uint8_t b)
 {
 	uint8_t rc;
 
+	noInterrupts();
 	pI2C->beginTransmission(i2cAddress);
 	pI2C->write(SETTING_COMMAND);
 	pI2C->write(SET_RGB_COMMAND);
@@ -290,6 +304,7 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::SetBacklight(uint8_t r, uint8_t g, uint8_t b)
 	pI2C->write(g);
 	pI2C->write(b);
 	rc = pI2C->endTransmission();
+	interrupts();
 
 	if (rc != 0) {
 		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
@@ -374,11 +389,13 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::SetContrast(uint8_t contrast)
 {
 	uint8_t rc;
 
+	noInterrupts();
 	pI2C->beginTransmission(i2cAddress);
 	pI2C->write(SETTING_COMMAND);
 	pI2C->write(CONTRAST_COMMAND);
 	pI2C->write(contrast);
 	rc = pI2C->endTransmission();
+	interrupts();
 
 	if (rc != 0) {
 		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
