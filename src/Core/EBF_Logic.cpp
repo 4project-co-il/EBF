@@ -60,11 +60,15 @@ EBF_Logic *EBF_Logic::pStaticInstance = new EBF_Logic();
 
 		for (uint8_t i=0; i<EXTERNAL_NUM_INTERRUPTS; i++) {
 			if ((EIC->INTFLAG.reg & 1<<i) != 0) {
-				pLogic->HandleIsr(i);
+				// Do/While loop might catch a case where the same interrupt changes fast while in the ISR
+				do {
+					// Clear the interrupt flag, so we will not handle the same interrupt in the next call of the
+					// handler from the Arduino's processing functions
+					// Clearing before the ISR, as fast as possible will allow catching a faster change of the interrupt
+					EIC->INTFLAG.reg = 1<<i;
 
-				// Clear the interrupt flag, so we will not handle the same interrupt in the next call of the
-				// handler from the Arduino's processing functions
-				EIC->INTFLAG.reg = 1<<i;
+					pLogic->HandleIsr(i);
+				} while ((EIC->INTFLAG.reg & 1<<i) != 0);
 			}
 		}
 	}
