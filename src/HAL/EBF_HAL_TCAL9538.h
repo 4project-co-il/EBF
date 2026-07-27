@@ -10,7 +10,7 @@
 #include "../Core/EBF_Core.h"
 #include "../Core/EBF_I2CDevice.h"
 
-// This class implements access to TCAL9538 chip, I2C I/O expander with interrupts
+// This class implements access to TCAL9538 chip, I2C 8bit I/O expander with interrupts
 class EBF_HAL_TCAL9538 : public EBF_I2CDevice {
 	private:
 		EBF_DEBUG_MODULE_NAME("EBF_HAL_TCAL9538");
