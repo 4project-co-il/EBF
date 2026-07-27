@@ -2,6 +2,8 @@
 #include "EBF_Timer.h"
 #include "EBF_HalInstance.h"
 
+#include "PnP_PlugAndPlayManager.h"
+
 // EBF_Logic implementation
 EBF_Logic *EBF_Logic::pStaticInstance = new EBF_Logic();
 
@@ -94,6 +96,10 @@ EBF_Logic::EBF_Logic()
 #ifdef EBF_USE_INTERRUPTS
 	isRunFromISR = 0;
 	isPostInterruptProcessing = 0;
+
+	memset(pHalIsr, 0, sizeof(EBF_HalInstance*) * EXTERNAL_NUM_INTERRUPTS);
+	memset(isrHint, 0, sizeof(uint32_t) * EXTERNAL_NUM_INTERRUPTS);
+
 #endif
 
 #ifdef EBF_SLEEP_IMPLEMENTATION
@@ -362,6 +368,17 @@ EBF_HalInstance *EBF_Logic::GetHalInstance(EBF_HalInstance::HAL_Type type, uint8
 }
 
 #ifdef EBF_USE_INTERRUPTS
+uint32_t EBF_Logic::GetInterruptHint(uint8_t interruptNumber) {
+#if defined(ARDUINO_ARCH_SAMD)
+// For SAMD there is a converstion table
+#if ARDUINO_SAMD_VARIANT_COMPLIANCE >= 10606
+	interruptNumber = g_APinDescription[interruptNumber].ulExtInt;
+#endif
+#endif
+
+	return isrHint[interruptNumber];
+}
+
 uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode)
 {
 	uint8_t rc;

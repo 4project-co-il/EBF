@@ -17,6 +17,9 @@ class EBF_Logic {
 		EBF_DEBUG_MODULE_NAME("EBF_Logic");
 
 	public:
+		friend class PnP_PlugAndPlayHub;
+
+	public:
 		EBF_Logic();
 
 		uint8_t Init(uint8_t queueSize);
@@ -50,6 +53,7 @@ class EBF_Logic {
 		// Message queue functions
 		uint8_t IsRunFromIsr() { return isRunFromISR; }
 		uint32_t GetInterruptHint() { return interruptHint; }
+		uint32_t GetInterruptHint(uint8_t interruptNumber);
 		uint8_t IsPostInterruptProcessing() { return isPostInterruptProcessing; }
 		uint8_t AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode);
 		uint8_t AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode, uint32_t hint);
@@ -64,6 +68,7 @@ class EBF_Logic {
 #else
 		uint8_t IsRunFromIsr() { return 0; }
 		uint32_t GetInterruptHint() { return 0; }
+		uint32_t GetInterruptHint(uint8_t interruptNumber) { return 0; }
 		uint8_t IsPostInterruptProcessing() { return 0; }
 		uint32_t GetLastMessageParam1() { return 0; }
 		uint8_t AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode) { return EBF_INVALID_STATE; }
