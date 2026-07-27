@@ -5,17 +5,18 @@ uint8_t EBF_I2C::Init(EBF_CallbackType callbackFunc, uint8_t address)
 {
 	uint8_t rc;
 
-	rc = EBF_HalInstance::Init(HAL_Type::I2C_INTERFACE, address);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
-
 	this->callbackFunc = callbackFunc;
 
 	if (callbackFunc == NULL) {
 		// No callback. No need to poll in that case
 		SetPollingInterval(EBF_NO_POLLING);
+	} else {
+		// Register this HAL instance only when we have a callback to call when data is available
+		rc = EBF_HalInstance::Init(HAL_Type::I2C_INTERFACE, address);
+		if (rc != EBF_OK) {
+			EBF_REPORT_ERROR(rc);
+			return rc;
+		}
 	}
 
 	if (address == 0) {
