@@ -115,6 +115,7 @@ class EBF_Logic {
 		EBF_Timer** pTimers;
 		uint8_t timerIndex;
 
+		uint16_t maxHalInstances;
 		// Array of HAL instance pointers
 		EBF_HalInstance** pHalInstances;
 		uint8_t halIndex;

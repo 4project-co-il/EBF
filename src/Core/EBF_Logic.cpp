@@ -79,6 +79,7 @@ EBF_Logic::EBF_Logic()
 	pTimers = NULL;
 	timerIndex = 0;
 
+	maxHalInstances = 0;
 	pHalInstances = NULL;
 	halIndex = 0;
 
@@ -131,7 +132,8 @@ uint8_t EBF_Logic::Init(uint8_t queueSize)
 #endif
 
 	if (EBF_HalInstance::GetNumberOfInstances() > 0) {
-		pHalInstances = (EBF_HalInstance**)malloc(sizeof(EBF_HalInstance*) * EBF_HalInstance::GetNumberOfInstances());
+		maxHalInstances = EBF_HalInstance::GetNumberOfInstances();
+		pHalInstances = (EBF_HalInstance**)malloc(sizeof(EBF_HalInstance*) * maxHalInstances);
 
 		if (pHalInstances == NULL) {
 			EBF_REPORT_ERROR_INT(EBF_NOT_ENOUGH_MEMORY);
@@ -193,7 +195,7 @@ uint8_t EBF_Logic::AddTimer(EBF_Timer &timer)
 
 uint8_t EBF_Logic::AddHalInstance(EBF_HalInstance &instance)
 {
-	if (halIndex >= EBF_HalInstance::GetNumberOfInstances()) {
+	if (halIndex >= maxHalInstances) {
 		EBF_REPORT_ERROR_INT(EBF_INDEX_OUT_OF_BOUNDS);
 		return EBF_INDEX_OUT_OF_BOUNDS;
 	}
