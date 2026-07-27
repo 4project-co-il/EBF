@@ -59,7 +59,7 @@ uint8_t EBF_Module_4Inputs::AttachInterrupt(uint8_t interruptPin)
 	uint8_t rc;
 	EBF_Logic *pLogic = EBF_Logic::GetInstance();
 
-	rc = pLogic->AttachInterrupt(interruptPin, this, EBF_DigitalInput::InterruptMode::MODE_CHANGE);
+	rc = pLogic->AttachInterrupt(interruptPin, this, EBF_DigitalInput::InterruptMode::MODE_LOW);
 	if (rc != EBF_OK) {
 		EBF_REPORT_ERROR(rc);
 		return rc;
@@ -116,6 +116,14 @@ uint8_t EBF_Module_4Inputs::Process()
 			if (intStatus & 1<<currentEventIndex) {
 				ExecuteCallback();
 			}
+
+			// Since most likely the interrupts will not arrive at the same time for several ports
+			// It makes sence to check if there are no more interrupts to process and exit the loop
+			intStatus &= ~(1<<currentEventIndex);
+
+			if (intStatus == 0) {
+				break;
+			}
 		}
 	}
 #endif
@@ -127,36 +135,53 @@ uint8_t EBF_Module_4Inputs::Process()
 void EBF_Module_4Inputs::ProcessInterrupt()
 {
 	uint8_t rc;
-	uint8_t intStatus;
-	uint8_t inputs;
+	uint8_t currentInputs;
+	uint8_t changedLines;
+	uint8_t stillProcessing = true;
 
-	// Read interrupt register from the chip to know what input fired the interrupt
-	rc = chip.GetInterruptStatus(intStatus);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return;
-	}
+	// The loop will continue while processing is still needed
+	while (stillProcessing) {
+		// clear the processing flag. it will be set on every processing pass, so another verification loop will be done
+		stillProcessing = false;
 
-	// Read current inputs, it will reset the interrupts
-	rc = chip.GetInput(inputs);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return;
-	}
+		// Get current inputs
+		rc = chip.GetInput(currentInputs);
+		if (rc != EBF_OK) {
+			EBF_REPORT_ERROR(rc);
+			return;
+		}
 
-	// Loop on all the lines to find the changes. Several lines might change together
-	for (uint8_t i=0; i<numberOfInputs; i++) {
-		if (intStatus & 1<<i) {
+		// Process detected changes
+		changedLines = currentInputs ^ lastValues;
+
+		lastValues = currentInputs;
+
+		// There are changes
+		if (changedLines != 0) {
+			// Loop on all the bits to find what changed
+			for (uint8_t i=0; i<numberOfInputs; i++) {
+				if (changedLines & 1<<i) {
+					// Found the change
+					stillProcessing = true;
+
 #ifdef EBF_DIRECT_CALL_FROM_ISR
-			// Set currentEventIndex and lastValues before actual call to the callbacks
-			currentEventIndex = i;
-			lastValues = inputs;
-
-			ExecuteCallback();
+					// Set currentEventIndex and lastValues before actual call to the callbacks
+					currentEventIndex = i;
+					ExecuteCallback();
 #else
-			// Postpone the processing so the event will be handled from the normal run
-			PostponeProcessing(i, inputs);
+					// Postpone the processing so the event will be handled from the normal run
+					PostponeProcessing(i, currentInputs);
 #endif
+
+					// Since most likely the interrupts will not arrive at the same time for several ports
+					// It makes sence to check if there are no more interrupts to process and exit the loop
+					changedLines &= ~(1<<i);
+
+					if (changedLines == 0) {
+						break;
+					}
+				}
+			}
 		}
 	}
 }
