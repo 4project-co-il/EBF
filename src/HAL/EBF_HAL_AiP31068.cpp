@@ -86,6 +86,24 @@ uint8_t EBF_HAL_AiP31068::WriteChar(uint8_t b)
 	}
 }
 
+uint8_t EBF_HAL_AiP31068::WriteChars(const uint8_t* pBuffer, uint8_t size)
+{
+	uint8_t rc;
+
+	pI2C->beginTransmission(i2cAddress);
+	pI2C->write(LCD_DATA_PREFIX);
+	for (uint8_t i=0; i<size; i++) {
+		pI2C->write(pBuffer[i]);
+	}
+	rc = pI2C->endTransmission();
+
+	if (rc == 0) {
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
 // Clears the display and moves to the first row/col position
 uint8_t EBF_HAL_AiP31068::Clear()
 {

@@ -67,6 +67,7 @@ class EBF_HAL_AiP31068 : public EBF_I2CDevice {
 
 	public:
 		uint8_t WriteChar(uint8_t b);
+		uint8_t WriteChars(const uint8_t* pBuffer, uint8_t size);
 
 		// LCD commands
 		uint8_t Clear();

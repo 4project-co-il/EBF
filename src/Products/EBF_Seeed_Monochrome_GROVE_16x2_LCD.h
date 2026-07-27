@@ -23,6 +23,7 @@ class EBF_Seeed_Monochrome_GROVE_16x2_LCD : protected EBF_HalInstance, public Pr
 
 		// Print class interface
 		size_t write(uint8_t b) { return chip.WriteChar(b); }
+		size_t write(const uint8_t *buffer, size_t size) { return chip.WriteChars(buffer, size); }
 
 		// LCD commands
 		uint8_t Clear() { return chip.Clear(); }
