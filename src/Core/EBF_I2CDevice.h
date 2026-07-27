@@ -25,6 +25,9 @@ class EBF_I2CDevice {
 
 		uint8_t Read16bitRegister(uint8_t regAddress, uint16_t& value);
 		uint8_t Write16bitRegister(uint8_t regAddress, uint16_t value);
+
+		uint8_t Read32bitRegister(uint8_t regAddress, uint32_t& value);
+		uint8_t Write32bitRegister(uint8_t regAddress, uint32_t value);
 };
 
 #endif
