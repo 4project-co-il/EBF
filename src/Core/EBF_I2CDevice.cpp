@@ -154,3 +154,26 @@ uint8_t EBF_I2CDevice::Write32bitRegister(uint8_t regAddress, uint32_t value)
 
 	return rc;
 }
+
+uint8_t EBF_I2CDevice::WriteBuffer(uint8_t *pBuffer, uint8_t length)
+{
+	uint8_t rc = EBF_OK;
+
+	noInterrupts();
+	do {
+		pI2C->beginTransmission(i2cAddress);
+
+		for (uint8_t i=0; i<length; i++) {
+			pI2C->write(pBuffer[i]);
+		}
+		rc = pI2C->endTransmission();
+		if (rc != 0) {
+			rc = EBF_COMMUNICATION_PROBLEM;
+			EBF_REPORT_ERROR(rc);
+			break;
+		}
+	} while (0);
+	interrupts();
+
+	return rc;
+}
