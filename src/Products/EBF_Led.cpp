@@ -130,20 +130,17 @@ uint8_t EBF_Led::Blink(uint16_t msOn, uint16_t msOff)
 
 // The led will fade in, from OFF to ON (up to brightness)
 // The process will last msDuration milli-seconds
-// and will be done in the specified number of steps
-uint8_t EBF_Led::FadeIn(uint16_t msDuration, uint8_t steps)
+// and the value will be updated every msUpdate milli-seconds, 20mSec by default
+uint8_t EBF_Led::FadeIn(uint16_t msDuration, uint8_t msUpdate)
 {
 	uint8_t rc;
 
-	// onDuration will be used to store step duration
-	onDuration = msDuration / steps;
-	SetPollingInterval(onDuration);
+	// Save the update period and set the polling interval accordingly
+	fadeUpdatePeriod = msUpdate;
+	SetPollingInterval(fadeUpdatePeriod);
 
-	// offDuration will be used to store current brightness
-	// We will start from 0
-	offDuration = 0;
-
-	fadeStep = brightness / steps;
+	// Save total fading duration
+	onDuration = msDuration;
 
 	effectStart = micros();
 	state = LED_FADING_IN;
@@ -159,25 +156,22 @@ uint8_t EBF_Led::FadeIn(uint16_t msDuration, uint8_t steps)
 
 // The led will fade out, from ON (current brightness) to OFF
 // The process will last msDuration milli-seconds
-// and will be done in the specified number of steps
-uint8_t EBF_Led::FadeOut(uint16_t msDuration, uint8_t steps)
+// and the value will be updated every msUpdate milli-seconds, 20mSec by default
+uint8_t EBF_Led::FadeOut(uint16_t msDuration, uint8_t msUpdate)
 {
 	uint8_t rc;
 
-	// onDuration will be used to store step duration
-	onDuration = msDuration / steps;
-	SetPollingInterval(onDuration);
+	// Save the update period and set the polling interval accordingly
+	fadeUpdatePeriod = msUpdate;
+	SetPollingInterval(fadeUpdatePeriod);
 
-	// offDuration will be used to store current brightness
-	// We will start from max brightness
-	offDuration = brightness;
-
-	fadeStep = brightness / steps;
+	// Save total fading duration
+	onDuration = msDuration;
 
 	effectStart = micros();
 	state = LED_FADING_OUT;
 
-	rc = EBF_PwmOutput::SetValue((uint8_t)offDuration);
+	rc = EBF_PwmOutput::SetValue((uint8_t)onDuration);
 	if (rc != EBF_OK) {
 		EBF_REPORT_ERROR(rc);
 		return rc;
@@ -190,6 +184,7 @@ uint8_t EBF_Led::Process()
 {
 	uint8_t rc = EBF_OK;
 	unsigned long timePassed;
+	uint16_t fadingBrightness;
 
 	switch (state)
 	{
@@ -239,60 +234,60 @@ uint8_t EBF_Led::Process()
 		break;
 
 	case LED_FADING_IN:
-		timePassed = micros() - effectStart;
+		timePassed = (micros() - effectStart) / 1000;	// in mSec
 
-		if (timePassed > onDuration * 1000) {
-			// offDuration will be used to store current brightness
-			offDuration += fadeStep;
-
-			if (offDuration > brightness) {
-				offDuration = brightness;
-			}
-
-			rc = EBF_PwmOutput::SetValue((uint8_t)offDuration);
-
-			if (offDuration >= brightness) {
-				// We've reached max brightness
-				state = LED_ON;
-
-				SetPollingInterval(EBF_NO_POLLING);
-			} else {
-				effectStart = micros();
-				SetPollingInterval(onDuration);
-			}
+		// Calculate the brightness after passed time
+		if (timePassed >= onDuration) {
+			// effect time passed, set to max brightness
+			fadingBrightness = brightness;
 		} else {
-			// Processing was called before needed
-			// Set polling to the time left
-			SetPollingInterval(onDuration - timePassed / 1000);
+			fadingBrightness = (uint8_t)((1.0 - (onDuration - timePassed) / (float)onDuration) * brightness);
+		}
+
+		// Set current brightness level
+		rc = EBF_PwmOutput::SetValue(fadingBrightness);
+
+		if (fadingBrightness == brightness) {
+			// We've reached max fading level
+			state = LED_ON;
+
+			SetPollingInterval(EBF_NO_POLLING);
+		} else {
+			// Need more time for fading
+			if (onDuration - timePassed > fadeUpdatePeriod) {
+				SetPollingInterval(fadeUpdatePeriod);
+			} else {
+				SetPollingInterval(onDuration - timePassed);
+			}
 		}
 		break;
 
 	case LED_FADING_OUT:
-		timePassed = micros() - effectStart;
+		timePassed = (micros() - effectStart) / 1000;	// in mSec
 
-		if (timePassed > onDuration * 1000) {
-			// offDuration will be used to store current brightness
-			if (fadeStep > offDuration) {
-				offDuration = 0;
-			} else {
-				offDuration -= fadeStep;
-			}
-
-			rc = EBF_PwmOutput::SetValue((uint8_t)offDuration);
-
-			if (offDuration == 0) {
-				// We've reached min brightness
-				state = LED_OFF;
-
-				SetPollingInterval(EBF_NO_POLLING);
-			} else {
-				effectStart = micros();
-				SetPollingInterval(onDuration);
-			}
+		// Calculate the brightness after passed time
+		if (timePassed >= onDuration) {
+			// effect time passed, set to OFF
+			fadingBrightness = 0;
 		} else {
-			// Processing was called before needed
-			// Set polling to the time left
-			SetPollingInterval(onDuration - timePassed / 1000);
+			fadingBrightness = (uint8_t)((onDuration - timePassed) / (float)onDuration * brightness);
+		}
+
+		// Set current brightness level
+		rc = EBF_PwmOutput::SetValue(fadingBrightness);
+
+		if (fadingBrightness == 0) {
+			// We've reached min fading level (OFF)
+			state = LED_OFF;
+
+			SetPollingInterval(EBF_NO_POLLING);
+		} else {
+			// Need more time for fading
+			if (onDuration - timePassed > fadeUpdatePeriod) {
+				SetPollingInterval(fadeUpdatePeriod);
+			} else {
+				SetPollingInterval(onDuration - timePassed);
+			}
 		}
 		break;
 

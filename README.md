@@ -145,10 +145,10 @@ void onTimer()
   ledState = !ledState;
 
   if (ledState) {
-    // The fading will be done during 900 mSec with 50 steps
-    led.FadeIn(900, 50);
+    // The fading will be done during 900 mSec with update every 20 mSec
+    led.FadeIn(900, 20);
   } else {
-    led.FadeOut(900, 50);
+    led.FadeOut(900, 20);
   }
 
   // EBF timers are one-shot in nature, restart it

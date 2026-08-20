@@ -22,8 +22,8 @@ class EBF_Led : protected EBF_PwmOutput {
 		uint8_t Off();
 		uint8_t SetBrightness(uint8_t percent);
 		uint8_t Blink(uint16_t msOn, uint16_t msOff);
-		uint8_t FadeIn(uint16_t msDuration, uint8_t steps);
-		uint8_t FadeOut(uint16_t msDuration, uint8_t steps);
+		uint8_t FadeIn(uint16_t msDuration, uint8_t msUpdate = 20);
+		uint8_t FadeOut(uint16_t msDuration, uint8_t msUpdate = 20);
 
 	private:
 		enum LedState : uint8_t {
@@ -38,9 +38,9 @@ class EBF_Led : protected EBF_PwmOutput {
 		LedState state;
 		uint8_t brightness;			// 0-255 values
 		unsigned long effectStart;	// in micro-Sec
-		uint16_t onDuration;		// in milli-Sec
+		uint16_t onDuration;		// in milli-Sec, duraction of the fading effect during fading
 		uint16_t offDuration;		// in milli-Sec
-		uint8_t fadeStep;
+		uint8_t fadeUpdatePeriod;	// in milli-Sec
 
 		uint8_t Process();
 };
