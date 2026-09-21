@@ -10,6 +10,9 @@ uint8_t EBF_HAL_PCA9685::Init(uint16_t freq)
 	uint8_t rc;
 	uint8_t prescale;
 
+	// Save current update frequency
+	updateFrequency = freq;
+
 	// freq can be between 24Hz up to 1526Hz
 	if (freq < 24 || freq >= 1526) {
 		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);

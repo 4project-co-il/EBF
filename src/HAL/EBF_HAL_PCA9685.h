@@ -139,6 +139,12 @@ class EBF_HAL_PCA9685 : public EBF_I2CDevice {
 		// The OnOff buffer should containg 2 16bit values for each channel, similar to SetChannelPWM parameters
 		// First stepON value, second stepOFF value for each channel
 		uint8_t SetMultipleChannelsPWM(uint8_t startChannel, uint8_t numberOfChannels, uint16_t *pOnOffBuffer);
+
+		// Returns chip current update frequency
+		uint16_t GetUpdateFrequency() { return updateFrequency; }
+
+	private:
+		uint16_t updateFrequency;
 };
 
 #endif
