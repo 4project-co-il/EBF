@@ -21,7 +21,7 @@ class EBF_HAL_AiP31068 : public EBF_I2CDevice {
 		EBF_HAL_AiP31068(EBF_I2C *i2cInterface);
 		EBF_HAL_AiP31068(EBF_I2C &i2cInterface) : EBF_HAL_AiP31068(&i2cInterface) {}
 
-		uint8_t Init();
+		uint8_t Init(uint8_t i2cAddress);
 
 	private:
 		// commands

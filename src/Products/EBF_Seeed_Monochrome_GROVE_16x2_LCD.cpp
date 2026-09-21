@@ -5,8 +5,6 @@ uint8_t EBF_Seeed_Monochrome_GROVE_16x2_LCD::Init(uint8_t i2cAddress)
 {
 	uint8_t rc;
 
-	chip.i2cAddress = i2cAddress;
-
 	rc = EBF_HalInstance::Init(HAL_Type::I2C_INTERFACE, i2cAddress);
 	if (rc != EBF_OK) {
 		EBF_REPORT_ERROR(rc);
@@ -17,7 +15,11 @@ uint8_t EBF_Seeed_Monochrome_GROVE_16x2_LCD::Init(uint8_t i2cAddress)
 	SetPollingInterval(EBF_NO_POLLING);
 
 	// Init the LCD to it's default settings
-	chip.Init();
+	rc = chip.Init(i2cAddress);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
 
 	return EBF_OK;
 }

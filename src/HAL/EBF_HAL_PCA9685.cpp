@@ -2,13 +2,15 @@
 
 EBF_HAL_PCA9685::EBF_HAL_PCA9685(EBF_I2C *i2cInterface) : EBF_I2CDevice(i2cInterface)
 {
-	i2cAddress = defaultI2CAddress;
+	EBF_I2CDevice::i2cAddress = defaultI2CAddress;
 }
 
-uint8_t EBF_HAL_PCA9685::Init(uint16_t freq)
+uint8_t EBF_HAL_PCA9685::Init(uint16_t freq, uint8_t i2cAddress)
 {
 	uint8_t rc;
 	uint8_t prescale;
+
+	EBF_I2CDevice::i2cAddress = i2cAddress;
 
 	// Save current update frequency
 	updateFrequency = freq;

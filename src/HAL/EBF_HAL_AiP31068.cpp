@@ -7,7 +7,7 @@
 
 EBF_HAL_AiP31068::EBF_HAL_AiP31068(EBF_I2C *i2cInterface) : EBF_I2CDevice(i2cInterface)
 {
-	i2cAddress = defaultI2CAddress;
+	EBF_I2CDevice::i2cAddress = defaultI2CAddress;
 
 	displayControl = 0;
 	displayMode = 0;
@@ -17,9 +17,11 @@ EBF_HAL_AiP31068::EBF_HAL_AiP31068(EBF_I2C *i2cInterface) : EBF_I2CDevice(i2cInt
 }
 
 // Inits the LCD to 2-line mode, Display ON, Cursor OFF, Blink OFF, LTR direction
-uint8_t EBF_HAL_AiP31068::Init()
+uint8_t EBF_HAL_AiP31068::Init(uint8_t i2cAddress)
 {
 	uint8_t rc;
+
+	EBF_I2CDevice::i2cAddress = i2cAddress;
 
 	// Initialize the LCD for 2 line mode
 	rc = SendCommand(LCD_FUNCTIONSET | LCD_FUNC_2LINE);

@@ -21,6 +21,8 @@ class EBF_HAL_PCA9548 : public EBF_I2CDevice {
 		EBF_HAL_PCA9548(EBF_I2C *i2cInterface);
 		EBF_HAL_PCA9548(EBF_I2C &i2cInterface) : EBF_HAL_PCA9548(&i2cInterface) { }
 
+		uint8_t Init(uint8_t i2cAddress);
+
 	private:
 		// Registers
 

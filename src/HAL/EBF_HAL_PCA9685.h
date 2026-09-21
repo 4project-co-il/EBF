@@ -31,7 +31,7 @@ class EBF_HAL_PCA9685 : public EBF_I2CDevice {
 
 		// Initialize the chip to specified frequency of PWM outputs
 		// freq can be between 24Hz up to 1526Hz
-		uint8_t Init(uint16_t freq);
+		uint8_t Init(uint16_t freq = 50, uint8_t i2cAddress = defaultI2CAddress);
 
 	private:
 		// Registers

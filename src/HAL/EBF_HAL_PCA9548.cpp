@@ -2,7 +2,15 @@
 
 EBF_HAL_PCA9548::EBF_HAL_PCA9548(EBF_I2C *i2cInterface) : EBF_I2CDevice(i2cInterface)
 {
-	i2cAddress = defaultI2CAddress;
+	EBF_I2CDevice::i2cAddress = defaultI2CAddress;
+}
+
+// Initialize the chip to specified I2C address
+uint8_t EBF_HAL_PCA9548::Init(uint8_t i2cAddress)
+{
+	EBF_I2CDevice::i2cAddress = i2cAddress;
+
+	return EBF_OK;
 }
 
 // Switch to specified port

@@ -8,16 +8,14 @@ uint8_t EBF_Module_8Outputs::Init(uint16_t pwmFrequency, uint8_t i2cAddress)
 {
 	uint8_t rc;
 
-	chip.i2cAddress = i2cAddress;
-
 	rc = EBF_HalInstance::Init(HAL_Type::I2C_INTERFACE, i2cAddress);
 	if (rc != EBF_OK) {
 		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
 
-	// Init the chip with specified frequency
-	rc = chip.Init(pwmFrequency);
+	// Init the chip to the I2C address with specified frequency
+	rc = chip.Init(pwmFrequency, i2cAddress);
 	if (rc != EBF_OK) {
 		EBF_REPORT_ERROR(rc);
 		return rc;

@@ -11,13 +11,18 @@ uint8_t EBF_Module_8Inputs::Init(uint8_t i2cAddress)
 {
 	uint8_t rc;
 
-	chip.i2cAddress = i2cAddress;
-
 	for (uint8_t i=0; i<numberOfInputs; i++) {
 		onChangeCallback[i] = EBF_EmptyCallback;
 	}
 
 	rc = EBF_HalInstance::Init(HAL_Type::I2C_INTERFACE, i2cAddress);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	// Init the chip
+	rc = chip.Init(i2cAddress);
 	if (rc != EBF_OK) {
 		EBF_REPORT_ERROR(rc);
 		return rc;
