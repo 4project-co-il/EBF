@@ -52,15 +52,6 @@ class EBF_Module_4Inputs : public EBF_HalInstance {
 		// where you can call the GetEventIndex to know which input actually changed
 		uint8_t GetEventIndex() { return currentEventIndex; }
 
-		typedef union {
-			struct {
-				uint32_t index : 3;		// up to 8 inputs
-				uint32_t event : 8;		// input event that should be executed
-				uint32_t reserved : 21;
-			} fields;
-			uint32_t uint32;
-		} PostponedInterruptData;
-
 	protected:
 		// I2C I/O ports chip
 		EBF_HAL_TCAL9538 chip;
@@ -77,6 +68,15 @@ class EBF_Module_4Inputs : public EBF_HalInstance {
 #ifdef EBF_USE_INTERRUPTS
 		void ProcessInterrupt();
 #endif
+
+		typedef union {
+			struct {
+				uint32_t index : 3;		// up to 8 inputs
+				uint32_t event : 8;		// input event that should be executed
+				uint32_t reserved : 21;
+			} fields;
+			uint32_t uint32;
+		} PostponedInterruptData;
 };
 
 #endif
