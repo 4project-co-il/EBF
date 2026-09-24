@@ -13,13 +13,12 @@ uint8_t EBF_Servo::Init(uint8_t pinNumber)
 
 	rc = EBF_HalInstance::Init(EBF_HalInstance::HAL_Type::PWM_OUTPUT, pinNumber);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	servo.attach(pinNumber);
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // Sets the position of the servo motor in percents.
@@ -43,7 +42,7 @@ uint8_t EBF_Servo::SetPosition(uint8_t percent)
 
 	servo.write(pos);
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // Move the servo motor to the specified percent position
@@ -52,7 +51,7 @@ uint8_t EBF_Servo::SetPosition(uint8_t percent, uint16_t msDuration, uint8_t ste
 {
 	if (percent == lastPercent) {
 		// Nothing to do
-		return EBF_OK;
+		EBF_REPORT_AND_RETURN(EBF_OK);
 	}
 
 	targetPercent = percent;
@@ -83,7 +82,7 @@ uint8_t EBF_Servo::SetPosition(uint8_t percent, uint16_t msDuration, uint8_t ste
 
 	effectStart = micros();
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 uint8_t EBF_Servo::Process()
@@ -122,5 +121,5 @@ uint8_t EBF_Servo::Process()
 		}
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }

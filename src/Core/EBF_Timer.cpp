@@ -19,12 +19,8 @@ uint8_t EBF_Timer::Init(EBF_CallbackType callbackPtr, uint16_t milliSec)
 	this->milliSecTimeout = milliSec;
 
 	rc = EBF_Logic::GetInstance()->AddTimer(*this);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_Timer::Start()
@@ -32,14 +28,12 @@ uint8_t EBF_Timer::Start()
 	EBF_Logic *pLogic = EBF_Logic::GetInstance();
 
 	if (this->callbackPtr == NULL) {
-		EBF_REPORT_ERROR(EBF_NOT_INITIALIZED);
-		return EBF_NOT_INITIALIZED;
+		EBF_REPORT_AND_RETURN(EBF_NOT_INITIALIZED);
 	}
 
 	// Timer is already running
 	if (this->isRunning != 0) {
-		EBF_REPORT_ERROR(EBF_RESOURCE_IS_IN_USE);
-		return EBF_RESOURCE_IS_IN_USE;
+		EBF_REPORT_AND_RETURN(EBF_RESOURCE_IS_IN_USE);
 	}
 
 	// Should use EBF's micros, since it's updated during power save mode
@@ -50,7 +44,7 @@ uint8_t EBF_Timer::Start()
 	// Request recalculation of timeouts
 	pLogic->Recalculate();
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 uint8_t EBF_Timer::Start(uint16_t milliSec)
@@ -59,17 +53,15 @@ uint8_t EBF_Timer::Start(uint16_t milliSec)
 
 	rc = this->SetTimeout(milliSec);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	rc = this->Start();
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 uint8_t EBF_Timer::Stop()
@@ -82,7 +74,7 @@ uint8_t EBF_Timer::Stop()
 	// Request recalculation of timeouts
 	pLogic->Recalculate();
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 uint8_t EBF_Timer::Restart()
@@ -91,24 +83,22 @@ uint8_t EBF_Timer::Restart()
 
 	rc = this->Stop();
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	rc = this->Start();
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 uint8_t EBF_Timer::SetTimeout(uint16_t milliSec)
 {
 	this->milliSecTimeout = milliSec;
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 uint32_t EBF_Timer::Process()

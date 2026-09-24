@@ -26,8 +26,7 @@ uint8_t EBF_SPI::Init(
 
 	rc = EBF_HalInstance::Init(HAL_Type::SPI_INTERFACE, serialNumber);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	this->callbackFunc = callbackFunc;
@@ -44,7 +43,7 @@ uint8_t EBF_SPI::Init(
 	pSpiInstance->begin();
 	pSpiInstance->setClockDivider(clockDivider);
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 void EBF_SPI::SetPollingInterval(uint32_t ms)
@@ -60,7 +59,7 @@ void EBF_SPI::SetPollingInterval(uint32_t ms)
 uint8_t EBF_SPI::Process()
 {
 	// Nothing to do for SPI
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 #endif // EBF_REMOVE_SPI_IMPLEMENTATION

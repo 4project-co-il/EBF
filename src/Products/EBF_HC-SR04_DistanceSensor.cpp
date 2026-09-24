@@ -10,20 +10,18 @@ uint8_t EBF_HCSR04_DistanceSensor::Init(uint8_t triggerPinNumber, uint8_t echoPi
 	// Use empty callback function to allow Process and ProcessCallback calls
 	rc = EBF_DigitalInput::Init(echoPinNumber, EBF_EmptyCallback, EBF_DigitalInput::InterruptMode::MODE_CHANGE);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	rc = trigger.Init(triggerPinNumber);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	this->changePercent = 100;
 	this->lastValue = GetValue();
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 void EBF_HCSR04_DistanceSensor::SetOnChange(EBF_CallbackType onChangeCallback, uint8_t changePercent)
@@ -65,5 +63,5 @@ uint8_t EBF_HCSR04_DistanceSensor::Process()
 		ProcessCallback();
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }

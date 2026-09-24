@@ -17,15 +17,13 @@ uint8_t EBF_HAL_PCA9685::Init(uint16_t freq, uint8_t i2cAddress)
 
 	// freq can be between 24Hz up to 1526Hz
 	if (freq < 24 || freq >= 1526) {
-		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
-		return EBF_INDEX_OUT_OF_BOUNDS;
+		EBF_REPORT_AND_RETURN(EBF_INDEX_OUT_OF_BOUNDS);
 	}
 
 	// In order to change the PRE_SCALE to set the required frequency, the chip have to be in sleep mode
 	rc = EnterSleepMode();
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// Prescale is calculated as clock / (4096 * freq) - 1
@@ -34,18 +32,13 @@ uint8_t EBF_HAL_PCA9685::Init(uint16_t freq, uint8_t i2cAddress)
 
 	rc = Write8bitRegister(regPrescale, prescale);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// Exit sleep mode
 	rc = ExitSleepMode(0);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_HAL_PCA9685::EnterSleepMode()
@@ -67,12 +60,8 @@ uint8_t EBF_HAL_PCA9685::EnterSleepMode()
 	mode |= 1<<5;
 
 	rc = Write8bitRegister(regMode1, mode);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_HAL_PCA9685::ExitSleepMode(uint8_t restoreOutputs)
@@ -94,8 +83,7 @@ uint8_t EBF_HAL_PCA9685::ExitSleepMode(uint8_t restoreOutputs)
 
 	rc = Write8bitRegister(regMode1, mode);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// Have to wait 500uSec for the clock to stabilize before anything can be done with the chip
@@ -107,8 +95,7 @@ uint8_t EBF_HAL_PCA9685::ExitSleepMode(uint8_t restoreOutputs)
 		mode = 0;
 		rc = Read8bitRegister(regMode1, mode);
 		if (rc != EBF_OK) {
-			EBF_REPORT_ERROR(rc);
-			return rc;
+			EBF_REPORT_AND_RETURN(rc);
 		}
 
 		// We cab restore the PWM outputs
@@ -117,13 +104,12 @@ uint8_t EBF_HAL_PCA9685::ExitSleepMode(uint8_t restoreOutputs)
 			// We just write the mode register content again
 			rc = Write8bitRegister(regMode1, mode);
 			if (rc != EBF_OK) {
-				EBF_REPORT_ERROR(rc);
-				return rc;
+				EBF_REPORT_AND_RETURN(rc);
 			}
 		}
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // Sets PWM output on specified channel
@@ -136,8 +122,7 @@ uint8_t EBF_HAL_PCA9685::SetChannelPWM(uint8_t channel, uint16_t stepON, uint16_
 
 	// PCA9685 chip have 16 channels 0..15
 	if (channel > 15) {
-		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
-		return EBF_INDEX_OUT_OF_BOUNDS;
+		EBF_REPORT_AND_RETURN(EBF_INDEX_OUT_OF_BOUNDS);
 	}
 
 	// Prepare the buffer
@@ -148,12 +133,8 @@ uint8_t EBF_HAL_PCA9685::SetChannelPWM(uint8_t channel, uint16_t stepON, uint16_
 	buffer[4] = (stepOFF >> 8) & 0x0F;
 
 	rc = WriteBuffer(buffer, sizeof(buffer));
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_HAL_PCA9685::GetChannelPWM(uint8_t channel, uint16_t &stepON, uint16_t &stepOFF)
@@ -163,14 +144,12 @@ uint8_t EBF_HAL_PCA9685::GetChannelPWM(uint8_t channel, uint16_t &stepON, uint16
 
 	// PCA9685 chip have 16 channels 0..15
 	if (channel > 15) {
-		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
-		return EBF_INDEX_OUT_OF_BOUNDS;
+		EBF_REPORT_AND_RETURN(EBF_INDEX_OUT_OF_BOUNDS);
 	}
 
 	rc = Read32bitRegister(regLED0_ON_L + channel*4, pwmData);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// The data is read in wrong order
@@ -192,7 +171,7 @@ uint8_t EBF_HAL_PCA9685::GetChannelPWM(uint8_t channel, uint16_t &stepON, uint16
 		stepOFF = NUMBER_OF_STEPS;
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // Sets the channel to specified value (0 or 1)
@@ -202,8 +181,7 @@ uint8_t EBF_HAL_PCA9685::SetChannelValue(uint8_t channel, uint8_t value)
 
 	// PCA9685 chip have 16 channels 0..15
 	if (channel > 15) {
-		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
-		return EBF_INDEX_OUT_OF_BOUNDS;
+		EBF_REPORT_AND_RETURN(EBF_INDEX_OUT_OF_BOUNDS);
 	}
 
 	// 5 bytes are needed to set a channel (channel register, ON_L, ON_H, OFF_L, OFF_H)
@@ -227,12 +205,8 @@ uint8_t EBF_HAL_PCA9685::SetChannelValue(uint8_t channel, uint8_t value)
 	}
 
 	rc = WriteBuffer(buffer, sizeof(buffer));
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 // Sets multiple channels using one communication sequeince in order to syncronize all outputs
@@ -244,8 +218,7 @@ uint8_t EBF_HAL_PCA9685::SetMultipleChannelsPWM(uint8_t startChannel, uint8_t nu
 
 	// PCA9685 chip have 16 channels 0..15
 	if (numberOfChannels > 15) {
-		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
-		return EBF_INDEX_OUT_OF_BOUNDS;
+		EBF_REPORT_AND_RETURN(EBF_INDEX_OUT_OF_BOUNDS);
 	}
 
 	// 5 bytes are needed to set a channel (channel register, ON_L, ON_H, OFF_L, OFF_H)
@@ -263,10 +236,6 @@ uint8_t EBF_HAL_PCA9685::SetMultipleChannelsPWM(uint8_t startChannel, uint8_t nu
 	}
 
 	rc = WriteBuffer(buffer, sizeof(buffer));
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }

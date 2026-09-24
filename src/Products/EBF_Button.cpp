@@ -9,8 +9,7 @@ uint8_t EBF_Button::Init(uint8_t pinNumber, bool internelPullup)
 
 	rc = EBF_Switch::Init(pinNumber, internelPullup);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	this->state = (EBF_Button::ButtonState)EBF_Switch::state;
@@ -22,7 +21,7 @@ uint8_t EBF_Button::Init(uint8_t pinNumber, bool internelPullup)
 	// Long press will be 3 sec by default
 	longPressTime = 3000;
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // Called when the switch changes its state after the debounce
@@ -64,8 +63,7 @@ uint8_t EBF_Button::Process()
 
 	rc = EBF_Switch::Process();
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// When in waiting for long press state, wait till the long press time
@@ -81,5 +79,5 @@ uint8_t EBF_Button::Process()
 		onLongPressCallback();
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }

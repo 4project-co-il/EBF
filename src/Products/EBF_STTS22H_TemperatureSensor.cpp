@@ -27,24 +27,21 @@ uint8_t EBF_STTS22H_TemperatureSensor::Init(uint8_t i2cAddress, OperationMode mo
 
 	rc = EBF_HalInstance::Init(HAL_Type::I2C_INTERFACE, i2cAddress);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// Init the STTS22H chip
 	rc = chip.Init(i2cAddress);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	rc = SetOperationMode(mode);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 #ifdef EBF_USE_INTERRUPTS
@@ -55,15 +52,14 @@ uint8_t EBF_STTS22H_TemperatureSensor::AttachInterrupt(uint8_t interruptPin)
 
 	rc = pLogic->AttachInterrupt(interruptPin, this, EBF_DigitalInput::InterruptMode::MODE_LOW);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	interruptAttached = 1;
 
 	UpdatePollInterval();
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 #endif
 
@@ -132,8 +128,7 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetOperationMode(OperationMode mode)
 	// Any change should be done after the device is moved to power down mode
 	rc = chip.PowerDown();
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	switch (operationMode)
@@ -149,8 +144,7 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetOperationMode(OperationMode mode)
 
 		rc = chip.SetOneShotMode();
 		if (rc != EBF_OK) {
-			EBF_REPORT_ERROR(rc);
-			return rc;
+			EBF_REPORT_AND_RETURN(rc);
 		}
 		break;
 
@@ -159,8 +153,7 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetOperationMode(OperationMode mode)
 
 		rc = chip.Set1HzMode();
 		if (rc != EBF_OK) {
-			EBF_REPORT_ERROR(rc);
-			return rc;
+			EBF_REPORT_AND_RETURN(rc);
 		}
 		break;
 
@@ -169,8 +162,7 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetOperationMode(OperationMode mode)
 
 		rc = chip.SetFreeRunMode(EBF_HAL_STTS22H::AVERAGING_25HZ);
 		if (rc != EBF_OK) {
-			EBF_REPORT_ERROR(rc);
-			return rc;
+			EBF_REPORT_AND_RETURN(rc);
 		}
 		break;
 
@@ -179,8 +171,7 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetOperationMode(OperationMode mode)
 
 		rc = chip.SetFreeRunMode(EBF_HAL_STTS22H::AVERAGING_50HZ);
 		if (rc != EBF_OK) {
-			EBF_REPORT_ERROR(rc);
-			return rc;
+			EBF_REPORT_AND_RETURN(rc);
 		}
 		break;
 
@@ -189,8 +180,7 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetOperationMode(OperationMode mode)
 
 		rc = chip.SetFreeRunMode(EBF_HAL_STTS22H::AVERAGING_100HZ);
 		if (rc != EBF_OK) {
-			EBF_REPORT_ERROR(rc);
-			return rc;
+			EBF_REPORT_AND_RETURN(rc);
 		}
 		break;
 
@@ -199,15 +189,14 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetOperationMode(OperationMode mode)
 
 		rc = chip.SetFreeRunMode(EBF_HAL_STTS22H::AVERAGING_200HZ);
 		if (rc != EBF_OK) {
-			EBF_REPORT_ERROR(rc);
-			return rc;
+			EBF_REPORT_AND_RETURN(rc);
 		}
 		break;
 	}
 
 	UpdatePollInterval();
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // Returns the measured temperature in Celsius
@@ -288,7 +277,7 @@ uint8_t EBF_STTS22H_TemperatureSensor::Process()
 		if (lowThresholdSet || highThresholdSet) {
 			rc = chip.GetIntFlags(highThreshold, lowThreshold);
 			if (rc != EBF_OK) {
-				EBF_REPORT_ERROR(rc);
+				EBF_REPORT_AND_RETURN(rc);
 			}
 
 			if(highThresholdSet && highThreshold) {
@@ -302,7 +291,7 @@ uint8_t EBF_STTS22H_TemperatureSensor::Process()
 		break;
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 #ifdef EBF_USE_INTERRUPTS
@@ -316,6 +305,7 @@ void EBF_STTS22H_TemperatureSensor::ProcessInterrupt()
 	rc = chip.GetIntFlags(highThreshold, lowThreshold);
 	if (rc != EBF_OK) {
 		EBF_REPORT_ERROR(rc);
+		return;
 	}
 
 	// Save the interrupt flags
@@ -341,12 +331,8 @@ uint8_t EBF_STTS22H_TemperatureSensor::PostponeProcessing()
 
 	// Pass the control back to EBF, so it will call the Process() function from normal run
 	rc = pLogic->PostponeInterrupt(this, currentInterruptData.uint32);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 #endif
 
@@ -358,12 +344,8 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetThresholdHigh(float temp)
 	highThresholdSet = 1;
 
 	rc = chip.SetThresholdHigh(temp);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 // Sets low threshold value
@@ -374,12 +356,8 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetThresholdLow(float temp)
 	lowThresholdSet = 1;
 
 	rc = chip.SetThresholdLow(temp);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 // Gets high threshold value
@@ -391,7 +369,6 @@ float EBF_STTS22H_TemperatureSensor::GetThresholdHigh()
 	rc = chip.GetThresholdHigh(value);
 	if (rc != EBF_OK) {
 		EBF_REPORT_ERROR(rc);
-		return rc;
 	}
 
 	return value;
@@ -406,7 +383,6 @@ float EBF_STTS22H_TemperatureSensor::GetThresholdLow()
 	rc = chip.GetThresholdLow(value);
 	if (rc != EBF_OK) {
 		EBF_REPORT_ERROR(rc);
-		return rc;
 	}
 
 	return value;
@@ -420,12 +396,8 @@ uint8_t EBF_STTS22H_TemperatureSensor::DisableThresholdHigh()
 	highThresholdSet = 0;
 
 	rc = chip.DisableThresholdHigh();
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 // Disable low threshold triggering
@@ -436,12 +408,8 @@ uint8_t EBF_STTS22H_TemperatureSensor::DisableThresholdLow()
 	lowThresholdSet = 0;
 
 	rc = chip.DisableThresholdLow();
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 void EBF_STTS22H_TemperatureSensor::ExecuteCallback(volatile PostponedInterruptData& data)

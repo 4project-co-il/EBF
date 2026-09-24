@@ -7,8 +7,7 @@ uint8_t EBF_DigitalOutput::Init(uint8_t pinNumber)
 
 	rc = EBF_HalInstance::Init(HAL_Type::DIGITAL_OUTPUT, pinNumber);
 	if (rc!= EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// Digital outputs should not be polled
@@ -18,12 +17,12 @@ uint8_t EBF_DigitalOutput::Init(uint8_t pinNumber)
 
 	pinMode(pinNumber, OUTPUT);
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 uint8_t EBF_DigitalOutput::SetValue(uint8_t value)
 {
 	digitalWrite(pinNumber, value);
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }

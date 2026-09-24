@@ -33,10 +33,16 @@ typedef void (*EBF_ErrorHandlerType)(const char *module, uint32_t line, EBF_ERRO
 #define EBF_REPORT_ERROR_INT(error) (ReportError(moduleName, __LINE__, (EBF_ERROR_CODE)error))
 #define EBF_REPORT_ERROR(error) (EBF_Core::ReportError(moduleName, __LINE__, (EBF_ERROR_CODE)error))
 #define EBF_DEBUG_MODULE_NAME(name) const char* moduleName=name;
+
+#define EBF_REPORT_AND_RETURN(errorCode) {EBF_REPORT_ERROR(errorCode); return (errorCode);}
+#define EBF_REPORT_AND_RETURN_INT(errorCode) {EBF_REPORT_ERROR_INT(errorCode); return (errorCode);}
 #else
 #define EBF_REPORT_ERROR_INT(error) ({;})
 #define EBF_REPORT_ERROR(error) ({;})
 #define EBF_DEBUG_MODULE_NAME(name)
+
+#define EBF_REPORT_AND_RETURN(errorCode) ({return (errorCode);})
+#define EBF_REPORT_AND_RETURN_INT(errorCode) ({return (errorCode);})
 #endif
 
 #endif

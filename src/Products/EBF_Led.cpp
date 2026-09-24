@@ -7,20 +7,21 @@ uint8_t EBF_Led::Init(uint8_t pinNumber)
 
 	rc = EBF_PwmOutput::Init(pinNumber);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	state = LED_OFF;
 	// Full brightness by default
 	brightness = 255;
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // SetValue acts as an ON/OFF function, value == 0 will perform as OFF, any other value as ON
 uint8_t EBF_Led::SetValue(uint8_t value)
 {
+	uint8_t rc;
+
 	if (value == 0) {
 		state = LED_OFF;
 	} else {
@@ -29,7 +30,9 @@ uint8_t EBF_Led::SetValue(uint8_t value)
 		value = brightness;
 	}
 
-	return EBF_PwmOutput::SetValue(value);
+	rc = EBF_PwmOutput::SetValue(value);
+
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 // GetValue returns current status of the led (ON or OFF)
@@ -53,16 +56,24 @@ uint8_t EBF_Led::GetValue()
 
 uint8_t EBF_Led::On()
 {
+	uint8_t rc;
+
 	state = LED_ON;
 
-	return EBF_PwmOutput::SetValue(brightness);
+	rc = EBF_PwmOutput::SetValue(brightness);
+
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_Led::Off()
 {
+	uint8_t rc;
+
 	state = LED_OFF;
 
-	return EBF_PwmOutput::SetValue(0);
+	rc = EBF_PwmOutput::SetValue(0);
+
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 // Brightness will work only on hardware PWM enabled pins
@@ -96,12 +107,7 @@ uint8_t EBF_Led::SetBrightness(uint8_t percent)
 		break;
 	}
 
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
-
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 // Turns on for msOn milliSeconds and stay off for msOff milliSeconds
@@ -120,12 +126,8 @@ uint8_t EBF_Led::Blink(uint16_t msOn, uint16_t msOff)
 	SetPollingInterval(0);
 
 	rc = EBF_PwmOutput::SetValue(brightness);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 // The led will fade in, from OFF to ON (up to brightness)
@@ -146,12 +148,8 @@ uint8_t EBF_Led::FadeIn(uint16_t msDuration, uint8_t msUpdate)
 	state = LED_FADING_IN;
 
 	rc = EBF_PwmOutput::SetValue((uint8_t)offDuration);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 // The led will fade out, from ON (current brightness) to OFF
@@ -172,12 +170,8 @@ uint8_t EBF_Led::FadeOut(uint16_t msDuration, uint8_t msUpdate)
 	state = LED_FADING_OUT;
 
 	rc = EBF_PwmOutput::SetValue((uint8_t)onDuration);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_Led::Process()
@@ -296,10 +290,5 @@ uint8_t EBF_Led::Process()
 		break;
 	}
 
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
-
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }

@@ -10,8 +10,7 @@ uint8_t EBF_Potentiometer::Init(uint8_t pinNumber, uint8_t changePercent, uint8_
 	// Use empty callback function to allow Process and ProcessCallback calls
 	rc = EBF_AnalogInput::Init(pinNumber, EBF_EmptyCallback, changePercent);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	numOfSamples = numberOfAveragingSamples;
@@ -19,8 +18,7 @@ uint8_t EBF_Potentiometer::Init(uint8_t pinNumber, uint8_t changePercent, uint8_
 	// allocate samples array
 	pSamples = (uint16_t*)malloc(sizeof(uint16_t) * numOfSamples);
 	if (pSamples == NULL) {
-		EBF_REPORT_ERROR(EBF_NOT_ENOUGH_MEMORY);
-		return EBF_NOT_ENOUGH_MEMORY;
+		EBF_REPORT_AND_RETURN(EBF_NOT_ENOUGH_MEMORY);
 	}
 
 	// Fill all the samples with the same reading at the beginning to have initial value
@@ -33,7 +31,7 @@ uint8_t EBF_Potentiometer::Init(uint8_t pinNumber, uint8_t changePercent, uint8_
 	// Start sampling from the beginning of the array
 	currentSample = 0;
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 uint16_t EBF_Potentiometer::GetRawAverage()
@@ -79,5 +77,5 @@ uint8_t EBF_Potentiometer::Process()
 		ProcessCallback();
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }

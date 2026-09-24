@@ -38,6 +38,7 @@ class EBF_Logic {
 		void ReportError(const char* pModuleName, uint32_t line, EBF_ERROR_CODE error);
 
 		const char* ErrorCode2Str(EBF_ERROR_CODE code);
+		EBF_ERROR_CODE GetLastError() { return lastError; }
 #endif
 
 	public:
@@ -128,6 +129,7 @@ class EBF_Logic {
 #ifndef EBF_REMOVE_DEBUG_CODE
 		// EBF_Serial instance to print error messages
 		EBF_Serial* pErrorSerial;
+		EBF_ERROR_CODE lastError;
 #endif
 };
 

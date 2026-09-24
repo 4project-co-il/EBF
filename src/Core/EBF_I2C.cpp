@@ -14,8 +14,7 @@ uint8_t EBF_I2C::Init(EBF_CallbackType callbackFunc, uint8_t address)
 		// Register this HAL instance only when we have a callback to call when data is available
 		rc = EBF_HalInstance::Init(HAL_Type::I2C_INTERFACE, address);
 		if (rc != EBF_OK) {
-			EBF_REPORT_ERROR(rc);
-			return rc;
+			EBF_REPORT_AND_RETURN(rc);
 		}
 	}
 
@@ -25,7 +24,7 @@ uint8_t EBF_I2C::Init(EBF_CallbackType callbackFunc, uint8_t address)
 		i2c.begin(address);
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 void EBF_I2C::SetPollingInterval(uint32_t ms)
@@ -42,7 +41,7 @@ uint8_t EBF_I2C::Process()
 {
 	// Callback might not be set, nothing to do in that case
 	if (callbackFunc == NULL) {
-		return EBF_OK;
+		EBF_REPORT_AND_RETURN(EBF_OK);
 	}
 
 	// The stream have data, call the callback
@@ -50,5 +49,5 @@ uint8_t EBF_I2C::Process()
 		callbackFunc();
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }

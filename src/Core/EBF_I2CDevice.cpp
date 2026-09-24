@@ -22,7 +22,7 @@ uint8_t EBF_I2CDevice::Read8bitRegister(uint8_t regAddress, uint8_t& value)
 	} while (0);
 	interrupts();
 
-	return rc;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_I2CDevice::Write8bitRegister(uint8_t regAddress, uint8_t value)
@@ -43,7 +43,7 @@ uint8_t EBF_I2CDevice::Write8bitRegister(uint8_t regAddress, uint8_t value)
 	} while (0);
 	interrupts();
 
-	return rc;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_I2CDevice::Read16bitRegister(uint8_t regAddress, uint16_t& value)
@@ -71,7 +71,7 @@ uint8_t EBF_I2CDevice::Read16bitRegister(uint8_t regAddress, uint16_t& value)
 	} while (0);
 	interrupts();
 
-	return rc;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_I2CDevice::Write16bitRegister(uint8_t regAddress, uint16_t value)
@@ -93,7 +93,7 @@ uint8_t EBF_I2CDevice::Write16bitRegister(uint8_t regAddress, uint16_t value)
 	} while (0);
 	interrupts();
 
-	return rc;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 
@@ -128,7 +128,7 @@ uint8_t EBF_I2CDevice::Read32bitRegister(uint8_t regAddress, uint32_t& value)
 	} while (0);
 	interrupts();
 
-	return rc;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_I2CDevice::Write32bitRegister(uint8_t regAddress, uint32_t value)
@@ -152,7 +152,7 @@ uint8_t EBF_I2CDevice::Write32bitRegister(uint8_t regAddress, uint32_t value)
 	} while (0);
 	interrupts();
 
-	return rc;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_I2CDevice::WriteBuffer(uint8_t *pBuffer, uint8_t length)
@@ -175,5 +175,5 @@ uint8_t EBF_I2CDevice::WriteBuffer(uint8_t *pBuffer, uint8_t length)
 	} while (0);
 	interrupts();
 
-	return rc;
+	EBF_REPORT_AND_RETURN(rc);
 }

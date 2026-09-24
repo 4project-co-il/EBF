@@ -123,8 +123,7 @@ uint8_t EBF_Logic::Init(uint8_t queueSize)
 
 	rc = this->msgQueue.Init(queueSize);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR_INT(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN_INT(rc);
 	}
 #endif
 
@@ -132,8 +131,7 @@ uint8_t EBF_Logic::Init(uint8_t queueSize)
 		pTimers = (EBF_Timer**)malloc(sizeof(EBF_Timer*) * EBF_Timer::GetNumberOfTimers());
 
 		if (pTimers == NULL) {
-			EBF_REPORT_ERROR_INT(EBF_NOT_ENOUGH_MEMORY);
-			return EBF_NOT_ENOUGH_MEMORY;
+			EBF_REPORT_AND_RETURN_INT(EBF_NOT_ENOUGH_MEMORY);
 		}
 	}
 
@@ -146,12 +144,11 @@ uint8_t EBF_Logic::Init(uint8_t queueSize)
 		pHalInstances = (EBF_HalInstance**)malloc(sizeof(EBF_HalInstance*) * maxHalInstances);
 
 		if (pHalInstances == NULL) {
-			EBF_REPORT_ERROR_INT(EBF_NOT_ENOUGH_MEMORY);
-			return EBF_NOT_ENOUGH_MEMORY;
+			EBF_REPORT_AND_RETURN_INT(EBF_NOT_ENOUGH_MEMORY);
 		}
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN_INT(EBF_OK);
 }
 
 #ifndef EBF_REMOVE_DEBUG_CODE
@@ -166,6 +163,7 @@ const char* EBF_Logic::ErrorCode2Str(EBF_ERROR_CODE code)
 	case EBF_NOT_INITIALIZED:		return "NOT_INITIALIZED";
 	case EBF_INVALID_STATE:			return "INVALID_STATE";
 	case EBF_COMMUNICATION_PROBLEM:	return "COMMUNICATION_PROBLEM";
+	default: return "Unknown error code";
 	}
 
 	return NULL;
@@ -175,7 +173,9 @@ void EBF_Logic::ReportError(const char* pModuleName, uint32_t line, EBF_ERROR_CO
 {
 	const char* pStr;
 
-	if (pErrorSerial != NULL) {
+	lastError = error;
+
+	if (pErrorSerial != NULL && error != EBF_OK) {
 		pErrorSerial->print(pModuleName);
 		pErrorSerial->print(":");
 		pErrorSerial->print(line);
@@ -193,27 +193,25 @@ void EBF_Logic::ReportError(const char* pModuleName, uint32_t line, EBF_ERROR_CO
 uint8_t EBF_Logic::AddTimer(EBF_Timer &timer)
 {
 	if (timerIndex >= EBF_Timer::GetNumberOfTimers()) {
-		EBF_REPORT_ERROR_INT(EBF_INDEX_OUT_OF_BOUNDS);
-		return EBF_INDEX_OUT_OF_BOUNDS;
+		EBF_REPORT_AND_RETURN_INT(EBF_INDEX_OUT_OF_BOUNDS);
 	}
 
 	pTimers[timerIndex] = &timer;
 	timerIndex++;
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN_INT(EBF_OK);
 }
 
 uint8_t EBF_Logic::AddHalInstance(EBF_HalInstance &instance)
 {
 	if (halIndex >= maxHalInstances) {
-		EBF_REPORT_ERROR_INT(EBF_INDEX_OUT_OF_BOUNDS);
-		return EBF_INDEX_OUT_OF_BOUNDS;
+		EBF_REPORT_AND_RETURN_INT(EBF_INDEX_OUT_OF_BOUNDS);
 	}
 
 	pHalInstances[halIndex] = &instance;
 	halIndex++;
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN_INT(EBF_OK);
 }
 
 uint8_t EBF_Logic::Process()
@@ -281,7 +279,7 @@ uint8_t EBF_Logic::Process()
 
 	// Recalculation needed, exit and the main loop will call that function again
 	if (recalculateNeeded) {
-		return EBF_OK;
+		EBF_REPORT_AND_RETURN_INT(EBF_OK);
 	}
 
 	// Should give other things some CPU time
@@ -312,7 +310,7 @@ uint8_t EBF_Logic::Process()
 			}
 		}
 
-		return EBF_OK;
+		EBF_REPORT_AND_RETURN_INT(EBF_OK);
 #endif
 	}
 #endif
@@ -342,7 +340,7 @@ uint8_t EBF_Logic::Process()
 
 		// Need to recalculate wanted delay after message processing
 		if(recalculateNeeded) {
-			return EBF_OK;
+			EBF_REPORT_AND_RETURN_INT(EBF_OK);
 		}
 #endif
 		while ( delayWanted > 0 && (this->micros() - start) >= 1000) {
@@ -351,7 +349,7 @@ uint8_t EBF_Logic::Process()
 		}
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN_INT(EBF_OK);
 }
 
 EBF_HalInstance *EBF_Logic::GetHalInstance(EBF_HalInstance::HAL_Type type, uint8_t id)
@@ -385,12 +383,8 @@ uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHa
 
 	// Use interrupt number as the hint
 	rc = AttachInterrupt(interruptNumber, pHalInstance, mode, interruptNumber);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR_INT(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN_INT(rc);
 }
 
 uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHalInstance, uint8_t mode, uint32_t hint)
@@ -405,8 +399,7 @@ uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHa
 #endif
 
 	if (interruptNumber > EXTERNAL_NUM_INTERRUPTS) {
-		EBF_REPORT_ERROR_INT(EBF_INDEX_OUT_OF_BOUNDS);
-		return EBF_INDEX_OUT_OF_BOUNDS;
+		EBF_REPORT_AND_RETURN_INT(EBF_INDEX_OUT_OF_BOUNDS);
 	}
 
 	pHalIsr[interruptNumber] = pHalInstance;
@@ -472,7 +465,7 @@ uint8_t EBF_Logic::AttachInterrupt(uint8_t interruptNumber, EBF_HalInstance *pHa
 	#error Current board type is not supported
 #endif
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN_INT(EBF_OK);
 }
 
 void EBF_Logic::HandleIsr(uint8_t interruptNumber)
@@ -493,12 +486,8 @@ uint8_t EBF_Logic::PostponeInterrupt(EBF_HalInstance *pHalInstance)
 	uint8_t rc;
 
 	rc = PostponeInterrupt(pHalInstance, 0);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR_INT(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_Logic::PostponeInterrupt(EBF_HalInstance *pHalInstance, uint32_t param1)
@@ -511,12 +500,8 @@ uint8_t EBF_Logic::PostponeInterrupt(EBF_HalInstance *pHalInstance, uint32_t par
 	msg.param1 = param1;
 
 	rc = msgQueue.AddMessage(msg);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR_INT(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN_INT(rc);
 }
 #endif
 
@@ -619,7 +604,7 @@ uint8_t EBF_Logic::InitSleep()
 
 	// TODO: Check if other modules can be disabled to save more power
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN_INT(EBF_OK);
 }
 
 // Based on ArduinoLowPower
@@ -630,7 +615,7 @@ uint8_t EBF_Logic::EnterSleep(uint32_t msSleep)
 
 	// No sleep needed
 	if (sleepMode == EBF_SleepMode::EBF_NO_SLEEP) {
-		return EBF_OK;
+		EBF_REPORT_AND_RETURN_INT(EBF_OK);
 	}
 
 	// Move IEC (External Interrupt Controller) to GCLK2, which is running on low power internal 32K oscilator
@@ -722,7 +707,7 @@ uint8_t EBF_Logic::EnterSleep(uint32_t msSleep)
 	}
 
 	// Back to normal CPU oreration
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 void EBF_Logic::ExitSleep()

@@ -15,12 +15,8 @@ uint8_t EBF_HAL_STTS22H::Init(uint8_t i2cAddress)
 
 	// Reading status register to reset the interrupt line
 	rc = GetStatusRegister(status);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 // Returns Status register content
@@ -29,26 +25,17 @@ uint8_t EBF_HAL_STTS22H::GetStatusRegister(StatusRegister_t &status)
 	uint8_t rc;
 
 	rc = Read8bitRegister(regStatus, status.reg);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
-
 
 uint8_t EBF_HAL_STTS22H::GetControlRegister(ControlRegister_t &ctrl)
 {
 	uint8_t rc;
 
 	rc = Read8bitRegister(regControl, ctrl.reg);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_HAL_STTS22H::SetControlRegister(ControlRegister_t ctrl)
@@ -59,12 +46,8 @@ uint8_t EBF_HAL_STTS22H::SetControlRegister(ControlRegister_t ctrl)
 	ctrl.fields.addrInc = 1;
 
 	rc = Write8bitRegister(regControl, ctrl.reg);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_HAL_STTS22H::GetValueRaw(int16_t &value)
@@ -74,13 +57,12 @@ uint8_t EBF_HAL_STTS22H::GetValueRaw(int16_t &value)
 
 	rc = Read16bitRegister(regTempOutput, readVal);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	value = (int16_t)readVal;
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 uint8_t EBF_HAL_STTS22H::PowerDown()
@@ -90,12 +72,8 @@ uint8_t EBF_HAL_STTS22H::PowerDown()
 
 	// Sending zero control register powers down the chip
 	rc = SetControlRegister(ctrl);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_HAL_STTS22H::SetOneShotMode()
@@ -106,12 +84,8 @@ uint8_t EBF_HAL_STTS22H::SetOneShotMode()
 	ctrl.fields.oneShot = 1;
 
 	rc = SetControlRegister(ctrl);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_HAL_STTS22H::Set1HzMode()
@@ -122,12 +96,8 @@ uint8_t EBF_HAL_STTS22H::Set1HzMode()
 	ctrl.fields.mode_1Hz = 1;
 
 	rc = SetControlRegister(ctrl);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_HAL_STTS22H::SetFreeRunMode(AveragingFrequency freq)
@@ -139,12 +109,8 @@ uint8_t EBF_HAL_STTS22H::SetFreeRunMode(AveragingFrequency freq)
 	ctrl.fields.avg = (uint8_t)freq;
 
 	rc = SetControlRegister(ctrl);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_HAL_STTS22H::IsBusy()
@@ -165,13 +131,9 @@ uint8_t EBF_HAL_STTS22H::SetThresholdHigh(float temp)
 	uint8_t rc;
 
 	// Threshold = (temp_limit_reg - 63) * 0.64°C
-	rc = Write8bitRegister(regTempHighLimit, (uint8_t)floor((temp / 0.64 + 63 + 0.5)));
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
+	rc = Write8bitRegister(regTempHighLimit, (uint8_t)floor((temp / 0.64 + 63)));
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_HAL_STTS22H::SetThresholdLow(float temp)
@@ -179,13 +141,9 @@ uint8_t EBF_HAL_STTS22H::SetThresholdLow(float temp)
 	uint8_t rc;
 
 	// Threshold = (temp_limit_reg - 63) * 0.64°C
-	rc = Write8bitRegister(regTempLowLimit, (uint8_t)floor((temp / 0.64 + 63 + 0.5)));
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
+	rc = Write8bitRegister(regTempLowLimit, (uint8_t)floor((temp / 0.64 + 63)));
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_HAL_STTS22H::GetThresholdHigh(float &temp)
@@ -195,14 +153,13 @@ uint8_t EBF_HAL_STTS22H::GetThresholdHigh(float &temp)
 
 	rc = Read8bitRegister(regTempHighLimit, readVal);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// Threshold = (temp_limit_reg - 63) * 0.64°C
-	temp = (readVal - 63.0 - 0.5) * 0.64;
+	temp = (readVal - 63.0) * 0.64;
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 uint8_t EBF_HAL_STTS22H::GetThresholdLow(float &temp)
@@ -212,14 +169,13 @@ uint8_t EBF_HAL_STTS22H::GetThresholdLow(float &temp)
 
 	rc = Read8bitRegister(regTempLowLimit, readVal);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// Threshold = (temp_limit_reg - 63) * 0.64°C
-	temp = (readVal - 63.0 - 0.5) * 0.64;
+	temp = (readVal - 63.0) * 0.64;
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 uint8_t EBF_HAL_STTS22H::DisableThresholdHigh()
@@ -228,12 +184,8 @@ uint8_t EBF_HAL_STTS22H::DisableThresholdHigh()
 
 	// Value 0 disables the threshold
 	rc = Write8bitRegister(regTempHighLimit, 0);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_HAL_STTS22H::DisableThresholdLow()
@@ -242,12 +194,8 @@ uint8_t EBF_HAL_STTS22H::DisableThresholdLow()
 
 	// Value 0 disables the threshold
 	rc = Write8bitRegister(regTempLowLimit, 0);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_HAL_STTS22H::GetIntFlags(uint8_t &highThreshold, uint8_t &lowThreshold)
@@ -257,11 +205,11 @@ uint8_t EBF_HAL_STTS22H::GetIntFlags(uint8_t &highThreshold, uint8_t &lowThresho
 
 	rc = GetStatusRegister(status);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	highThreshold = status.fields.overThreshold;
 	lowThreshold = status.fields.underThreshold;
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }

@@ -11,8 +11,7 @@ uint8_t EBF_MessageQueue::Init(uint8_t queueSize)
 	// Init queue data
 	this->pQueueData = (MessageEntry*)malloc(sizeof(MessageEntry) * this->queueSize);
 	if (this->pQueueData == NULL) {
-		EBF_REPORT_ERROR(EBF_NOT_ENOUGH_MEMORY);
-		return EBF_NOT_ENOUGH_MEMORY;
+		EBF_REPORT_AND_RETURN(EBF_NOT_ENOUGH_MEMORY);
 	}
 
 	memset(this->pQueueData, 0, sizeof(MessageEntry) * this->queueSize);
@@ -21,7 +20,7 @@ uint8_t EBF_MessageQueue::Init(uint8_t queueSize)
 	this->pOutLocation = this->pQueueData;
 	this->pEndLocation = &this->pQueueData[this->queueSize];
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 uint8_t EBF_MessageQueue::GetMaxMessagesNumber()
@@ -39,8 +38,7 @@ uint8_t EBF_MessageQueue::AddMessage(MessageEntry &message)
 {
     if (mesasgesInQueue == queueSize && pInLocation == pOutLocation) {
 		// Buffer is full
-		EBF_REPORT_ERROR(EBF_NOT_ENOUGH_MEMORY);
-		return EBF_NOT_ENOUGH_MEMORY;
+		EBF_REPORT_AND_RETURN(EBF_NOT_ENOUGH_MEMORY);
 	}
 
 	memcpy(pInLocation, &message, sizeof(MessageEntry));
@@ -57,7 +55,7 @@ uint8_t EBF_MessageQueue::AddMessage(MessageEntry &message)
 		maxMessagesInQueue = mesasgesInQueue;
 	}
 
-    return EBF_OK;
+    EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // Processes next message in the queue
@@ -65,8 +63,7 @@ uint8_t EBF_MessageQueue::GetMessage(MessageEntry &message)
 {
 	// Queue is empty
     if (mesasgesInQueue == 0) {
-		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
-		return EBF_INDEX_OUT_OF_BOUNDS;
+		EBF_REPORT_AND_RETURN(EBF_INDEX_OUT_OF_BOUNDS);
 	}
 
 	memcpy(&message, pOutLocation, sizeof(MessageEntry));
@@ -79,6 +76,6 @@ uint8_t EBF_MessageQueue::GetMessage(MessageEntry &message)
 		pOutLocation = pQueueData;
 	}
 
-    return EBF_OK;
+    EBF_REPORT_AND_RETURN(EBF_OK);
 }
 

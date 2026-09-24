@@ -10,7 +10,7 @@ uint8_t EBF_HAL_PCA9548::Init(uint8_t i2cAddress)
 {
 	EBF_I2CDevice::i2cAddress = i2cAddress;
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // Switch to specified port
@@ -32,5 +32,5 @@ uint8_t EBF_HAL_PCA9548::Switch(uint8_t port)
 		}
 	} while (0);
 
-	return rc;
+	EBF_REPORT_AND_RETURN(rc);
 }

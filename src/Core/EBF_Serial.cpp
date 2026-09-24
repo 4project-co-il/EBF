@@ -46,8 +46,7 @@ uint8_t EBF_Serial::Init(
 
 	rc = EBF_HalInstance::Init(HAL_Type::UART_INTERFACE, serialNumber);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	this->callbackFunc = callbackFunc;
@@ -78,7 +77,7 @@ uint8_t EBF_Serial::Init(
 		break;
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 void EBF_Serial::SetPollingInterval(uint32_t ms)
@@ -95,7 +94,7 @@ uint8_t EBF_Serial::Process()
 {
 	// Callback might not be set, nothing to do in that case
 	if (callbackFunc == NULL) {
-		return EBF_OK;
+		EBF_REPORT_AND_RETURN(EBF_OK);
 	}
 
 	// The stream have data, call the callback
@@ -103,7 +102,7 @@ uint8_t EBF_Serial::Process()
 		callbackFunc();
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 EBF_Serial::operator bool()

@@ -26,12 +26,8 @@ uint8_t EBF_HalInstance::Init(HAL_Type type, uint32_t id)
 	this->id = id;
 
 	rc = EBF_Logic::GetInstance()->AddHalInstance(*this);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 void EBF_HalInstance::SetPollingInterval(uint32_t ms)

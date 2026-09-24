@@ -7,18 +7,19 @@ uint8_t EBF_Relay::Init(uint8_t pinNumber)
 
 	rc = EBF_DigitalOutput::Init(pinNumber);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	state = RELAY_OFF;
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // SetValue acts as an ON/OFF function, value == 0 will perform as OFF, any other value as ON
 uint8_t EBF_Relay::SetValue(uint8_t value)
 {
+	uint8_t rc;
+
 	if (value == 0) {
 		state = RELAY_OFF;
 	} else {
@@ -26,21 +27,31 @@ uint8_t EBF_Relay::SetValue(uint8_t value)
 		value = 1;
 	}
 
-	return EBF_DigitalOutput::SetValue(value);
+	rc = EBF_DigitalOutput::SetValue(value);
+
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_Relay::On()
 {
+	uint8_t rc;
+
 	state = RELAY_ON;
 
-	return EBF_DigitalOutput::SetValue(1);
+	rc = EBF_DigitalOutput::SetValue(1);
+
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_Relay::Off()
 {
+	uint8_t rc;
+
 	state = RELAY_OFF;
 
-	return EBF_DigitalOutput::SetValue(0);
+	rc = EBF_DigitalOutput::SetValue(0);
+
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 uint8_t EBF_Relay::Process()
@@ -49,5 +60,5 @@ uint8_t EBF_Relay::Process()
 	// No polling needed
 	SetPollingInterval(EBF_NO_POLLING);
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }

@@ -10,27 +10,24 @@ uint8_t EBF_Module_8Outputs::Init(uint16_t pwmFrequency, uint8_t i2cAddress)
 
 	rc = EBF_HalInstance::Init(HAL_Type::I2C_INTERFACE, i2cAddress);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// Init the chip to the I2C address with specified frequency
 	rc = chip.Init(pwmFrequency, i2cAddress);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// Turn off all the outputs
 	for (uint8_t i=0; i<numberOfOutputs; i++) {
 		rc = chip.SetChannelValue(i, 0);
 		if (rc != EBF_OK) {
-			EBF_REPORT_ERROR(rc);
-			return rc;
+			EBF_REPORT_AND_RETURN(rc);
 		}
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // Sets boolean value on the specified output channel (1=HIGH, 0=LOW)
@@ -39,17 +36,12 @@ uint8_t EBF_Module_8Outputs::SetValue(uint8_t index, uint8_t value)
 	uint8_t rc;
 
 	if (index > numberOfOutputs) {
-		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
-		return EBF_INDEX_OUT_OF_BOUNDS;
+		EBF_REPORT_AND_RETURN(EBF_INDEX_OUT_OF_BOUNDS);
 	}
 
 	rc = chip.SetChannelValue(index, value);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 // Sets PWM timing value on the specified output channel
@@ -59,8 +51,7 @@ uint8_t EBF_Module_8Outputs::SetPWM(uint8_t index, float pwmPercent)
 	uint8_t rc;
 
 	if (index > numberOfOutputs) {
-		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
-		return 0;
+		EBF_REPORT_AND_RETURN(EBF_INDEX_OUT_OF_BOUNDS);
 	}
 
 	if (pwmPercent < 0.0) pwmPercent = 0.0;
@@ -77,12 +68,7 @@ uint8_t EBF_Module_8Outputs::SetPWM(uint8_t index, float pwmPercent)
 		rc = chip.SetChannelPWM(index, 0, (uint16_t)4095 * (pwmPercent / 100.0));
 	}
 
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
-
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 
 // Returns current value of the specified output line
@@ -95,13 +81,13 @@ float EBF_Module_8Outputs::GetValue(uint8_t index)
 
 	if (index > numberOfOutputs) {
 		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
-		return 0;
+		return 0.0;
 	}
 
 	rc = chip.GetChannelPWM(index, stepON, stepOFF);
 	if (rc != EBF_OK) {
 		EBF_REPORT_ERROR(rc);
-		return rc;
+		return 0.0;
 	}
 
 	// Check constant values

@@ -13,8 +13,7 @@ uint8_t EBF_DigitalInput::Init(
 
 	rc = EBF_HalInstance::Init(HAL_Type::DIGITAL_INPUT, pinNumber);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	this->pinNumber = pinNumber;
@@ -35,7 +34,7 @@ uint8_t EBF_DigitalInput::Init(
 		SetPollingInterval(EBF_NO_POLLING);
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 uint8_t EBF_DigitalInput::AttachInterrupt()
@@ -56,12 +55,11 @@ uint8_t EBF_DigitalInput::AttachInterrupt()
 				SetPollingInterval(EBF_NO_POLLING);
 			}
 
-			return EBF_OK;
+			EBF_REPORT_AND_RETURN(EBF_OK);
 		}
 #endif
 
-	EBF_REPORT_ERROR(EBF_INVALID_STATE);
-	return EBF_INVALID_STATE;
+	EBF_REPORT_AND_RETURN(EBF_INVALID_STATE);
 }
 
 void EBF_DigitalInput::SetPollingInterval(uint32_t ms)
@@ -81,7 +79,7 @@ uint8_t EBF_DigitalInput::Process()
 
 	// Callback might not be set, nothing to do in that case
 	if (callbackFunc == NULL) {
-		return EBF_OK;
+		EBF_REPORT_AND_RETURN(EBF_OK);
 	}
 
 	// Process postponed call
@@ -142,7 +140,7 @@ uint8_t EBF_DigitalInput::Process()
 
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 void EBF_DigitalInput::ProcessInterrupt()

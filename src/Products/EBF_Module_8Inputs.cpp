@@ -17,45 +17,39 @@ uint8_t EBF_Module_8Inputs::Init(uint8_t i2cAddress)
 
 	rc = EBF_HalInstance::Init(HAL_Type::I2C_INTERFACE, i2cAddress);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// Init the chip
 	rc = chip.Init(i2cAddress);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// Configure the chip to all inputs, latch enable and interrupt mask enabled
 	rc = chip.SetConfiguration(0xFF);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	rc = chip.SetLatching(0xFF);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// Enable all 8bits since it's a 8input module implementation
 	rc = chip.SetInterruptMask(0x00);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// Get initial input lines status and reset the interrupts
 	rc = chip.GetInput(lastValues);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 #ifdef EBF_USE_INTERRUPTS
@@ -66,14 +60,13 @@ uint8_t EBF_Module_8Inputs::AttachInterrupt(uint8_t interruptPin)
 
 	rc = pLogic->AttachInterrupt(interruptPin, this, EBF_DigitalInput::InterruptMode::MODE_LOW);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// No polling is needed when interrupt is used
 	SetPollingInterval(EBF_NO_POLLING);
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 #endif
 
@@ -103,8 +96,7 @@ uint8_t EBF_Module_8Inputs::Process()
 	// Read interrupt register from the chip to know what input fired the interrupt
 	rc = chip.GetInterruptStatus(intStatus);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// We have something to process
@@ -112,8 +104,7 @@ uint8_t EBF_Module_8Inputs::Process()
 		// Read current inputs, it will reset the interrupts
 		rc = chip.GetInput(lastValues);
 		if (rc != EBF_OK) {
-			EBF_REPORT_ERROR(rc);
-			return;
+			EBF_REPORT_AND_RETURN(rc);
 		}
 
 		// Loop on all the lines to find the changes. Several lines might change together
@@ -133,7 +124,7 @@ uint8_t EBF_Module_8Inputs::Process()
 	}
 #endif
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 #ifdef EBF_USE_INTERRUPTS
@@ -203,25 +194,20 @@ uint8_t EBF_Module_8Inputs::PostponeProcessing(uint8_t eventIndex, uint8_t input
 
 	// Pass the control back to EBF, so it will call the Process() function from normal run
 	rc = pLogic->PostponeInterrupt(this, data.uint32);
-	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
-	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(rc);
 }
 #endif
 
 uint8_t EBF_Module_8Inputs::SetOnChange(uint8_t index, EBF_CallbackType onChangeCallback)
 {
 	if (index >= numberOfInputs) {
-		EBF_REPORT_ERROR(EBF_INDEX_OUT_OF_BOUNDS);
-		return EBF_INDEX_OUT_OF_BOUNDS;
+		EBF_REPORT_AND_RETURN(EBF_INDEX_OUT_OF_BOUNDS);
 	}
 
 	this->onChangeCallback[index] = onChangeCallback;
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // Returns current value of the specified input line

@@ -38,6 +38,20 @@ void EBF_Core::ReportError(const char* pModuleName, uint32_t line, EBF_ERROR_COD
 
 	pLogic->ReportError(pModuleName, line, error);
 }
+
+EBF_ERROR_CODE EBF_Core::GetLastError()
+{
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
+	return pLogic->GetLastError();
+}
+
+const char* EBF_Core::ErrorCode2Str(EBF_ERROR_CODE code)
+{
+	EBF_Logic *pLogic = EBF_Logic::GetInstance();
+
+	return pLogic->ErrorCode2Str(code);
+}
 #endif
 
 uint8_t EBF_Core::Process()

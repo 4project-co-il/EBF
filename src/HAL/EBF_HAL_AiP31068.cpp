@@ -26,34 +26,30 @@ uint8_t EBF_HAL_AiP31068::Init(uint8_t i2cAddress)
 	// Initialize the LCD for 2 line mode
 	rc = SendCommand(LCD_FUNCTIONSET | LCD_FUNC_2LINE);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
     // Turn the display on with no cursor and no blinking by default
     displayControl = LCD_DISPLAYON | LCD_CURSOROFF | LCD_BLINKOFF;
 	rc = SendCommand(LCD_DISPLAYCONTROL | displayControl);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// Clear the display
 	rc = Clear();
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// LTR direction by default
     displayMode = LCD_ENTRYLEFT | LCD_ENTRYSHIFTDEC;
     rc = SendCommand(LCD_ENTRYMODESET | displayMode);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 uint8_t EBF_HAL_AiP31068::SendCommand(uint8_t command)
@@ -72,11 +68,10 @@ uint8_t EBF_HAL_AiP31068::SendCommand(uint8_t command)
 	delayMicroseconds(50);
 
 	if (rc != 0) {
-		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
-		return EBF_COMMUNICATION_PROBLEM;
+		EBF_REPORT_AND_RETURN(EBF_COMMUNICATION_PROBLEM);
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 uint8_t EBF_HAL_AiP31068::WriteChar(uint8_t b)
@@ -118,7 +113,6 @@ uint8_t EBF_HAL_AiP31068::WriteChars(const uint8_t* pBuffer, uint8_t size)
 	// According to datasheet, the controller needs 43uSec after every data write
 	delayMicroseconds(50);
 
-
 	if (rc == 0) {
 		return 1;
 	} else {
@@ -133,8 +127,7 @@ uint8_t EBF_HAL_AiP31068::Clear()
 
 	rc = SendCommand(LCD_CLEARDISPLAY);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// TODO: delay() is bad, but looks like there is no other way to do it
@@ -142,7 +135,7 @@ uint8_t EBF_HAL_AiP31068::Clear()
 	// 1500 uSec in addition to 50uSec in SendCommand
 	delayMicroseconds(1500);
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // Moves to the first row/col position without clearing the display
@@ -152,8 +145,7 @@ uint8_t EBF_HAL_AiP31068::Home()
 
 	rc = SendCommand(LCD_RETURNHOME);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// TODO: delay() is bad, but looks like there is no other way to do it
@@ -161,7 +153,7 @@ uint8_t EBF_HAL_AiP31068::Home()
 	// 1500 uSec in addition to 50uSec in SendCommand
 	delayMicroseconds(1500);
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // Moves the cursor to specified row and column
@@ -232,15 +224,14 @@ uint8_t EBF_HAL_AiP31068::ScrollLeft(uint8_t count)
 	for (uint8_t i=0; i<count; i++) {
 		rc = ScrollLeft();
 		if (rc != EBF_OK) {
-			EBF_REPORT_ERROR(rc);
-			return rc;
+			EBF_REPORT_AND_RETURN(rc);
 		}
 
 		// Have to wait between the commands
 		delayMicroseconds(50);
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // Scroll the display right by 1 character
@@ -257,15 +248,14 @@ uint8_t EBF_HAL_AiP31068::ScrollRight(uint8_t count)
 	for (uint8_t i=0; i<count; i++) {
 		rc = ScrollRight();
 		if (rc != EBF_OK) {
-			EBF_REPORT_ERROR(rc);
-			return rc;
+			EBF_REPORT_AND_RETURN(rc);
 		}
 
 		// Have to wait between the commands
 		delayMicroseconds(50);
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // Changes the direction of text flow to LTR - Left-To-Right

@@ -16,8 +16,7 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::Init(uint8_t i2cAddress)
 
 	rc = EBF_HalInstance::Init(HAL_Type::I2C_INTERFACE, i2cAddress);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// This is output only device, polling is not needed
@@ -36,18 +35,17 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::Init(uint8_t i2cAddress)
 	interrupts();
 
 	if (rc != 0) {
-		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
-		return EBF_COMMUNICATION_PROBLEM;
+		EBF_REPORT_AND_RETURN(EBF_COMMUNICATION_PROBLEM);
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // Called to process the instance after pollInterval
 // Nothing to do for output only device
 uint8_t EBF_SparkFun_QWIIC_SerLCD::Process()
 {
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 size_t EBF_SparkFun_QWIIC_SerLCD::write(uint8_t b)
@@ -107,11 +105,10 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::SendSettingCommand(uint8_t command)
 	interrupts();
 
 	if (rc != 0) {
-		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
-		return EBF_COMMUNICATION_PROBLEM;
+		EBF_REPORT_AND_RETURN(EBF_COMMUNICATION_PROBLEM);
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 uint8_t EBF_SparkFun_QWIIC_SerLCD::SendSpecialCommand(uint8_t command)
@@ -126,11 +123,10 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::SendSpecialCommand(uint8_t command)
 	interrupts();
 
 	if (rc != 0) {
-		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
-		return EBF_COMMUNICATION_PROBLEM;
+		EBF_REPORT_AND_RETURN(EBF_COMMUNICATION_PROBLEM);
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 uint8_t EBF_SparkFun_QWIIC_SerLCD::SendSpecialCommand(uint8_t command, uint8_t count)
@@ -147,11 +143,10 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::SendSpecialCommand(uint8_t command, uint8_t c
 	interrupts();
 
 	if (rc != 0) {
-		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
-		return EBF_COMMUNICATION_PROBLEM;
+		EBF_REPORT_AND_RETURN(EBF_COMMUNICATION_PROBLEM);
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // Clears the display and moves to the first row/col position
@@ -161,14 +156,13 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::Clear()
 
 	rc = SendSettingCommand(LCD_SET_CLEAR);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// TODO: delay() is bad, but looks like there is no other way to do it
 	delayMicroseconds(1500);	// According to datasheet, the HD44780 needs 1.52mSec after clear command
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // Moves to the first row/col position without clearing the display
@@ -178,14 +172,13 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::Home()
 
 	rc = SendSettingCommand(LCD_CMD_RETURNHOME);
 	if (rc != EBF_OK) {
-		EBF_REPORT_ERROR(rc);
-		return rc;
+		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// TODO: delay() is bad, but looks like there is no other way to do it
 	delayMicroseconds(1500);	// According to datasheet, the HD44780 needs 1.52mSec after home command
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // Moves the cursor to specified row and column
@@ -307,11 +300,10 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::SetBacklight(uint8_t r, uint8_t g, uint8_t b)
 	interrupts();
 
 	if (rc != 0) {
-		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
-		return EBF_COMMUNICATION_PROBLEM;
+		EBF_REPORT_AND_RETURN(EBF_COMMUNICATION_PROBLEM);
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
 // Set the backlight color to ULONG encoded value in format 0x00RRGGBB
@@ -398,9 +390,8 @@ uint8_t EBF_SparkFun_QWIIC_SerLCD::SetContrast(uint8_t contrast)
 	interrupts();
 
 	if (rc != 0) {
-		EBF_REPORT_ERROR(EBF_COMMUNICATION_PROBLEM);
-		return EBF_COMMUNICATION_PROBLEM;
+		EBF_REPORT_AND_RETURN(EBF_COMMUNICATION_PROBLEM);
 	}
 
-	return EBF_OK;
+	EBF_REPORT_AND_RETURN(EBF_OK);
 }

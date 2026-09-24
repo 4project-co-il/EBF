@@ -27,6 +27,8 @@ class EBF_Core {
 #ifndef EBF_REMOVE_DEBUG_CODE
 		void SetErrorHandlerSerial(EBF_Serial &serial);
 		static void ReportError(const char* pModuleName, uint32_t line, EBF_ERROR_CODE error);
+		EBF_ERROR_CODE GetLastError();
+		const char* ErrorCode2Str(EBF_ERROR_CODE code);
 #endif
 
 	public:
