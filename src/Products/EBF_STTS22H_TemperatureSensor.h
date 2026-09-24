@@ -62,6 +62,10 @@ class EBF_STTS22H_TemperatureSensor : public EBF_HalInstance {
 		uint8_t SetThresholdHigh(float temp);
 		// Sets low threshold value
 		uint8_t SetThresholdLow(float temp);
+		// Gets high threshold value
+		float GetThresholdHigh();
+		// Gets low threshold value
+		float GetThresholdLow();
 		// Disable high threshold triggering
 		uint8_t DisableThresholdHigh();
 		// Disable low threshold triggering

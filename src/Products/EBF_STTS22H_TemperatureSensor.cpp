@@ -382,6 +382,36 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetThresholdLow(float temp)
 	return EBF_OK;
 }
 
+// Gets high threshold value
+float EBF_STTS22H_TemperatureSensor::GetThresholdHigh()
+{
+	uint8_t rc;
+	float value;
+
+	rc = chip.GetThresholdHigh(value);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return value;
+}
+
+// Gets low threshold value
+float EBF_STTS22H_TemperatureSensor::GetThresholdLow()
+{
+	uint8_t rc;
+	float value;
+
+	rc = chip.GetThresholdLow(value);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	return value;
+}
+
 // Disable high threshold triggering
 uint8_t EBF_STTS22H_TemperatureSensor::DisableThresholdHigh()
 {

@@ -79,6 +79,8 @@ class EBF_HAL_STTS22H : public EBF_I2CDevice {
 
 		uint8_t SetThresholdHigh(float temp);
 		uint8_t SetThresholdLow(float temp);
+		uint8_t GetThresholdHigh(float &temp);
+		uint8_t GetThresholdLow(float &temp);
 		uint8_t DisableThresholdHigh();
 		uint8_t DisableThresholdLow();
 

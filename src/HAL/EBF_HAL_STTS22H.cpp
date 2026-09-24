@@ -164,7 +164,7 @@ uint8_t EBF_HAL_STTS22H::SetThresholdHigh(float temp)
 {
 	uint8_t rc;
 
-	// Threshold = (temp_limit_reg -63) * 0.64°C
+	// Threshold = (temp_limit_reg - 63) * 0.64°C
 	rc = Write8bitRegister(regTempHighLimit, (uint8_t)floor((temp / 0.64 + 63 + 0.5)));
 	if (rc != EBF_OK) {
 		EBF_REPORT_ERROR(rc);
@@ -178,12 +178,46 @@ uint8_t EBF_HAL_STTS22H::SetThresholdLow(float temp)
 {
 	uint8_t rc;
 
-	// Threshold = (temp_limit_reg -63) * 0.64°C
+	// Threshold = (temp_limit_reg - 63) * 0.64°C
 	rc = Write8bitRegister(regTempLowLimit, (uint8_t)floor((temp / 0.64 + 63 + 0.5)));
 	if (rc != EBF_OK) {
 		EBF_REPORT_ERROR(rc);
 		return rc;
 	}
+
+	return EBF_OK;
+}
+
+uint8_t EBF_HAL_STTS22H::GetThresholdHigh(float &temp)
+{
+	uint8_t rc;
+	uint8_t readVal = 0;
+
+	rc = Read8bitRegister(regTempHighLimit, readVal);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	// Threshold = (temp_limit_reg - 63) * 0.64°C
+	temp = (readVal - 63.0 - 0.5) * 0.64;
+
+	return EBF_OK;
+}
+
+uint8_t EBF_HAL_STTS22H::GetThresholdLow(float &temp)
+{
+	uint8_t rc;
+	uint8_t readVal = 0;
+
+	rc = Read8bitRegister(regTempLowLimit, readVal);
+	if (rc != EBF_OK) {
+		EBF_REPORT_ERROR(rc);
+		return rc;
+	}
+
+	// Threshold = (temp_limit_reg - 63) * 0.64°C
+	temp = (readVal - 63.0 - 0.5) * 0.64;
 
 	return EBF_OK;
 }
