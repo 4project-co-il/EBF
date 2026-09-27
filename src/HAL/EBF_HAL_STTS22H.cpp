@@ -50,7 +50,7 @@ uint8_t EBF_HAL_STTS22H::SetControlRegister(ControlRegister_t ctrl)
 	EBF_REPORT_AND_RETURN(rc);
 }
 
-uint8_t EBF_HAL_STTS22H::GetValueRaw(int16_t &value)
+uint8_t EBF_HAL_STTS22H::GetValue(float &value)
 {
 	uint8_t rc;
 	uint16_t readVal = 0;
@@ -60,7 +60,7 @@ uint8_t EBF_HAL_STTS22H::GetValueRaw(int16_t &value)
 		EBF_REPORT_AND_RETURN(rc);
 	}
 
-	value = (int16_t)readVal;
+	value = ((int16_t)readVal) / 100.0f;
 
 	EBF_REPORT_AND_RETURN(EBF_OK);
 }
@@ -126,27 +126,27 @@ uint8_t EBF_HAL_STTS22H::IsBusy()
 	return status.fields.busy;
 }
 
-uint8_t EBF_HAL_STTS22H::SetThresholdHigh(float temp)
+uint8_t EBF_HAL_STTS22H::SetThresholdHigh(float value)
 {
 	uint8_t rc;
 
 	// Threshold = (temp_limit_reg - 63) * 0.64°C
-	rc = Write8bitRegister(regTempHighLimit, (uint8_t)floor((temp / 0.64 + 63)));
+	rc = Write8bitRegister(regTempHighLimit, (uint8_t)floor((value / 0.64 + 63)));
 
 	EBF_REPORT_AND_RETURN(rc);
 }
 
-uint8_t EBF_HAL_STTS22H::SetThresholdLow(float temp)
+uint8_t EBF_HAL_STTS22H::SetThresholdLow(float value)
 {
 	uint8_t rc;
 
 	// Threshold = (temp_limit_reg - 63) * 0.64°C
-	rc = Write8bitRegister(regTempLowLimit, (uint8_t)floor((temp / 0.64 + 63)));
+	rc = Write8bitRegister(regTempLowLimit, (uint8_t)floor((value / 0.64 + 63)));
 
 	EBF_REPORT_AND_RETURN(rc);
 }
 
-uint8_t EBF_HAL_STTS22H::GetThresholdHigh(float &temp)
+uint8_t EBF_HAL_STTS22H::GetThresholdHigh(float &value)
 {
 	uint8_t rc;
 	uint8_t readVal = 0;
@@ -157,12 +157,12 @@ uint8_t EBF_HAL_STTS22H::GetThresholdHigh(float &temp)
 	}
 
 	// Threshold = (temp_limit_reg - 63) * 0.64°C
-	temp = (readVal - 63.0) * 0.64;
+	value = (readVal - 63.0) * 0.64;
 
 	EBF_REPORT_AND_RETURN(EBF_OK);
 }
 
-uint8_t EBF_HAL_STTS22H::GetThresholdLow(float &temp)
+uint8_t EBF_HAL_STTS22H::GetThresholdLow(float &value)
 {
 	uint8_t rc;
 	uint8_t readVal = 0;
@@ -173,7 +173,7 @@ uint8_t EBF_HAL_STTS22H::GetThresholdLow(float &temp)
 	}
 
 	// Threshold = (temp_limit_reg - 63) * 0.64°C
-	temp = (readVal - 63.0) * 0.64;
+	value = (readVal - 63.0) * 0.64;
 
 	EBF_REPORT_AND_RETURN(EBF_OK);
 }

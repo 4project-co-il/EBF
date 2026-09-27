@@ -203,14 +203,14 @@ uint8_t EBF_STTS22H_TemperatureSensor::SetOperationMode(OperationMode mode)
 float EBF_STTS22H_TemperatureSensor::GetValueC()
 {
 	uint8_t rc;
-	int16_t rawTemp;
+	float value;
 
-	rc = chip.GetValueRaw(rawTemp);
+	rc = chip.GetValue(value);
 	if (rc != EBF_OK) {
 		EBF_REPORT_ERROR(rc);
 	}
 
-	return (float)rawTemp / 100.0f;
+	return value;
 }
 
 // Returns the measured temperature in Fahrenheit
@@ -244,6 +244,8 @@ uint8_t EBF_STTS22H_TemperatureSensor::Process()
 		interruptData.uint32 = pLogic->GetLastMessageParam1();
 
 		ExecuteCallback(interruptData);
+
+		EBF_REPORT_AND_RETURN(EBF_OK);
 	}
 
 	switch (state)
