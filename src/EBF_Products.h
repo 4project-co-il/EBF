@@ -20,4 +20,7 @@
 #include "Products/EBF_TMP102_TemperatureSensor.h"
 #include "Products/EBF_SparkFun_QWIIC_SerLCD.h"
 #include "Products/EBF_Seeed_Monochrome_GROVE_16x2_LCD.h"
+#include "Products/EBF_Module_4Inputs.h"
+#include "Products/EBF_Module_8Inputs.h"
+#include "Products/EBF_Module_1RGB_Led.h"
 #endif
