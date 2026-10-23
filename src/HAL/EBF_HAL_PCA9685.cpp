@@ -118,7 +118,7 @@ uint8_t EBF_HAL_PCA9685::ExitSleepMode(uint8_t restoreOutputs)
 uint8_t EBF_HAL_PCA9685::SetChannelPWM(uint8_t channel, uint16_t stepON, uint16_t stepOFF)
 {
 	uint8_t rc;
-	uint8_t buffer[5];	// 5 bytes are needed to set a channel (channel register, ON_L, ON_H, OFF_L, OFF_H)
+	uint8_t buffer[4];	// ON_L, ON_H, OFF_L, OFF_H
 
 	// PCA9685 chip have 16 channels 0..15
 	if (channel > 15) {
@@ -126,13 +126,12 @@ uint8_t EBF_HAL_PCA9685::SetChannelPWM(uint8_t channel, uint16_t stepON, uint16_
 	}
 
 	// Prepare the buffer
-	buffer[0] = regLED0_ON_L + channel*4;
-	buffer[1] = stepON & 0xFF;
-	buffer[2] = (stepON >> 8) & 0x0F;
-	buffer[3] = stepOFF & 0xFF;
-	buffer[4] = (stepOFF >> 8) & 0x0F;
+	buffer[0] = stepON & 0xFF;
+	buffer[1] = (stepON >> 8) & 0x0F;
+	buffer[2] = stepOFF & 0xFF;
+	buffer[3] = (stepOFF >> 8) & 0x0F;
 
-	rc = WriteBuffer(buffer, sizeof(buffer));
+	rc = WriteBuffer(regLED0_ON_L + channel*4, buffer, sizeof(buffer));
 
 	EBF_REPORT_AND_RETURN(rc);
 }
@@ -184,27 +183,25 @@ uint8_t EBF_HAL_PCA9685::SetChannelValue(uint8_t channel, uint8_t value)
 		EBF_REPORT_AND_RETURN(EBF_INDEX_OUT_OF_BOUNDS);
 	}
 
-	// 5 bytes are needed to set a channel (channel register, ON_L, ON_H, OFF_L, OFF_H)
-	uint8_t buffer[5];
+	// ON_L, ON_H, OFF_L, OFF_H
+	uint8_t buffer[4];
 
 	// Prepare the buffer
-	buffer[0] = regLED0_ON_L + channel*4;
-
 	if (value == 0) {
 		// Turning OFF using bit4 in LEDx_OFF_H register
+		buffer[0] = 0;
 		buffer[1] = 0;
 		buffer[2] = 0;
-		buffer[3] = 0;
-		buffer[4] = 1<<4;
+		buffer[3] = 1<<4;
 	} else {
 		// Turning ON using bit4 in LEDx_ON_H register
-		buffer[1] = 0;
-		buffer[2] = 1<<4;
+		buffer[0] = 0;
+		buffer[1] = 1<<4;
+		buffer[2] = 0;
 		buffer[3] = 0;
-		buffer[4] = 0;
 	}
 
-	rc = WriteBuffer(buffer, sizeof(buffer));
+	rc = WriteBuffer(regLED0_ON_L + channel*4, buffer, sizeof(buffer));
 
 	EBF_REPORT_AND_RETURN(rc);
 }
@@ -221,21 +218,19 @@ uint8_t EBF_HAL_PCA9685::SetMultipleChannelsPWM(uint8_t startChannel, uint8_t nu
 		EBF_REPORT_AND_RETURN(EBF_INDEX_OUT_OF_BOUNDS);
 	}
 
-	// 5 bytes are needed to set a channel (channel register, ON_L, ON_H, OFF_L, OFF_H)
-	uint8_t buffer[5*numberOfChannels];
+	// per channel: (ON_L, ON_H, OFF_L, OFF_H)
+	uint8_t buffer[4*numberOfChannels];
 	uint8_t bufIdx = 0;
 
 	// prepare the buffer
 	for (uint8_t i=0; i<numberOfChannels; i++) {
-		buffer[bufIdx++] = regLED0_ON_L + (startChannel+i)*4;
-
 		buffer[bufIdx++] = pOnOffBuffer[i*2] & 0xFF;
 		buffer[bufIdx++] = (pOnOffBuffer[i*2] >> 8) & 0x0F;
 		buffer[bufIdx++] = pOnOffBuffer[i*2 + 1] & 0xFF;
 		buffer[bufIdx++] = (pOnOffBuffer[i*2 + 1] >> 8) & 0x0F;
 	}
 
-	rc = WriteBuffer(buffer, sizeof(buffer));
+	rc = WriteBuffer(regLED0_ON_L + startChannel*4, buffer, sizeof(buffer));
 
 	EBF_REPORT_AND_RETURN(rc);
 }

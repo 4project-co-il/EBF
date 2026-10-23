@@ -155,6 +155,61 @@ uint8_t EBF_I2CDevice::Write32bitRegister(uint8_t regAddress, uint32_t value)
 	EBF_REPORT_AND_RETURN(rc);
 }
 
+uint8_t EBF_I2CDevice::ReadBuffer(uint8_t regAddress, uint8_t *pBuffer, uint8_t length)
+{
+	uint8_t rc = EBF_OK;
+
+	noInterrupts();
+	do {
+		pI2C->beginTransmission(i2cAddress);
+		pI2C->write(regAddress);
+		rc = pI2C->endTransmission(false);
+		if (rc != 0) {
+			rc = EBF_COMMUNICATION_PROBLEM;
+			break;
+		}
+
+		pI2C->requestFrom(i2cAddress, length);
+
+		// Read the buffer
+		for (uint8_t i=0; i<length; i++) {
+			pBuffer[i] = pI2C->read();
+		}
+	} while (0);
+	interrupts();
+
+	EBF_REPORT_AND_RETURN(rc);
+}
+
+uint8_t EBF_I2CDevice::WriteBuffer(uint8_t regAddress, uint8_t *pBuffer, uint8_t length)
+{
+	uint8_t rc = EBF_OK;
+
+	noInterrupts();
+	do {
+		pI2C->beginTransmission(i2cAddress);
+
+		// Write the register address
+		pI2C->write(regAddress);
+
+		// Write the buffer
+		for (uint8_t i=0; i<length; i++) {
+			pI2C->write(pBuffer[i]);
+		}
+
+		rc = pI2C->endTransmission();
+
+		if (rc != 0) {
+			rc = EBF_COMMUNICATION_PROBLEM;
+			EBF_REPORT_ERROR(rc);
+			break;
+		}
+	} while (0);
+	interrupts();
+
+	EBF_REPORT_AND_RETURN(rc);
+}
+
 uint8_t EBF_I2CDevice::WriteBuffer(uint8_t *pBuffer, uint8_t length)
 {
 	uint8_t rc = EBF_OK;
@@ -163,10 +218,13 @@ uint8_t EBF_I2CDevice::WriteBuffer(uint8_t *pBuffer, uint8_t length)
 	do {
 		pI2C->beginTransmission(i2cAddress);
 
+		// Write the buffer
 		for (uint8_t i=0; i<length; i++) {
 			pI2C->write(pBuffer[i]);
 		}
+
 		rc = pI2C->endTransmission();
+
 		if (rc != 0) {
 			rc = EBF_COMMUNICATION_PROBLEM;
 			EBF_REPORT_ERROR(rc);

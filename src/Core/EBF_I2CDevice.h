@@ -29,6 +29,9 @@ class EBF_I2CDevice {
 		uint8_t Read32bitRegister(uint8_t regAddress, uint32_t& value);
 		uint8_t Write32bitRegister(uint8_t regAddress, uint32_t value);
 
+		uint8_t ReadBuffer(uint8_t regAddress, uint8_t *pBuffer, uint8_t length);
+		uint8_t WriteBuffer(uint8_t regAddress, uint8_t *pBuffer, uint8_t length);
+		// Version of WriteBuffer that includes the register addresses in the buffer
 		uint8_t WriteBuffer(uint8_t *pBuffer, uint8_t length);
 };
 
