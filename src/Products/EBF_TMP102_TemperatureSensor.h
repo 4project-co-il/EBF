@@ -19,6 +19,8 @@ class EBF_TMP102_TemperatureSensor : public EBF_HalInstance {
 		EBF_TMP102_TemperatureSensor(EBF_I2C *pI2cInterface) : chip(pI2cInterface) { }
 		EBF_TMP102_TemperatureSensor(EBF_I2C &i2cInterface) : EBF_TMP102_TemperatureSensor(&i2cInterface) { }
 
+		using ConsecutiveFaults = EBF_HAL_TMP102::ConsecutiveFaults;
+
 		typedef enum : uint8_t {
 			POWER_DOWN = 0,
 			MODE_ONE_SHOT,
@@ -27,13 +29,6 @@ class EBF_TMP102_TemperatureSensor : public EBF_HalInstance {
 			MODE_4HZ,
 			MODE_8HZ,
 		} OperationMode;
-
-		typedef enum : uint8_t {
-			FAULTS_1	= EBF_HAL_TMP102::FAULTS_1,
-			FAULTS_2	= EBF_HAL_TMP102::FAULTS_2,
-			FAULTS_4	= EBF_HAL_TMP102::FAULTS_4,
-			FAULTS_6	= EBF_HAL_TMP102::FAULTS_6,
-		} ConsecutiveFaults;
 
 		uint8_t Init(uint8_t i2cAddress = 0x3F, OperationMode mode = POWER_DOWN);
 
