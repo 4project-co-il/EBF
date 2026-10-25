@@ -61,6 +61,16 @@ class EBF_Module_1RGB_Led : protected EBF_HalInstance {
 		// Infinite repeat times = 0x0F (15)
 		uint8_t PrepareBlinkAnimation(Time timeOn, Time timeOff, uint8_t repeatTimes = 15);
 
+		// Prepares police lights animation using red and blue colors
+		// TitalColorTime should be (on+off)*numberOfFlashes + 100mSec rest
+		uint8_t PreparePoliceAnimation(
+			Time onTime = Time::TIME_50MS,
+			Time offTime = Time::TIME_100MS,
+			uint8_t numberOfFlashes = 2,
+			Time restTime = Time::TIME_100MS,
+			float intensity = 100.0
+		);
+
 		// Starts the prepared animation
 		uint8_t StartAnimation();
 
