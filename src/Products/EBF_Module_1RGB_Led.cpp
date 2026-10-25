@@ -191,7 +191,7 @@ uint8_t EBF_Module_1RGB_Led::PrepareBlinkAnimation(Time timeOn, Time timeOff, ui
 		}
 	}
 
-	// Configure the patterns for RGB channels
+	// Configure dedicated patterns for each of the RGB channels, since they have different PWM values
 
 	channel = channelRed;
 	rc = chip.ConfigurePattern(
@@ -249,6 +249,34 @@ uint8_t EBF_Module_1RGB_Led::PrepareBlinkAnimation(Time timeOn, Time timeOff, ui
 		savedFading,
 		timeOff
 	);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	// Assign every color's patters to order 0 place for each engines
+	rc = chip.SetEnginePatternsOrder(0, 0);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	rc = chip.SetEnginePatternsOrder(1, 1);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	rc = chip.SetEnginePatternsOrder(2, 2);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	// Enable order #0 for the 3 engines we use
+	rc = chip.EnableEngineOrder(0x01, 0x01, 0x01);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	// No engine level repetitions are needed for that animation
+	rc = chip.SetEngineRepetitions(0, 0 ,0);
 	if (rc != EBF_OK) {
 		EBF_REPORT_AND_RETURN(rc);
 	}
