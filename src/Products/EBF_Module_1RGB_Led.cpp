@@ -253,7 +253,7 @@ uint8_t EBF_Module_1RGB_Led::PrepareBlinkAnimation(Time timeOn, Time timeOff, ui
 		EBF_REPORT_AND_RETURN(rc);
 	}
 
-	// Assign every color's patters to order 0 place for each engines
+	// Assign every color's pattern to order 0 place for each engines
 	rc = chip.SetEnginePatternsOrder(0, 0);
 	if (rc != EBF_OK) {
 		EBF_REPORT_AND_RETURN(rc);
@@ -317,6 +317,136 @@ uint8_t EBF_Module_1RGB_Led::StopAnimation()
 
 	// Switch to manual mode by default
 	rc = chip.EnableAnimationMode(0);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	// Update the configuration
+	rc = chip.UpdateCommand();
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	EBF_REPORT_AND_RETURN(rc);
+}
+
+uint8_t EBF_Module_1RGB_Led::PreparePoliceAnimation(Time onTime, Time offTime, uint8_t numberOfFlashes, Time restTime, float intensity)
+{
+	uint8_t rc;
+	uint8_t pwm;
+
+	// Check if the animation engine is running
+	if (chip.IsEngineBusy()) {
+		// We need to stop it before changing the configuration
+		rc = chip.StopCommand();
+		if (rc != EBF_OK) {
+			EBF_REPORT_AND_RETURN(rc);
+		}
+	}
+
+	// Limit number of flashes to 14, since 15 means infinite repetition and it will create a problem
+	if (numberOfFlashes > 14) {
+		EBF_REPORT_AND_RETURN(EBF_INDEX_OUT_OF_BOUNDS);
+	}
+
+	// Limit the values to 0%..100%
+	intensity = constrain(intensity, 0.0, 100.0);
+
+	// convert specified intensity to pwm value
+	pwm = (uint8_t)mapf(intensity, 0.0, 100.0, 0.0, 255.0);
+
+	// We will use pattern 0 for flashing number of times with specified ON/OFF times
+	rc = chip.ConfigurePattern(
+		0,
+		Time::NO_DELAY,
+		Time::NO_DELAY,
+		numberOfFlashes,
+		pwm,
+		pwm,
+		0,
+		0,
+		0,
+		onTime,
+		Time::NO_DELAY,
+		offTime,
+		Time::NO_DELAY
+	);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	// We will use pattern 1 for reset time between the colors
+	rc = chip.ConfigurePattern(
+		1,
+		restTime,
+		Time::NO_DELAY,
+		0,
+		0,
+		0,
+		0,
+		0,
+		0,
+		Time::NO_DELAY,
+		Time::NO_DELAY,
+		Time::NO_DELAY,
+		Time::NO_DELAY
+	);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	// We will use pattern 2 for the dark period. It's the same as pattern 1, but with PWM=0
+	rc = chip.ConfigurePattern(
+		2,
+		Time::NO_DELAY,
+		Time::NO_DELAY,
+		numberOfFlashes,
+		0,
+		0,
+		0,
+		0,
+		0,
+		onTime,
+		Time::NO_DELAY,
+		offTime,
+		Time::NO_DELAY
+	);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	// Set RED channel order to pattern0 (blink), pattern1 (restTime), pattern2 (dark), pattern1 (restTime)
+	rc = chip.SetEnginePatternsOrder(channelRed, 0, 1, 2, 1);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	// Set BLUE channel order to pattern2 (dark), pattern1 (restTime), pattern0 (blink), pattern1 (restTime)
+	rc = chip.SetEnginePatternsOrder(channelBlue, 2, 1, 0, 1);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	// Set GREEN channel to have dark patterns indefinetely to have it set to black automatically
+	rc = chip.SetEnginePatternsOrder(channelGreen, 2, 1, 2, 1);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	// Enable orders 0,1,2,3 for all 3 channels
+	rc = chip.EnableEngineOrder(0x0F, 0x0F, 0x0F);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	// Infinite engine level repetitions are needed for that animation
+	rc = chip.SetEngineRepetitions(0x03, 0x03 ,0x03);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	// Enable the animation mode on all 3 channels
+	rc = chip.EnableAnimationMode(0x07);
 	if (rc != EBF_OK) {
 		EBF_REPORT_AND_RETURN(rc);
 	}
