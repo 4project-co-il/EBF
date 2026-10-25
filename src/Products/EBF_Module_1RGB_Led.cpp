@@ -172,7 +172,7 @@ uint8_t EBF_Module_1RGB_Led::SetFadingTime(Time fading)
 	EBF_REPORT_AND_RETURN(rc);
 }
 
-uint8_t EBF_Module_1RGB_Led::Animate(Time timeOn, Time timeOff, uint8_t repeatTimes)
+uint8_t EBF_Module_1RGB_Led::PrepareAnimation(Time timeOn, Time timeOff, uint8_t repeatTimes)
 {
 	uint8_t rc;
 	uint8_t channel;
@@ -265,11 +265,15 @@ uint8_t EBF_Module_1RGB_Led::Animate(Time timeOn, Time timeOff, uint8_t repeatTi
 		EBF_REPORT_AND_RETURN(rc);
 	}
 
+	EBF_REPORT_AND_RETURN(rc);
+}
+
+uint8_t EBF_Module_1RGB_Led::StartAnimation()
+{
+	uint8_t rc;
+
 	// Start the animation
 	rc = chip.StartCommand();
-	if (rc != EBF_OK) {
-		EBF_REPORT_AND_RETURN(rc);
-	}
 
 	EBF_REPORT_AND_RETURN(rc);
 }

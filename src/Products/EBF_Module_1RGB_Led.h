@@ -53,11 +53,14 @@ class EBF_Module_1RGB_Led : protected EBF_HalInstance {
 		// Turns OFF the LED
 		uint8_t Off();
 
-		// Animate Blink/Breath transition for specified ON/OFF/Repetition settings.
+		// Prepares Blink/Breath transition for specified ON/OFF/Repetition settings.
 		// Infinite repeat times = 0x0F (15)
-		uint8_t Animate(Time timeOn, Time timeOff, uint8_t repeatTimes = 15);
+		uint8_t PrepareAnimation(Time timeOn, Time timeOff, uint8_t repeatTimes = 15);
 
-		// Stops the animation
+		// Starts the prepared animation
+		uint8_t StartAnimation();
+
+		// Stops the animation and goes back to manual RGB settings mode
 		uint8_t StopAnimation();
 
 		// Returns 1 when the animation is running, 0 otherwise.
