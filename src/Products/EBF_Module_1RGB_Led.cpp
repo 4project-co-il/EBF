@@ -20,9 +20,9 @@ uint8_t EBF_Module_1RGB_Led::Init(uint8_t i2cAddress, float maxCurrentRed, float
 	}
 
 	// Set default saved RGV values to white, in case someone will call On() before SetRGB();
-	savedRGB[0] = 0xFF;	// R
-	savedRGB[1] = 0xFF;	// G
-	savedRGB[2] = 0xFF;	// B
+	savedRGB[channelRed] = 0xFF;	// R
+	savedRGB[channelGreen] = 0xFF;	// G
+	savedRGB[channelBlue] = 0xFF;	// B
 
 	EBF_REPORT_AND_RETURN(EBF_OK);
 }
@@ -47,12 +47,12 @@ uint8_t EBF_Module_1RGB_Led::SetRGB(float red, float green, float blue, uint8_t 
 	green = constrain(green, 0.0, 100.0);
 	blue = constrain(blue, 0.0, 100.0);
 
-	savedRGB[0] = (uint8_t)mapf(red, 0.0, 100.0, 0.0, 255.0);
-	savedRGB[1] = (uint8_t)mapf(green, 0.0, 100.0, 0.0, 255.0);
-	savedRGB[2] = (uint8_t)mapf(blue, 0.0, 100.0, 0.0, 255.0);
+	savedRGB[channelRed] = (uint8_t)mapf(red, 0.0, 100.0, 0.0, 255.0);
+	savedRGB[channelGreen] = (uint8_t)mapf(green, 0.0, 100.0, 0.0, 255.0);
+	savedRGB[channelBlue] = (uint8_t)mapf(blue, 0.0, 100.0, 0.0, 255.0);
 
 	if (!keepOff) {
-		rc = chip.SetPWM(savedRGB[0], savedRGB[1], savedRGB[2]);
+		rc = chip.SetPWM(savedRGB[channelRed], savedRGB[channelGreen], savedRGB[channelBlue]);
 		if (rc != EBF_OK) {
 			EBF_REPORT_AND_RETURN(rc);
 		}
@@ -65,12 +65,12 @@ uint8_t EBF_Module_1RGB_Led::SetRGB(uint32_t rgb, uint8_t keepOff)
 {
 	uint8_t rc = EBF_OK;
 
-	savedRGB[0] = (rgb >> 16) & 0xFF;
-	savedRGB[1] = (rgb >> 8) & 0xFF;
-	savedRGB[2] = rgb & 0xFF;
+	savedRGB[channelRed] = (rgb >> 16) & 0xFF;
+	savedRGB[channelGreen] = (rgb >> 8) & 0xFF;
+	savedRGB[channelBlue] = rgb & 0xFF;
 
 	if (!keepOff) {
-		rc = chip.SetPWM(savedRGB[0], savedRGB[1], savedRGB[2]);
+		rc = chip.SetPWM(savedRGB[channelRed], savedRGB[channelGreen], savedRGB[channelBlue]);
 		if (rc != EBF_OK) {
 			EBF_REPORT_AND_RETURN(rc);
 		}
@@ -131,7 +131,7 @@ uint8_t EBF_Module_1RGB_Led::On()
 	uint8_t rc;
 
 	// Set saved RGB values
-	rc = chip.SetPWM(savedRGB[0], savedRGB[1], savedRGB[2]);
+	rc = chip.SetPWM(savedRGB[channelRed], savedRGB[channelGreen], savedRGB[channelBlue]);
 	if (rc != EBF_OK) {
 		EBF_REPORT_AND_RETURN(rc);
 	}
@@ -193,7 +193,7 @@ uint8_t EBF_Module_1RGB_Led::PrepareAnimation(Time timeOn, Time timeOff, uint8_t
 
 	// Configure the patterns for RGB channels
 
-	channel = 0;
+	channel = channelRed;
 	rc = chip.ConfigurePattern(
 		channel,
 		Time::NO_DELAY,
@@ -213,7 +213,7 @@ uint8_t EBF_Module_1RGB_Led::PrepareAnimation(Time timeOn, Time timeOff, uint8_t
 		EBF_REPORT_AND_RETURN(rc);
 	}
 
-	channel = 1;
+	channel = channelGreen;
 	rc = chip.ConfigurePattern(
 		channel,
 		Time::NO_DELAY,
@@ -233,7 +233,7 @@ uint8_t EBF_Module_1RGB_Led::PrepareAnimation(Time timeOn, Time timeOff, uint8_t
 		EBF_REPORT_AND_RETURN(rc);
 	}
 
-	channel = 2;
+	channel = channelBlue;
 	rc = chip.ConfigurePattern(
 		channel,
 		Time::NO_DELAY,

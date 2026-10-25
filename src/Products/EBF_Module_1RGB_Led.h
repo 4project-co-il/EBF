@@ -15,6 +15,10 @@ class EBF_Module_1RGB_Led : protected EBF_HalInstance {
 	private:
 		EBF_DEBUG_MODULE_NAME("EBF_Module_1RGB_Led");
 
+		const uint8_t channelRed = 0;
+		const uint8_t channelGreen = 1;
+		const uint8_t channelBlue = 2;
+
 	public:
 		EBF_Module_1RGB_Led(EBF_I2C *pI2cInterface) : chip(pI2cInterface) {}
 		EBF_Module_1RGB_Led(EBF_I2C &i2cInterface) : EBF_Module_1RGB_Led(&i2cInterface) { }
