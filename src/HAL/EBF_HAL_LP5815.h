@@ -158,7 +158,17 @@ class EBF_HAL_LP5815 : public EBF_I2CDevice {
 			LP5815_Time sloperT3
 		);
 
+		// Assign animation engine numbers to specified channels
 		uint8_t SetChannelEngine(uint8_t ch0EngineNumber, uint8_t ch1EngineNumber, uint8_t ch2EngineNumber);
+
+		// Assign pattern numbers order to specified channel
+		uint8_t SetEnginePatternsOrder(uint8_t engineNumber, uint8_t pattern0, uint8_t pattern1 = 0, uint8_t pattern2 = 0, uint8_t pattern3 = 0);
+
+		// Enable engines orders. 4 bit for each engine.
+		uint8_t EnableEngineOrder(uint8_t engine0Orders, uint8_t engine1Orders, uint8_t engine2Orders, uint8_t engine3Orders = 0);
+
+		// Set engine repetition count. 0=No repetition, 0x01=1 repetition, 0x02=2 repetitions, 0x03=Infinite repetition
+		uint8_t SetEngineRepetitions(uint8_t engine0Repetitions = 0, uint8_t engine1Repetitions = 0, uint8_t engine2Repetitions = 0, uint8_t engine3Repetitions = 0);
 
 		// Enables animation mode, or disables to work in manual PWM mode. Bit per channel, 0x07 for all 3 channels at once
 		// Exponential dimming enables with bit per channel, 0x07 for all 3 channels at once

@@ -84,36 +84,6 @@ uint8_t EBF_HAL_LP5815::Init(uint8_t i2cAddress,
 		EBF_REPORT_AND_RETURN(rc);
 	}
 
-	// Set engine order pattern 0 for engine 0
-	rc = Write8bitRegister(regEngineConfig0, 0);
-	if (rc != EBF_OK) {
-		EBF_REPORT_AND_RETURN(rc);
-	}
-
-	// Set engine order pattern 1 for engine 1
-	rc = Write8bitRegister(regEngineConfig1, 1);
-	if (rc != EBF_OK) {
-		EBF_REPORT_AND_RETURN(rc);
-	}
-
-	// Set engine order pattern 2 for engine 2
-	rc = Write8bitRegister(regEngineConfig2, 2);
-	if (rc != EBF_OK) {
-		EBF_REPORT_AND_RETURN(rc);
-	}
-
-	// Enable order 1 for engines 0,1
-	rc = Write8bitRegister(regEngineConfig4, 0x11);
-	if (rc != EBF_OK) {
-		EBF_REPORT_AND_RETURN(rc);
-	}
-
-	// Enable order 1 for engines 2
-	rc = Write8bitRegister(regEngineConfig5, 0x01);
-	if (rc != EBF_OK) {
-		EBF_REPORT_AND_RETURN(rc);
-	}
-
 	// Enable all 3 channels output
 	rc = SetChannelOutput(0x07);
 	if (rc != EBF_OK) {
@@ -420,4 +390,67 @@ uint8_t EBF_HAL_LP5815::IsEngineBusy()
 	} else {
 		return 0;
 	}
+}
+
+uint8_t EBF_HAL_LP5815::SetEnginePatternsOrder(uint8_t engineNumber, uint8_t pattern0, uint8_t pattern1, uint8_t pattern2, uint8_t pattern3)
+{
+	uint8_t rc;
+
+	if (engineNumber > 3) {
+		EBF_REPORT_AND_RETURN(EBF_INDEX_OUT_OF_BOUNDS);
+	}
+	if (pattern0 > 3) {
+		EBF_REPORT_AND_RETURN(EBF_INDEX_OUT_OF_BOUNDS);
+	}
+	if (pattern1 > 3) {
+		EBF_REPORT_AND_RETURN(EBF_INDEX_OUT_OF_BOUNDS);
+	}
+	if (pattern2 > 3) {
+		EBF_REPORT_AND_RETURN(EBF_INDEX_OUT_OF_BOUNDS);
+	}
+	if (pattern3 > 3) {
+		EBF_REPORT_AND_RETURN(EBF_INDEX_OUT_OF_BOUNDS);
+	}
+
+	rc = Write8bitRegister(regEngineConfig0 + engineNumber, pattern3 << 6 | pattern2 << 4 | pattern1 << 2 | pattern0);
+
+	EBF_REPORT_AND_RETURN(rc);
+}
+
+uint8_t EBF_HAL_LP5815::EnableEngineOrder(uint8_t engine0Orders, uint8_t engine1Orders, uint8_t engine2Orders, uint8_t engine3Orders)
+{
+	uint8_t rc;
+
+	// Limit to 4 bits for each engine
+	engine0Orders = engine0Orders & 0x0F;
+	engine1Orders = engine1Orders & 0x0F;
+	engine2Orders = engine2Orders & 0x0F;
+	engine3Orders = engine3Orders & 0x0F;
+
+	rc = Write8bitRegister(regEngineConfig4, engine1Orders << 4 | engine0Orders);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	rc = Write8bitRegister(regEngineConfig5, engine3Orders << 4 | engine2Orders);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	EBF_REPORT_AND_RETURN(rc);
+}
+
+uint8_t EBF_HAL_LP5815::SetEngineRepetitions(uint8_t engine0Repetitions, uint8_t engine1Repetitions, uint8_t engine2Repetitions, uint8_t engine3Repetitions)
+{
+	uint8_t rc;
+
+	// Limit to 3 bits for each engine
+	engine0Repetitions = engine0Repetitions & 0x07;
+	engine1Repetitions = engine1Repetitions & 0x07;
+	engine2Repetitions = engine2Repetitions & 0x07;
+	engine3Repetitions = engine3Repetitions & 0x07;
+
+	rc = Write8bitRegister(regEngineConfig6, engine3Repetitions << 6 | engine2Repetitions << 4 | engine2Repetitions << 2 | engine0Repetitions);
+
+	EBF_REPORT_AND_RETURN(rc);
 }
