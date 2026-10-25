@@ -59,7 +59,7 @@ class EBF_Module_1RGB_Led : protected EBF_HalInstance {
 
 		// Prepares Blink/Breath transition for specified ON/OFF/Repetition settings.
 		// Infinite repeat times = 0x0F (15)
-		uint8_t PrepareAnimation(Time timeOn, Time timeOff, uint8_t repeatTimes = 15);
+		uint8_t PrepareBlinkAnimation(Time timeOn, Time timeOff, uint8_t repeatTimes = 15);
 
 		// Starts the prepared animation
 		uint8_t StartAnimation();
