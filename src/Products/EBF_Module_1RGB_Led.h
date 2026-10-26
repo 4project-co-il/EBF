@@ -66,7 +66,7 @@ class EBF_Module_1RGB_Led : protected EBF_HalInstance {
 		uint8_t PreparePoliceAnimation(
 			Time onTime = Time::TIME_50MS,
 			Time offTime = Time::TIME_50MS,
-			uint8_t numberOfFlashes = 3,
+			uint8_t numberOfFlashes = 5,
 			Time restTime = Time::TIME_100MS,
 			float intensity = 100.0
 		);
