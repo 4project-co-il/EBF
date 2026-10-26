@@ -14,6 +14,15 @@ class EBF_Serial : protected EBF_HalInstance, public Stream {
 	private:
 		EBF_DEBUG_MODULE_NAME("EBF_Serial");
 
+	// Interface for EBF classes communication
+	protected:
+		friend class EBF_SerialCommander;
+
+		class Listener {
+			public:
+				virtual void onDataAvailable() = 0;
+		};
+
 	public:
 #if defined(ARDUINO_ARCH_AVR)
 		EBF_Serial();
@@ -33,7 +42,8 @@ class EBF_Serial : protected EBF_HalInstance, public Stream {
 		uint8_t Process();
 
 		void SetPollingInterval(uint32_t ms);
-		void SetCallback(EBF_CallbackType callbackFunc) { this->callbackFunc = callbackFunc; }
+		void SetCallback(EBF_CallbackType callbackFunc);
+		void SetCallback(Listener* listenerInstance);
 
 		// Stream and Print interfaces
 		inline size_t write(unsigned long n) { return this->write((uint8_t)n); }
@@ -55,7 +65,12 @@ class EBF_Serial : protected EBF_HalInstance, public Stream {
 			SERIAL_UART
 		};
 
-		EBF_CallbackType callbackFunc;
+		// Can be EBF_CallbackType or Listener*
+		union {
+			EBF_CallbackType callbackFunc;
+			Listener* pListener;
+		} cbData;
+		uint8_t isListenerRegistered;
 
 		// Need to keep different pointer types for initialization
 		SerialType type;

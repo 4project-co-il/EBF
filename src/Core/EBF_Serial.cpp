@@ -49,7 +49,7 @@ uint8_t EBF_Serial::Init(
 		EBF_REPORT_AND_RETURN(rc);
 	}
 
-	this->callbackFunc = callbackFunc;
+	cbData.callbackFunc = callbackFunc;
 
 	if (callbackFunc == NULL) {
 		// No callback. No need to poll in that case
@@ -83,7 +83,7 @@ uint8_t EBF_Serial::Init(
 void EBF_Serial::SetPollingInterval(uint32_t ms)
 {
 	// No polling needed if there is no callback to call
-	if (callbackFunc == NULL) {
+	if (cbData.callbackFunc == NULL) {
 		EBF_HalInstance::SetPollingInterval(EBF_NO_POLLING);
 	} else {
 		EBF_HalInstance::SetPollingInterval(ms);
@@ -93,13 +93,17 @@ void EBF_Serial::SetPollingInterval(uint32_t ms)
 uint8_t EBF_Serial::Process()
 {
 	// Callback might not be set, nothing to do in that case
-	if (callbackFunc == NULL) {
+	if (cbData.callbackFunc == NULL) {
 		EBF_REPORT_AND_RETURN(EBF_OK);
 	}
 
 	// The stream have data, call the callback
 	if (available()) {
-		callbackFunc();
+		if (isListenerRegistered) {
+			cbData.pListener->onDataAvailable();
+		} else {
+			(cbData.callbackFunc)();
+		}
 	}
 
 	EBF_REPORT_AND_RETURN(EBF_OK);
@@ -273,4 +277,28 @@ int EBF_Serial::read(void)
 	}
 
 	return rc;
+}
+
+void EBF_Serial::SetCallback(EBF_CallbackType callbackFunc) {
+	cbData.callbackFunc = callbackFunc;
+	isListenerRegistered = 0;
+
+	// We have a callback, but no polling was set
+	// Since Arduino implementation don't have any notification on available data, we have to poll it
+	// We'll use 10mSec polling by default
+	if (cbData.callbackFunc != NULL && GetPollingInterval() == EBF_NO_POLLING) {
+		SetPollingInterval(10);
+	}
+}
+
+void EBF_Serial::SetCallback(Listener* listenerInstance) {
+	cbData.pListener = listenerInstance;
+	isListenerRegistered = 1;
+
+	// We have a callback, but no polling was set
+	// Since Arduino implementation don't have any notification on available data, we have to poll it
+	// We'll use 10mSec polling by default
+	if (cbData.pListener != NULL && GetPollingInterval() == EBF_NO_POLLING) {
+		SetPollingInterval(10);
+	}
 }
