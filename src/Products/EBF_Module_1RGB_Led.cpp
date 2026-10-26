@@ -459,3 +459,141 @@ uint8_t EBF_Module_1RGB_Led::PreparePoliceAnimation(Time onTime, Time offTime, u
 
 	EBF_REPORT_AND_RETURN(rc);
 }
+
+uint8_t EBF_Module_1RGB_Led::PrepareRainbowAnimation(Time transitionTime, float intensity)
+{
+	uint8_t rc;
+	uint8_t pwm;
+
+	// Check if the animation engine is running
+	if (chip.IsEngineBusy()) {
+		// We need to stop it before changing the configuration
+		rc = chip.StopCommand();
+		if (rc != EBF_OK) {
+			EBF_REPORT_AND_RETURN(rc);
+		}
+	}
+
+	// Limit the values to 0%..100%
+	intensity = constrain(intensity, 0.0, 100.0);
+
+	// convert specified intensity to pwm value
+	pwm = (uint8_t)mapf(intensity, 0.0, 100.0, 0.0, 255.0);
+
+	// Fading should be 0 for that animation
+	rc = chip.SetFadingTime(Time::NO_DELAY);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	// Configure the RGB channels with Polyrhythmic Interference
+/*
+PWM Value
+  255 |                     .-.  (PWM3)
+      |                    /   \
+  180 |       .-. (PWM1)  /     \
+      |      /   \       /       \
+   60 |     /     `-(PWM2)        \
+    0 |-(PWM0)---------------------(PWM4)-
+      0s     sloperT0  sloperT1 sloperT2 sloperT3
+*/
+
+	rc = chip.ConfigurePattern(
+		channelRed,
+		Time::NO_DELAY,
+		Time::NO_DELAY,
+		0x0F,				// Infinite repetition
+		0,
+		(uint8_t)(0.71 * pwm),
+		(uint8_t)(0.25 * pwm),
+		pwm,
+		0,
+		transitionTime,
+		(Time)(transitionTime-2),
+		(Time)(transitionTime+2),
+		transitionTime
+	);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	rc = chip.ConfigurePattern(
+		channelGreen,
+		Time::NO_DELAY,
+		Time::NO_DELAY,
+		0x0F,				// Infinite repetition
+		0,
+		(uint8_t)(0.28 * pwm),
+		pwm,
+		(uint8_t)(0.38 * pwm),
+		0,
+		(Time)(transitionTime+2),
+		transitionTime,
+		transitionTime,
+		transitionTime
+	);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	rc = chip.ConfigurePattern(
+		channelBlue,
+		Time::NO_DELAY,
+		Time::NO_DELAY,
+		0x0F,				// Infinite repetition
+		0,
+		(uint8_t)(0.88 * pwm),
+		(uint8_t)(0.19 * pwm),
+		(uint8_t)(0.56 * pwm),
+		0,
+		(Time)(transitionTime+1),
+		(Time)(transitionTime+1),
+		(Time)(transitionTime+1),
+		(Time)(transitionTime-2)
+	);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	// Assign every color's pattern to order 0 place for each engines
+	rc = chip.SetEnginePatternsOrder(0, 0);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	rc = chip.SetEnginePatternsOrder(1, 1);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	rc = chip.SetEnginePatternsOrder(2, 2);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	// Enable order #0 for the 3 engines we use
+	rc = chip.EnableEngineOrder(0x01, 0x01, 0x01);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	// No engine level repetitions are needed for that animation
+	rc = chip.SetEngineRepetitions(0, 0 ,0);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	// Enable the animation mode on all 3 channels
+	rc = chip.EnableAnimationMode(0x07);
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	// Update the configuration
+	rc = chip.UpdateCommand();
+	if (rc != EBF_OK) {
+		EBF_REPORT_AND_RETURN(rc);
+	}
+
+	EBF_REPORT_AND_RETURN(rc);
+}

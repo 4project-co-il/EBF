@@ -71,6 +71,9 @@ class EBF_Module_1RGB_Led : protected EBF_HalInstance {
 			float intensity = 100.0
 		);
 
+		// Prepares animation of rainbow colors transition
+		uint8_t PrepareRainbowAnimation(Time transitionTime = Time::TIME_500MS, float intensity = 100.0);
+
 		// Starts the prepared animation
 		uint8_t StartAnimation();
 
