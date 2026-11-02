@@ -139,33 +139,33 @@ uint8_t EBF_HAL_PCA9685::SetChannelPWM(uint8_t channel, uint16_t stepON, uint16_
 uint8_t EBF_HAL_PCA9685::GetChannelPWM(uint8_t channel, uint16_t &stepON, uint16_t &stepOFF)
 {
 	uint8_t rc;
-	uint32_t pwmData;
+	uint8_t pwmData[4];
 
 	// PCA9685 chip have 16 channels 0..15
 	if (channel > 15) {
 		EBF_REPORT_AND_RETURN(EBF_INDEX_OUT_OF_BOUNDS);
 	}
 
-	rc = Read32bitRegister(regLED0_ON_L + channel*4, pwmData);
+	rc = ReadBuffer(regLED0_ON_L + channel*4, pwmData, sizeof(pwmData));
 	if (rc != EBF_OK) {
 		EBF_REPORT_AND_RETURN(rc);
 	}
 
 	// The data is read in wrong order
-	stepON = (pwmData >> 24) & 0xFF;
-	stepON |= ((pwmData >> 16) & 0xFF) << 8;
+	stepON = pwmData[0];					// LSB
+	stepON |= (pwmData[1] & 0x0F) << 8;		// MSB
 
-	stepOFF = (pwmData >> 8) & 0xFF;
-	stepOFF |= ((pwmData) & 0xFF) << 8;
+	stepOFF = pwmData[2];					// LSB
+	stepOFF |= (pwmData[3] & 0x0F) << 8;	// MSB
 
 	// Constant ON setting
-	if (stepON & 1<<12) {
+	if (pwmData[1] & 1<<4) {
 		stepON = NUMBER_OF_STEPS;
 		stepOFF = 0;
 	}
 
 	// Constant OFF setting
-	if (stepOFF & 1<<12) {
+	if (pwmData[3] & 1<<4) {
 		stepON = 0;
 		stepOFF = NUMBER_OF_STEPS;
 	}
