@@ -1,10 +1,10 @@
 #include "EBF_Module_8Outputs.h"
 
 // Initializing EBF_Module_8Outputs class instance.
+// The i2cAddress should specify the device I2C address
 // The pwmFrequency should specify the desired frequency the channels should work (24..1526)
 // Default 50Hz frequency should be ok for analog servos, leds and motor controllers
-// The i2cAddress should specify the device I2C address
-uint8_t EBF_Module_8Outputs::Init(uint16_t pwmFrequency, uint8_t i2cAddress)
+uint8_t EBF_Module_8Outputs::Init(uint8_t i2cAddress, uint16_t pwmFrequency)
 {
 	uint8_t rc;
 
@@ -65,7 +65,7 @@ uint8_t EBF_Module_8Outputs::SetPWM(uint8_t index, float pwmPercent)
 	} else {
 		// We will always start ON period on 0's step of the chip, so pwmPercent will specify
 		// after how many steps 0..4096 should the line go back to OFF
-		rc = chip.SetChannelPWM(index, 0, (uint16_t)4095 * (pwmPercent / 100.0));
+		rc = chip.SetChannelPWM(index, 0, chip.NUMBER_OF_STEPS * (pwmPercent / 100.0));
 	}
 
 	EBF_REPORT_AND_RETURN(rc);

@@ -21,7 +21,7 @@ class EBF_Module_8Outputs : public EBF_HalInstance {
 
 		static const uint8_t numberOfOutputs = 8;
 
-		uint8_t Init(uint16_t pwmFrequency = 50, uint8_t i2cAddress = EBF_HAL_PCA9685::defaultI2CAddress);
+		uint8_t Init(uint8_t i2cAddress = EBF_HAL_PCA9685::defaultI2CAddress, uint16_t pwmFrequency = 50);
 
 		// Sets boolean value on the specified output channel (1=HIGH, 0=LOW)
 		uint8_t SetValue(uint8_t index, uint8_t value);
