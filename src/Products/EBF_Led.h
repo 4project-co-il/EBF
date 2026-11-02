@@ -38,7 +38,7 @@ class EBF_Led : protected EBF_PwmOutput {
 		LedState state;
 		uint8_t brightness;			// 0-255 values
 		unsigned long effectStart;	// in micro-Sec
-		uint16_t onDuration;		// in milli-Sec, duraction of the fading effect during fading
+		uint16_t onDuration;		// in milli-Sec, duration of the fading effect during fading
 		uint16_t offDuration;		// in milli-Sec
 		uint8_t fadeUpdatePeriod;	// in milli-Sec
 
