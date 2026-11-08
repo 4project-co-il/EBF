@@ -35,7 +35,7 @@ uint8_t EBF_Led::SetValue(uint8_t value)
 	EBF_REPORT_AND_RETURN(rc);
 }
 
-// GetValue returns current status of the led (ON or OFF)
+// GetValue returns 0 when the LED is OFF, or brightness level when the LED is ON
 uint8_t EBF_Led::GetValue()
 {
 	switch (state)
@@ -48,7 +48,7 @@ uint8_t EBF_Led::GetValue()
 		case LED_BLINKING_ON:
 		case LED_FADING_IN:
 		case LED_FADING_OUT:
-			return 1;
+			return brightness;
 	}
 
 	return 0;
@@ -77,12 +77,15 @@ uint8_t EBF_Led::Off()
 }
 
 // Brightness will work only on hardware PWM enabled pins
-uint8_t EBF_Led::SetBrightness(uint8_t percent)
+uint8_t EBF_Led::SetBrightness(float percent)
 {
 	uint8_t rc = EBF_OK;
 
-	if (percent > 100) {
-		percent = 100;
+	if (percent < 0.0) {
+		percent = 0.0;
+	}
+	if (percent > 100.0) {
+		percent = 100.0;
 	}
 
 	brightness = (uint8_t)(percent / 100.0 * 255);
@@ -147,7 +150,7 @@ uint8_t EBF_Led::FadeIn(uint16_t msDuration, uint8_t msUpdate)
 	effectStart = micros();
 	state = LED_FADING_IN;
 
-	rc = EBF_PwmOutput::SetValue((uint8_t)offDuration);
+	rc = EBF_PwmOutput::SetValue(0);
 
 	EBF_REPORT_AND_RETURN(rc);
 }
@@ -169,7 +172,7 @@ uint8_t EBF_Led::FadeOut(uint16_t msDuration, uint8_t msUpdate)
 	effectStart = micros();
 	state = LED_FADING_OUT;
 
-	rc = EBF_PwmOutput::SetValue((uint8_t)onDuration);
+	rc = EBF_PwmOutput::SetValue(brightness);
 
 	EBF_REPORT_AND_RETURN(rc);
 }

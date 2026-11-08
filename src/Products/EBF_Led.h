@@ -20,7 +20,8 @@ class EBF_Led : protected EBF_PwmOutput {
 
 		uint8_t On();
 		uint8_t Off();
-		uint8_t SetBrightness(uint8_t percent);
+		uint8_t SetBrightness(float percent);
+		uint8_t GetBrightness() { return brightness; }
 		uint8_t Blink(uint16_t msOn, uint16_t msOff);
 		uint8_t FadeIn(uint16_t msDuration, uint8_t msUpdate = 20);
 		uint8_t FadeOut(uint16_t msDuration, uint8_t msUpdate = 20);
