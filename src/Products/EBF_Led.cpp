@@ -113,13 +113,14 @@ uint8_t EBF_Led::SetBrightness(float percent)
 	EBF_REPORT_AND_RETURN(rc);
 }
 
-// Turns on for msOn milliSeconds and stay off for msOff milliSeconds
-uint8_t EBF_Led::Blink(uint16_t msOn, uint16_t msOff)
+// Turns on for msOn milliSeconds and stay off for msOff milliSeconds, for the repeatTimes times
+uint8_t EBF_Led::Blink(uint16_t msOn, uint16_t msOff, uint8_t repeatTimes)
 {
 	uint8_t rc;
 
-	onDuration = msOn;
+	onDuration_FadingDuration = msOn;
 	offDuration = msOff;
+	fadeUpdatePeriod_repeatTimes = repeatTimes-1;
 
 	// Start from the BLINKING_ON state
 	state = LED_BLINKING_ON;
@@ -141,11 +142,11 @@ uint8_t EBF_Led::FadeIn(uint16_t msDuration, uint8_t msUpdate)
 	uint8_t rc;
 
 	// Save the update period and set the polling interval accordingly
-	fadeUpdatePeriod = msUpdate;
-	SetPollingInterval(fadeUpdatePeriod);
+	fadeUpdatePeriod_repeatTimes = msUpdate;
+	SetPollingInterval(fadeUpdatePeriod_repeatTimes);
 
 	// Save total fading duration
-	onDuration = msDuration;
+	onDuration_FadingDuration = msDuration;
 
 	effectStart = micros();
 	state = LED_FADING_IN;
@@ -163,11 +164,11 @@ uint8_t EBF_Led::FadeOut(uint16_t msDuration, uint8_t msUpdate)
 	uint8_t rc;
 
 	// Save the update period and set the polling interval accordingly
-	fadeUpdatePeriod = msUpdate;
-	SetPollingInterval(fadeUpdatePeriod);
+	fadeUpdatePeriod_repeatTimes = msUpdate;
+	SetPollingInterval(fadeUpdatePeriod_repeatTimes);
 
 	// Save total fading duration
-	onDuration = msDuration;
+	onDuration_FadingDuration = msDuration;
 
 	effectStart = micros();
 	state = LED_FADING_OUT;
@@ -195,19 +196,27 @@ uint8_t EBF_Led::Process()
 	case LED_BLINKING_ON:
 		timePassed = micros() - effectStart;
 
-		if (timePassed > onDuration * 1000) {
+		if (timePassed > onDuration_FadingDuration * 1000) {
 			// On duration passed, turn the led off and set the data for BLINKING_OFF state
 			rc = EBF_PwmOutput::SetValue(0);
 
-			state = LED_BLINKING_OFF;
-			effectStart = micros();
+			// No more repeatitions for the blink
+			if (fadeUpdatePeriod_repeatTimes == 0) {
+				// Move to OFF state
+				state = LED_OFF;
 
-			// next polling is the duration of the OFF state
-			SetPollingInterval(offDuration);
+				SetPollingInterval(EBF_NO_POLLING);
+			} else {
+				state = LED_BLINKING_OFF;
+				effectStart = micros();
+
+				// next polling is the duration of the OFF state
+				SetPollingInterval(offDuration);
+			}
 		} else {
 			// On duration didn't pass yet, processing was called before needed
 			// Set polling to the time left
-			SetPollingInterval(onDuration - timePassed / 1000);
+			SetPollingInterval(onDuration_FadingDuration - timePassed / 1000);
 		}
 		break;
 
@@ -221,8 +230,13 @@ uint8_t EBF_Led::Process()
 			state = LED_BLINKING_ON;
 			effectStart = micros();
 
+			// Reduce one repeat count if it's not set to infinite repetition
+			if (fadeUpdatePeriod_repeatTimes != INFINITE_REPEAT) {
+				fadeUpdatePeriod_repeatTimes--;
+			}
+
 			// next polling is the duration of the OFF state
-			SetPollingInterval(onDuration);
+			SetPollingInterval(onDuration_FadingDuration);
 		} else {
 			// On duration didn't pass yet, processing was called before needed
 			// Set polling to the time left
@@ -234,11 +248,11 @@ uint8_t EBF_Led::Process()
 		timePassed = (micros() - effectStart) / 1000;	// in mSec
 
 		// Calculate the brightness after passed time
-		if (timePassed >= onDuration) {
+		if (timePassed >= onDuration_FadingDuration) {
 			// effect time passed, set to max brightness
 			fadingBrightness = brightness;
 		} else {
-			fadingBrightness = (uint8_t)((1.0 - (onDuration - timePassed) / (float)onDuration) * brightness);
+			fadingBrightness = (uint8_t)((1.0 - (onDuration_FadingDuration - timePassed) / (float)onDuration_FadingDuration) * brightness);
 		}
 
 		// Set current brightness level
@@ -251,10 +265,10 @@ uint8_t EBF_Led::Process()
 			SetPollingInterval(EBF_NO_POLLING);
 		} else {
 			// Need more time for fading
-			if (onDuration - timePassed > fadeUpdatePeriod) {
-				SetPollingInterval(fadeUpdatePeriod);
+			if (onDuration_FadingDuration - timePassed > fadeUpdatePeriod_repeatTimes) {
+				SetPollingInterval(fadeUpdatePeriod_repeatTimes);
 			} else {
-				SetPollingInterval(onDuration - timePassed);
+				SetPollingInterval(onDuration_FadingDuration - timePassed);
 			}
 		}
 		break;
@@ -263,11 +277,11 @@ uint8_t EBF_Led::Process()
 		timePassed = (micros() - effectStart) / 1000;	// in mSec
 
 		// Calculate the brightness after passed time
-		if (timePassed >= onDuration) {
+		if (timePassed >= onDuration_FadingDuration) {
 			// effect time passed, set to OFF
 			fadingBrightness = 0;
 		} else {
-			fadingBrightness = (uint8_t)((onDuration - timePassed) / (float)onDuration * brightness);
+			fadingBrightness = (uint8_t)((onDuration_FadingDuration - timePassed) / (float)onDuration_FadingDuration * brightness);
 		}
 
 		// Set current brightness level
@@ -280,10 +294,10 @@ uint8_t EBF_Led::Process()
 			SetPollingInterval(EBF_NO_POLLING);
 		} else {
 			// Need more time for fading
-			if (onDuration - timePassed > fadeUpdatePeriod) {
-				SetPollingInterval(fadeUpdatePeriod);
+			if (onDuration_FadingDuration - timePassed > fadeUpdatePeriod_repeatTimes) {
+				SetPollingInterval(fadeUpdatePeriod_repeatTimes);
 			} else {
-				SetPollingInterval(onDuration - timePassed);
+				SetPollingInterval(onDuration_FadingDuration - timePassed);
 			}
 		}
 		break;
