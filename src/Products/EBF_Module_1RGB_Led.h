@@ -57,9 +57,11 @@ class EBF_Module_1RGB_Led : protected EBF_HalInstance {
 		// Turns OFF the LED
 		uint8_t Off();
 
-		// Prepares Blink/Breath transition for specified ON/OFF/Repetition settings.
 		// Infinite repeat times = 0x0F (15)
-		uint8_t PrepareBlinkAnimation(Time timeOn, Time timeOff, uint8_t repeatTimes = 15);
+		const static uint8_t INFINITE_REPEAT = 15;
+
+		// Prepares Blink/Breath transition for specified ON/OFF/Repetition settings.
+		uint8_t PrepareBlinkAnimation(Time timeOn, Time timeOff, uint8_t repeatTimes = INFINITE_REPEAT);
 
 		// Prepares police lights animation using red and blue colors
 		// TitalColorTime should be (on+off)*numberOfFlashes + 100mSec rest

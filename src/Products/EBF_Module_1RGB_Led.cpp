@@ -178,8 +178,8 @@ uint8_t EBF_Module_1RGB_Led::PrepareBlinkAnimation(Time timeOn, Time timeOff, ui
 	uint8_t channel;
 
 	// limit the repeat times to max value
-	if (repeatTimes > 15) {
-		repeatTimes = 15;
+	if (repeatTimes > INFINITE_REPEAT) {
+		repeatTimes = INFINITE_REPEAT;
 	}
 
 	// Check if the animation engine is running
