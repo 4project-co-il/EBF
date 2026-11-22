@@ -1,10 +1,10 @@
-#include "EBF_Module_8Outputs.h"
+#include "EBF_Module_8Outputs_Servo.h"
 
-// Initializing EBF_Module_8Outputs class instance.
+// Initializing EBF_Module_8Outputs_Servo class instance.
 // The i2cAddress should specify the device I2C address
 // The pwmFrequency should specify the desired frequency the channels should work (24..1526)
 // Default 50Hz frequency should be ok for analog servos, leds and motor controllers
-uint8_t EBF_Module_8Outputs::Init(uint8_t i2cAddress, uint16_t pwmFrequency)
+uint8_t EBF_Module_8Outputs_Servo::Init(uint8_t i2cAddress, uint16_t pwmFrequency)
 {
 	uint8_t rc;
 
@@ -31,7 +31,7 @@ uint8_t EBF_Module_8Outputs::Init(uint8_t i2cAddress, uint16_t pwmFrequency)
 }
 
 // Sets boolean value on the specified output channel (1=HIGH, 0=LOW)
-uint8_t EBF_Module_8Outputs::SetValue(uint8_t index, uint8_t value)
+uint8_t EBF_Module_8Outputs_Servo::SetValue(uint8_t index, uint8_t value)
 {
 	uint8_t rc;
 
@@ -46,7 +46,7 @@ uint8_t EBF_Module_8Outputs::SetValue(uint8_t index, uint8_t value)
 
 // Sets PWM timing value on the specified output channel
 // float percent paramenter: 0=Complete OFF, 50=50% width ON/OFF, 100=Complete ON
-uint8_t EBF_Module_8Outputs::SetPWM(uint8_t index, float pwmPercent)
+uint8_t EBF_Module_8Outputs_Servo::SetPWM(uint8_t index, float pwmPercent)
 {
 	uint8_t rc;
 
@@ -73,7 +73,7 @@ uint8_t EBF_Module_8Outputs::SetPWM(uint8_t index, float pwmPercent)
 
 // Returns current value of the specified output line
 // float percent paramenter: 0=Complete OFF, 50=50% width ON/OFF, 100=Complete ON
-float EBF_Module_8Outputs::GetValue(uint8_t index)
+float EBF_Module_8Outputs_Servo::GetValue(uint8_t index)
 {
 	uint8_t rc;
 	uint16_t stepON;
